@@ -1,5 +1,5 @@
 <template>
-    <Bar :data="data" :options="chartOptions" />
+    <Bar :data="data" :options="chartOptions" style="width: 100%; height: 300px;"/>
   </template>
   
   <script setup>

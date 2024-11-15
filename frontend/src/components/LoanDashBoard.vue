@@ -1,20 +1,21 @@
 <template>
   <div class="dashboard">
-      <h2>KB 비상금 대출</h2>
-      <div class="progress-container">
-        <div class="progress-label">
-          <span>0월 상환 진행률</span>
-          <span>1/6 개월</span>
-          <span>{{ progressPercentage }}%</span>
-        </div>
-        <div class="progress-bar">
-          <div class="progress" :style="{ width: progressPercentage + '%' }"></div>
-        </div>
-        <div class="amounts">
-          <span>{{ currentAmount }}원</span>
-          <span>/ {{ totalAmount }}원</span>
-        </div>
+    <h2>KB 비상금 대출</h2>
+    <div class="body">
+    <div class="progress-container">
+      <div class="progress-label">
+        <span>0월 상환 진행률</span>
+        <span>1/6 개월</span>
+        <span>{{ progressPercentage }}%</span>
       </div>
+      <div class="progress-bar">
+        <div class="progress" :style="{ width: progressPercentage + '%' }"></div>
+      </div>
+      <div class="amounts">
+        <span>{{ currentAmount }}원</span>
+        <span>/ {{ totalAmount }}원</span>
+      </div>
+    </div>
     <section class="summary">
       <div class="summary-item">
         <span>목표 상환 원금</span>
@@ -35,12 +36,20 @@
         <p class="income">수입: {{ income }}원</p>
       </div>
       <vue-cal
+        small
         v-model="events"
-        :hide-view-selector="true" 
-        :time="false" 
-        :active-view="'month'" 
-        small 
-      ></vue-cal>
+        :hide-view-selector="true"
+        :time="false"
+        :active-view="'month'"
+        :events="events"
+        :event-count-on-month-view
+        :style="{ border: 'none' }">
+        <template #events-count="{ events }">
+          <span v-if="events.length">
+            {{ events.length }} 이벤트
+          </span>
+        </template>
+      </vue-cal>
     </section>
     <section class="plan">
       <h2>식비 절약 플랜</h2>
@@ -73,11 +82,13 @@
       </div>
     </section>
   </div>
+  </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
 import VueCal from 'vue-cal';
+import '../../node_modules/vue-cal/dist/vuecal.css'; // Ensure you import the CSS
 
 const currentAmount = 530000; // 현재 금액
 const totalAmount = 3000000; // 총 목표 금액
@@ -89,8 +100,9 @@ const expenditure = 1488100; // 지출
 const income = 2835502; // 수입
 
 const events = ref([
-  { start: '2022-09-12', end: '2022-09-12', title: '지출' },
-  { start: '2022-09-20', end: '2022-09-20', title: '수입' },
+  { start: '2024-11-19', end: '2024-11-19', title: '지출: 50,000원', color: '#f44336' }, // Expenditure
+  { start: '2024-11-20', end: '2024-11-20', title: '수입: 100,000원', color: '#4caf50' }, // Income
+  // Add more events as needed
 ]);
 
 const budgetItems = [
@@ -117,17 +129,16 @@ const getStatusText = (status) => {
 const getStatusClass = (status) => {
   switch (status) {
     case 'safe':
-      return 'status-safe'; // 초록색
+      return 'status-safe'; 
     case 'danger':
-      return 'status-danger'; // 빨간색
+      return 'status-danger'; 
     case 'warning':
-      return 'status-warning'; // 노란색
+      return 'status-warning'; 
     default:
       return '';
   }
 };
 
-// Calculate total budget
 const totalBudget = budgetItems.reduce((sum, item) => sum + item.budget, 0);
 </script>
 
@@ -135,6 +146,10 @@ const totalBudget = budgetItems.reduce((sum, item) => sum + item.budget, 0);
 .dashboard {
   text-align: center;
 }
+.body {
+  padding : 10px;
+}
+
 .progress-container {
   margin: 20px 0;
 }
@@ -192,11 +207,12 @@ const totalBudget = budgetItems.reduce((sum, item) => sum + item.budget, 0);
 
 .financial-info {
   display: flex;
-  justify-content: flex-end; /* Align to the right */
+  justify-content: flex-end; 
   margin: 20px 0;
   color: #ecb91f;
   font-weight: bold;
 }
+
 .expense {
   margin-right: 10px;
 }
@@ -207,17 +223,17 @@ const totalBudget = budgetItems.reduce((sum, item) => sum + item.budget, 0);
 
 .budget-container {
   display: flex;
-  align-items: center; /* Align items vertically */
-  justify-content: space-between; /* Space between budget bar and text */
+  align-items: center; 
+  justify-content: space-between; 
 }
 
 .budget-bar {
   display: flex;
-  height: 30px; /* Height of the budget bar */
+  height: 30px; 
   border-radius: 5px;
   margin-bottom: 20px;
   margin-top: 20px;
-  width: 70%; /* Set width to 100% to fill the container */
+  width: 70%; 
 }
 
 .budget-segment {
@@ -225,14 +241,14 @@ const totalBudget = budgetItems.reduce((sum, item) => sum + item.budget, 0);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white; /* Text color */
+  color: white; 
   font-weight: bold;
 }
 
 .change {
-  margin-left: 10px; /* Space between budget bar and text */
+  margin-left: 10px; 
   color: rgb(48, 110, 243);
-  cursor: pointer; /* Change cursor to pointer */
+  cursor: pointer; 
 }
 
 .category {
@@ -260,15 +276,15 @@ const totalBudget = budgetItems.reduce((sum, item) => sum + item.budget, 0);
 }
 
 .status-safe {
-  background-color: #4caf50; /* 안전 - 초록색 */
+  background-color: #4caf50; 
 }
 
 .status-danger {
-  background-color: #f44336; /* 위험 - 빨간색 */
+  background-color: #f44336; 
 }
 
 .status-warning {
-  background-color: #ffcc00; /* 적정 - 노란색 */
+  background-color: #ffcc00; 
 }
 
 .category-bar {
@@ -289,4 +305,5 @@ const totalBudget = budgetItems.reduce((sum, item) => sum + item.budget, 0);
   justify-content: space-between;
   font-size: 14px;
 }
+
 </style>
