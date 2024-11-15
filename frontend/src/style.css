@@ -1,4 +1,4 @@
-/* :root {
+/*:root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -12,7 +12,7 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-
+/*
 a {
   font-weight: 500;
   color: #646cff;
@@ -25,7 +25,7 @@ a:hover {
 body {
   margin: 0;
   display: flex;
-  /* justify-content: center; */
+  justify-content: center; 
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
@@ -63,16 +63,27 @@ button:focus-visible {
   max-width: 390px; /* Typical mobile width */
   width: 100%;
   margin: 0 auto;
-  padding: 1rem; /* Adjust padding as needed */
   text-align: center;
   background-color: #ffffff; /* Optional: background for app container */
+  font-family: SUITE-Regular;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #2c3e50;
+  /* margin-top: 20px; */
 }
 
 .v-app-bar {
   max-width: 390px;
   width: 100%;
   margin: 0 auto;
-  /* Center align if needed */
+}
+
+@font-face {
+  font-family: "SUITE-Regular";
+  src: url("https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2304-2@1.0/SUITE-Regular.woff2")
+    format("woff2");
+  font-weight: 400;
+  font-style: normal;
 }
 
 @media (prefers-color-scheme: light) {

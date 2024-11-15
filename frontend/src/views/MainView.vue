@@ -1,16 +1,6 @@
 <!-- loanlyManager/src/views/MainView.vue -->
 <template>
   <div>
-    <!-- <div class="main-container"> -->
-    <!-- <header class="header">
-      <button class="back-button">◀</button>
-      <h1 class="title">I’m not LOANly</h1>
-      <div class="icons">
-        <span class="icon">🔔</span>
-        <span class="icon">🏠</span>
-        <span class="icon">☰</span>
-      </div>
-    </header> -->
     <div class="tabs">
       <button
         @click="activeTab = 'dashboard'"
@@ -38,46 +28,31 @@
       <component :is="activeTabComponent" />
     </div>
   </div>
-</template>
-
-<script setup>
-import { ref, computed } from "vue";
-import LoanDashboard from "../components/LoanDashboard.vue";
-import SpendingAnalysis from "../components/SpendingAnalysis.vue";
-import SpendingStatus from "../components/SpendingStatus.vue";
-
-const activeTab = ref("dashboard");
-
-const activeTabComponent = computed(() => {
-  switch (activeTab.value) {
-    case "dashboard":
-      return LoanDashboard;
-    case "spending":
-      return SpendingStatus;
-    case "analysis":
-      return SpendingAnalysis;
-    default:
-      return LoanDashboard;
-  }
-});
-</script>
+  </template>
+  
+  <script setup>
+  import { ref,computed } from 'vue';
+  import LoanDashboard from '../components/LoanDashBoard.vue';
+  import SpendingAnalysis from '../components/SpendingAnalysis.vue';
+  import SpendingStatus from '../components/SpendingStatus.vue';
+  
+  const activeTab = ref('dashboard');
+  
+  const activeTabComponent = computed(() => {
+    switch (activeTab.value) {
+      case 'dashboard':
+        return LoanDashboard;
+      case 'spending':
+        return SpendingStatus;
+      case 'analysis':
+        return SpendingAnalysis;
+      default:
+        return LoanDashboard;
+    }
+  });
+  </script>
 
 <style scoped>
-/* .main-container {
-  width: 393px;
-  height: 928px;
-  margin: 0 auto;
-  text-align: center;
-}
-
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px;
-  background-color: #fff;
-  border-bottom: 1px solid #e0e0e0;
-} */
 
 .back-button {
   background: none;

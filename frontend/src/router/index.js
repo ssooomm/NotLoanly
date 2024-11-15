@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import MainView from '../views/MainView.vue';
-// import LoanInfoNotice from '../views/LoanInfoNotice.vue';
-// import LoanInfoNoticeDetail from '../views/LoanInfoNoticeDetail.vue';
+import LoanInfoNotice from '../views/loanInfo/LoanInfoNotice.vue';
 // import LoanInfoCollection from '../views/LoanInfoCollection.vue';
 // import LoanInput from '../views/LoanInput.vue';
 // import LoanComplete from '../views/LoanComplete.vue';
@@ -20,16 +19,11 @@ const routes = [
     name: 'Main',
     component: MainView,
   },
-  // {
-  //   path: '/loan-info-notice',
-  //   name: 'LoanInfoNotice',
-  //   component: LoanInfoNotice,
-  // },
-  // {
-  //   path: '/loan-info-notice/detail',
-  //   name: 'LoanInfoNoticeDetail',
-  //   component: LoanInfoNoticeDetail,
-  // },
+  {
+    path: '/loan-info-notice',
+    name: 'LoanInfoNotice',
+    component: LoanInfoNotice,
+  },
   // {
   //   path: '/loan-info-collection',
   //   name: 'LoanInfoCollection',
