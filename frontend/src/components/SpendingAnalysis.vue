@@ -2,7 +2,9 @@
     <div class="spending-analysis">
       <h2>오수민의 월 평균 소비</h2>
       <h3>{{ totalSpending }}원</h3>
-      <DoughnutChart v-if="doughnutChartData" :data="doughnutChartData" />
+      <div class="doughnutChart">
+        <DoughnutChart v-if="doughnutChartData" :data="doughnutChartData" />
+      </div>
       <h3>20대 평균 소비 TOP3</h3>
       <BarChart v-if="barChartData" :data="barChartData" /> 
     </div>
@@ -49,8 +51,11 @@
   
   <style scoped>
   .spending-analysis {
-    padding: 20px;
     text-align: center;
+  }
+  .doughnutChart {
+    width: 90%;
+    margin-left: 20px;
   }
   h2 {
     margin-bottom: 10px;

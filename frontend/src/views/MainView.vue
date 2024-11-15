@@ -23,7 +23,7 @@
   
   <script setup>
   import { ref,computed } from 'vue';
-  import LoanDashboard from '../components/LoanDashboard.vue';
+  import LoanDashboard from '../components/LoanDashBoard.vue';
   import SpendingAnalysis from '../components/SpendingAnalysis.vue';
   import SpendingStatus from '../components/SpendingStatus.vue';
   

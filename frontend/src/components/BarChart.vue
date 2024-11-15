@@ -24,18 +24,6 @@
       legend: {
         position: 'top',
       },
-      title: {
-        display: true,
-        text: '소비 분석'
-      },
-    },
-    scales: {
-      x: {
-        beginAtZero: true,
-      },
-      y: {
-        beginAtZero: true,
-      },
     },
   }
   </script>
