@@ -1,5 +1,5 @@
 <template>
-    <Bar :data="data" :options="chartOptions" />
+    <Bar :data="data" :options="chartOptions" style="width: 100%; height: 300px;"/>
   </template>
   
   <script setup>
@@ -23,18 +23,6 @@
     plugins: {
       legend: {
         position: 'top',
-      },
-      title: {
-        display: true,
-        text: '소비 분석'
-      },
-    },
-    scales: {
-      x: {
-        beginAtZero: true,
-      },
-      y: {
-        beginAtZero: true,
       },
     },
   }
