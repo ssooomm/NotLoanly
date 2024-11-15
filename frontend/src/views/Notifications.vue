@@ -1,13 +1,5 @@
 <template>
   <div class="main-container">
-    <header class="header">
-      <button class="back-button">◀</button>
-      <h1 class="title">알림함</h1>
-      <div class="icons">
-        <span class="icon">🏠</span>
-        <span class="icon">☰</span>
-      </div>
-    </header>
     <div class="tabs">
       <button class="tab">전체</button>
       <button class="tab">입출금</button>
