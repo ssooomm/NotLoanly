@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import MainView from '../views/MainView.vue';
-/*import LoanInfoNotice from '../views/LoanInfoNotice.vue';
+import LoanInfoNotice from '../views/LoanInfoNotice.vue';
 import LoanInfoNoticeDetail from '../views/LoanInfoNoticeDetail.vue';
 import LoanInfoCollection from '../views/LoanInfoCollection.vue';
 import LoanInput from '../views/LoanInput.vue';
@@ -12,7 +12,7 @@ import RepaymentDashboardSummary from '../views/RepaymentDashboardSummary.vue';
 import RepaymentDashboardExpenseRatioChange from '../views/RepaymentDashboardExpenseRatioChange.vue';
 import RepaymentStatus from '../views/RepaymentStatus.vue';
 import RepaymentDashboardExpenseAnalysis from '../views/RepaymentDashboardExpenseAnalysis.vue';
-import Notifications from '../views/Notifications.vue';*/
+import Notifications from '../views/Notifications.vue';
 
 const routes = [
   {
@@ -20,7 +20,7 @@ const routes = [
     name: 'Main',
     component: MainView,
   },
-  /*{
+  {
     path: '/loan-info-notice',
     name: 'LoanInfoNotice',
     component: LoanInfoNotice,
@@ -84,7 +84,7 @@ const routes = [
     path: '/notifications',
     name: 'Notifications',
     component: Notifications,
-  },*/
+  },
 ];
 
 const router = createRouter({
