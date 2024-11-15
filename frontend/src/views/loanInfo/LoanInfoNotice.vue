@@ -1,23 +1,14 @@
 <template>
     <div class="mobile-container">
-        <header class="header">
-            <button class="back-button text-white">◀</button>
-            <h1 class="title">I’m not LOANly</h1>
-            <div class="icons">
-                <span class="icon">🔔</span>
-                <span class="icon">🏠</span>
-                <span class="icon">☰</span>
-            </div>
-        </header>
         <div class="background-image-container">
             <img src="../../assets/img/loanInfo.png" alt="background" class="background-image">
         </div>
 
         <!-- 하단 고정 버튼 -->
         <div class="fixed-container">
-            <button class="action-button">
-                시작하기
-            </button>
+            <div class="d-flex justify-end mb-4 mr-4">
+                <v-btn icon="mdi-book-open-page-variant-outline"></v-btn>
+            </div>
             <button class="action-button">
                 시작하기
             </button>
@@ -31,7 +22,7 @@
 <style>
 .mobile-container {
     position: relative;
-    max-width: var(--max-width);
+    /* max-width: var(--max-width); */
     min-height: 100vh;
     margin: 0 auto;
     padding: 0;
@@ -50,6 +41,7 @@
 }
 
 .fixed-container {
+    max-width: 390px;
     position: fixed;
     bottom: 0;
     left: 0;
@@ -58,7 +50,7 @@
     background: transparent;
     z-index: 1000;
     /* padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)); */
-    max-width: var(--max-width);
+    /* max-width: var(--max-width); */
     margin: 0 auto;
 }
 
