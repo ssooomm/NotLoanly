@@ -146,9 +146,6 @@ const totalBudget = budgetItems.reduce((sum, item) => sum + item.budget, 0);
 .dashboard {
   text-align: center;
 }
-.body {
-  padding : 10px;
-}
 
 .progress-container {
   margin: 20px 0;
