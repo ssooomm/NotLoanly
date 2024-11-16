@@ -1,48 +1,46 @@
 <template>
   <div>
-    <div class="pa-4">
-      <v-col>
-        <h1 class="pb-3">KB 비상금 대출 신청</h1>
-        <div class="text-blue-grey-lighten-3">
-          비상금 대출의 시작부터 끝까지, <br />
-          사용자 맞춤으로 자동화된 상환 관리 서비스
-        </div>
+    <v-col>
+      <h1 class="pb-3">KB 비상금 대출 신청</h1>
+      <div class="text-blue-grey-lighten-3">
+        비상금 대출의 시작부터 끝까지, <br />
+        사용자 맞춤으로 자동화된 상환 관리 서비스
+      </div>
+    </v-col>
+    <!-- 대출 금액 입력 폼 -->
+    <v-form @submit.prevent>
+      <v-col class="pa-5">
+        <v-text-field
+          required
+          label="대출 금액"
+          variant="underlined"
+          type="text"
+          pattern="[0-9]*"
+          inputmode="numeric"
+          :rules="[minAmountRule, maxAmountRule]"
+          hide-details="auto"
+          v-model="formattedAmount"
+          @input="filterAmount"
+          @blur="validateAmount"
+        ></v-text-field>
+        <v-col
+          ><v-row class="py-3" justify="end"
+            >{{ displayAmount }} 만원</v-row
+          ></v-col
+        >
       </v-col>
-      <!-- 대출 금액 입력 폼 -->
-      <v-form @submit.prevent>
-        <v-col class="pa-5">
-          <v-text-field
-            required
-            label="대출 금액"
-            variant="underlined"
-            type="text"
-            pattern="[0-9]*"
-            inputmode="numeric"
-            :rules="[minAmountRule, maxAmountRule]"
-            hide-details="auto"
-            v-model="formattedAmount"
-            @input="filterAmount"
-            @blur="validateAmount"
-          ></v-text-field>
-          <v-col
-            ><v-row class="py-3" justify="end"
-              >{{ displayAmount }} 만원</v-row
-            ></v-col
-          >
-        </v-col>
-        <!-- 상품 정보 -->
-        <v-col>
-          <v-row class="pa-5" justify="space-between">
-            <h3>상품명</h3>
-            <span>{{ product.name }}</span>
-          </v-row>
-          <v-row class="pa-5" justify="space-between">
-            <h3>대출금리</h3>
-            <span>연 {{ product.interestRate }}%</span>
-          </v-row>
-        </v-col>
-      </v-form>
-    </div>
+      <!-- 상품 정보 -->
+      <v-col>
+        <v-row class="pa-5" justify="space-between">
+          <h3>상품명</h3>
+          <span>{{ product.name }}</span>
+        </v-row>
+        <v-row class="pa-5" justify="space-between">
+          <h3>대출금리</h3>
+          <span>연 {{ product.interestRate }}%</span>
+        </v-row>
+      </v-col>
+    </v-form>
     <!-- 확인 버튼 -->
     <v-btn
       class="bg-yellow-darken-2 fixed-bottom"
