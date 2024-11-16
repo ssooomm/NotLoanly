@@ -130,7 +130,6 @@ const confirm = () => {
     query: {
       loanAmount: amount.value,
       productName: product.value.name,
-      interestRate: product.value.interestRate,
     },
   });
 };
