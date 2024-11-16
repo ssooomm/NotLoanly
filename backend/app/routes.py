@@ -1,14 +1,19 @@
-from flask import Blueprint, jsonify, request
+#routers.py
+#RESTful API의 엔드포인트를 정의
 
-bp = Blueprint("api", __name__)
 
-@bp.route("/api/users", methods=["GET"])
-def get_users():
-    # 예제 데이터
-    users = [{"id": 1, "name": "Alice"}, {"id": 2, "name": "Bob"}]
-    return jsonify(users)
+from flask import Blueprint, request, jsonify
+from .services import chat_with_gpt
 
-@bp.route("/api/users", methods=["POST"])
-def create_user():
+main_routes = Blueprint("main_routes", __name__)
+
+@main_routes.route("/api/hello", methods=["GET"])
+def say_hello():
+    return jsonify({"message": "Hello, Flask!"})
+
+@main_routes.route("/api/chat", methods=["POST"])
+def chat():
     data = request.json
-    return jsonify({"message": f"User {data['name']} created!"})
+    user_input = data.get("message")
+    response = chat_with_gpt(user_input)
+    return jsonify({"response": response})
