@@ -9,7 +9,7 @@
         <v-row dense>
           <v-col cols="12" class="justify-center" v-for="(plan, index) in plans" :key="index">
             <v-card class="plan-card" outlined>
-              <div class="card-body">
+              <div class="card-body" @click="goToDetail(index)" v-ripple>
                 <!-- 왼쪽: 해시태그, 오른쪽: 이미지 -->
                 <div class="left-content">
                   <v-card-title class="plan-title">{{ plan.title }}</v-card-title>
@@ -31,6 +31,8 @@
 
 <script setup>
 import { ref } from 'vue';
+import { useRouter } from "vue-router";
+const router = useRouter();
 
 import shoppingImage from '@/assets/img/shopping.png';
 import foodImage from '@/assets/img/food.png';
@@ -50,7 +52,7 @@ const plans = ref([
     image: foodImage,
   },
   {
-    title: '여가 및 문화생활 절약 플랜',
+    title: '문화생활 절약 플랜',
     hashtags: ['# 산책가자', '# 친구 OTT 같이보자', '# 집에서 노래나 듣자'],
     image: leisureImage,
   },
@@ -65,6 +67,18 @@ const plans = ref([
     image: trafficImage,
   },
 ]);
+
+// 세부 페이지로 이동하는 함수
+const goToDetail = async (planId) => {
+  try {
+    await router.push({
+      name: 'RepaymentPlanSuggestionDetail',
+      params: { id: planId }
+    })
+  } catch (error) {
+    console.error('Navigation failed:', error)
+  }
+}
 </script>
 
 <style scoped>
@@ -72,17 +86,27 @@ const plans = ref([
   font-size: 24px;
   font-weight: bold;
   color: #333;
-  margin-bottom: 30px;
+  margin-bottom: 1rem;
 }
 
 .plan-card {
   display: flex;
   flex-direction: column;
-  padding: 16px;
+  padding: 1rem;
   border-radius: 12px;
   background-color: #f7f7f7;
   height: auto;
-  margin: 0 auto 16px;
+  margin: 0 auto 1rem;
+
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  top: 0;
+}
+
+.plan-card:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2) !important;
+  top: -4px;
 }
 
 .plan-title {
@@ -117,7 +141,7 @@ const plans = ref([
 
 .right-content {
   flex-shrink: 0;
-  margin-left: 16px;
+  /* margin-left: 16px; */
 }
 
 .plan-image {
