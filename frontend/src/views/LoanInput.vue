@@ -83,7 +83,8 @@ const validateAmount = () => {
     amount.value = roundedAmount;
   }
 
-  formattedAmount.value = amount.value.toLocaleString();
+  const formatter = new Intl.NumberFormat("ko-KR");
+  formattedAmount.value = formatter.format(amount.value);
 };
 
 // 대출 금액 입력 필터링(숫자만 입력 가능)
