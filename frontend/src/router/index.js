@@ -2,8 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router';
 import MainView from '../views/MainView.vue';
 import LoanInfoNotice from '../views/loanInfo/LoanInfoNotice.vue';
 // import LoanInfoCollection from '../views/LoanInfoCollection.vue';
-// import LoanInput from '../views/LoanInput.vue';
-// import LoanComplete from '../views/LoanComplete.vue';
+import LoanInput from '../views/LoanInput.vue';
+import LoanComplete from '../views/LoanComplete.vue';
 // import ExpenseAnalysis from '../views/ExpenseAnalysis.vue';
 import RepaymentPlanSuggestion from '../views/RepaymentPlanSuggestion.vue';
 // import RepaymentPlanSuggestionDetail from '../views/RepaymentPlanSuggestionDetail.vue';
@@ -29,16 +29,16 @@ const routes = [
   //   name: 'LoanInfoCollection',
   //   component: LoanInfoCollection,
   // },
-  // {
-  //   path: '/loan-input',
-  //   name: 'LoanInput',
-  //   component: LoanInput,
-  // },
-  // {
-  //   path: '/loan-complete',
-  //   name: 'LoanComplete',
-  //   component: LoanComplete,
-  // },
+  {
+    path: '/loan-input',
+    name: 'LoanInput',
+    component: LoanInput,
+  },
+  {
+    path: '/loan-complete',
+    name: 'LoanComplete',
+    component: LoanComplete,
+  },
   // {
   //   path: '/expense-analysis',
   //   name: 'ExpenseAnalysis',
