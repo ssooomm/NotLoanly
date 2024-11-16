@@ -42,17 +42,12 @@
       </v-col>
     </v-form>
     <!-- 확인 버튼 -->
-    <v-btn
-      class="bg-yellow-darken-2 fixed-bottom"
-      rounded="0"
-      variant="flat"
-      @click="confirm"
-      ><h3>확인</h3></v-btn
-    >
+    <ConfirmButton @confirm="handleConfirm" />
   </div>
 </template>
 
 <script setup>
+import ConfirmButton from "@/components/ConfirmButton.vue";
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 
@@ -70,6 +65,12 @@ const validateAmount = () => {
   // 콤마 제거 후 숫자로 변환
   const parsedAmount = parseFloat(formattedAmount.value.replace(/,/g, "")) || 0;
 
+  // 금액이 비어있는지 확인
+  if (parsedAmount === 0) {
+    alert("대출 금액을 입력해주세요.");
+    return false;
+  }
+
   // 만원 이하의 입력값을 올림 처리
   const roundedAmount = Math.ceil(parsedAmount / 10000) * 10000;
 
@@ -83,6 +84,8 @@ const validateAmount = () => {
 
   const formatter = new Intl.NumberFormat("ko-KR");
   formattedAmount.value = formatter.format(amount.value);
+
+  return true;
 };
 
 // 대출 금액 입력 필터링(숫자만 입력 가능)
@@ -123,14 +126,16 @@ const product = ref({
 });
 
 // 확인 버튼 클릭 시 이벤트
-const confirm = () => {
-  router.push({
-    path: "/loan-complete",
-    query: {
-      loanAmount: amount.value,
-      productName: product.value.name,
-    },
-  });
+const handleConfirm = () => {
+  if (validateAmount()) {
+    router.push({
+      path: "/loan-complete",
+      query: {
+        loanAmount: amount.value,
+        productName: product.value.name,
+      },
+    });
+  }
 };
 </script>
 
