@@ -3,8 +3,14 @@
     <!-- Navbar -->
     <v-app-bar :elevation="0" app class="custom-app-bar">
       <v-btn icon="mdi-chevron-left" @click="goBack"></v-btn>
-      <v-app-bar-title class="custom-title">{{ isNotificationsPage ? '알림함' : 'I’m not LOANly' }}</v-app-bar-title>
-      <v-btn v-if="!isNotificationsPage" icon="mdi-bell-outline" @click="goToNotifications"></v-btn>
+      <v-app-bar-title class="custom-title">{{
+        isNotificationsPage ? "알림함" : "I’m not LOANly"
+      }}</v-app-bar-title>
+      <v-btn
+        v-if="!isNotificationsPage"
+        icon="mdi-bell-outline"
+        @click="goToNotifications"
+      ></v-btn>
       <v-btn icon="mdi-home"></v-btn>
       <v-app-bar-nav-icon></v-app-bar-nav-icon>
     </v-app-bar>
@@ -15,14 +21,14 @@
       </v-container>
     </v-main>
     <!-- Footer -->
-    <v-footer app></v-footer>
+    <v-footer v-if="!hideFooter" app></v-footer>
   </v-app>
 </template>
 
 <script setup>
 import { useDisplay } from "vuetify";
-import { useRouter, useRoute } from 'vue-router';
-import { ref, watch } from 'vue';
+import { useRouter, useRoute } from "vue-router";
+import { ref, computed, watch } from "vue";
 
 const display = useDisplay();
 const router = useRouter();
@@ -34,19 +40,25 @@ const isNotificationsPage = ref(false);
 watch(
   () => route.path,
   (newPath) => {
-    isNotificationsPage.value = newPath === '/notifications';
+    isNotificationsPage.value = newPath === "/notifications";
   }
 );
 
 // 알림 페이지로 이동하는 함수
 const goToNotifications = () => {
-  router.push('/notifications');
+  router.push("/notifications");
 };
 
 // 뒤로 가기 버튼
 const goBack = () => {
   router.back();
 };
+
+// 푸터 숨김 여부
+const footerHiddenRoutes = ["/loan-input"]; // 푸터를 숨길 라우트 경로 추가
+
+// 현재 라우트가 footerHiddenRoutes 배열에 있는지 확인
+const hideFooter = computed(() => footerHiddenRoutes.includes(route.path));
 </script>
 
 <style scoped>
