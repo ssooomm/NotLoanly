@@ -55,7 +55,7 @@ const goBack = () => {
 };
 
 // 푸터 숨김 여부
-const footerHiddenRoutes = ["/loan-input"]; // 푸터를 숨길 라우트 경로 추가
+const footerHiddenRoutes = ["/loan-input", "/loan-complete"]; // 푸터를 숨길 라우트 경로 추가
 
 // 현재 라우트가 footerHiddenRoutes 배열에 있는지 확인
 const hideFooter = computed(() => footerHiddenRoutes.includes(route.path));
@@ -75,6 +75,6 @@ const hideFooter = computed(() => footerHiddenRoutes.includes(route.path));
   padding-top: 50px;
 }
 .custom-container {
-  padding: 0;
+  padding: 24px;
 }
 </style>
