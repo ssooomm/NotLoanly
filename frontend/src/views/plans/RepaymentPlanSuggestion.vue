@@ -1,32 +1,26 @@
 <template>
-  <v-app>
-    <v-main>
-      <v-container class="mt-5" fluid>
-        <!-- 상환 플랜 제목 -->
-        <h1 class="title text-center">상환 플랜 선택</h1>
+  <!-- 상환 플랜 제목 -->
+  <h1 class="title text-center">상환 플랜 선택</h1>
 
-        <!-- 플랜 카드 리스트 -->
-        <v-row dense>
-          <v-col cols="12" class="justify-center" v-for="(plan, index) in plans" :key="index">
-            <v-card class="plan-card" outlined>
-              <div class="card-body" @click="goToDetail(index)" v-ripple>
-                <!-- 왼쪽: 해시태그, 오른쪽: 이미지 -->
-                <div class="left-content">
-                  <v-card-title class="plan-title">{{ plan.title }}</v-card-title>
-                  <v-card-subtitle class="plan-hashtags">
-                    <p v-for="(hashtag, idx) in plan.hashtags" :key="idx" class="hashtag">{{ hashtag }}</p>
-                  </v-card-subtitle>
-                </div>
-                <div class="right-content">
-                  <img :src="plan.image" class="plan-image " alt="Plan Image" />
-                </div>
-              </div>
-            </v-card>
-          </v-col>
-        </v-row>
-      </v-container>
-    </v-main>
-  </v-app>
+  <!-- 플랜 카드 리스트 -->
+  <v-row dense>
+    <v-col cols="12" class="justify-center" v-for="(plan, index) in plans" :key="index">
+      <v-card class="plan-card" outlined>
+        <div class="card-body" @click="goToDetail(index)" v-ripple>
+          <!-- 왼쪽: 해시태그, 오른쪽: 이미지 -->
+          <div class="left-content">
+            <v-card-title class="plan-title">{{ plan.title }}</v-card-title>
+            <v-card-subtitle class="plan-hashtags">
+              <p v-for="(hashtag, idx) in plan.hashtags" :key="idx" class="hashtag">{{ hashtag }}</p>
+            </v-card-subtitle>
+          </div>
+          <div class="right-content">
+            <img :src="plan.image" class="plan-image " alt="Plan Image" />
+          </div>
+        </div>
+      </v-card>
+    </v-col>
+  </v-row>
 </template>
 
 <script setup>
@@ -149,8 +143,8 @@ const goToDetail = async (planId) => {
   height: auto;
 }
 
-.details-button {
+/* .details-button {
   color: #3f51b5;
   text-decoration: none;
-}
+} */
 </style>
