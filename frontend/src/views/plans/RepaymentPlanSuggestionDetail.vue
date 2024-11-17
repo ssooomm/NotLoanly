@@ -1,7 +1,7 @@
 <template>
     <v-row>
         <v-col cols="12">
-            <v-card class="pa-5" variant="text" v-if="currentPlan">
+            <v-card class="pa-5" flat v-if="currentPlan">
                 <v-card-title class="text-h5 font-weight-bold text-start">
                     {{ currentPlan.title }}
                 </v-card-title>
@@ -12,7 +12,7 @@
                     </ul>
                 </v-card-text>
             </v-card>
-            <v-card v-else class="pa-5" variant="text">
+            <v-card v-else class="pa-5" flat>
                 <v-card-title class="text-h5 font-weight-bold text-start">
                     플랜을 찾을 수 없습니다
                 </v-card-title>
