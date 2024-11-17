@@ -6,7 +6,7 @@ import LoanInfoNotice from '../views/loanInfo/LoanInfoNotice.vue';
 // import LoanComplete from '../views/LoanComplete.vue';
 // import ExpenseAnalysis from '../views/ExpenseAnalysis.vue';
 import RepaymentPlanSuggestion from '../views/plans/RepaymentPlanSuggestion.vue';
-// import RepaymentPlanSuggestionDetail from '../views/RepaymentPlanSuggestionDetail.vue';
+import RepaymentPlanSuggestionDetail from '../views/plans/RepaymentPlanSuggestionDetail.vue';
 // import RepaymentDashboardSummary from '../views/RepaymentDashboardSummary.vue';
 // import RepaymentDashboardExpenseRatioChange from '../views/RepaymentDashboardExpenseRatioChange.vue';
 // import RepaymentStatus from '../views/RepaymentStatus.vue';
@@ -49,11 +49,11 @@ const routes = [
     name: 'RepaymentPlanSuggestion',
     component: RepaymentPlanSuggestion,
   },
-  // {
-  //   path: '/repayment-plan-suggestion/detail',
-  //   name: 'RepaymentPlanSuggestionDetail',
-  //   component: RepaymentPlanSuggestionDetail,
-  // },
+  {
+    path: '/repayment-plan-suggestion/:id',
+    name: 'RepaymentPlanSuggestionDetail',
+    component: RepaymentPlanSuggestionDetail,
+  },
   // {
   //   path: '/repayment-dashboard-summary',
   //   name: 'RepaymentDashboardSummary',
