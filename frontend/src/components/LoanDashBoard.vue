@@ -60,7 +60,7 @@
           <div class="budget-segment" :style="{ width: (budgetItems[2].budget / totalBudget) * 100 + '%', backgroundColor: '#4caf50' }">여가비</div>
         </div>
         <div class="change" @click="toggleEditMode">
-          비율 변경 >
+          플랜 변경 >
         </div>
       </div>
       <div class="category" v-for="(item, index) in budgetItems" :key="index">
@@ -88,21 +88,22 @@
 <script setup>
 import { ref } from 'vue';
 import VueCal from 'vue-cal';
-import '../../node_modules/vue-cal/dist/vuecal.css'; // Ensure you import the CSS
+import { useRouter } from 'vue-router';
+import '../../node_modules/vue-cal/dist/vuecal.css'; 
 
-const currentAmount = 530000; // 현재 금액
-const totalAmount = 3000000; // 총 목표 금액
-const targetAmount = 500000; // 목표 상환 원금
-const interestAmount = 20000; // 이자 납입액
-const totalPayment = currentAmount + interestAmount; // 총 납부액
-const progressPercentage = ((currentAmount / totalAmount) * 100).toFixed(1); // 진행률
-const expenditure = 1488100; // 지출
-const income = 2835502; // 수입
+const currentAmount = 530000; 
+const totalAmount = 3000000; 
+const targetAmount = 500000; 
+const interestAmount = 20000;
+const totalPayment = currentAmount + interestAmount; 
+const progressPercentage = ((currentAmount / totalAmount) * 100).toFixed(1); 
+const expenditure = 1488100; 
+const income = 2835502; 
 
+const router = useRouter();
 const events = ref([
-  { start: '2024-11-19', end: '2024-11-19', title: '지출: 50,000원', color: '#f44336' }, // Expenditure
-  { start: '2024-11-20', end: '2024-11-20', title: '수입: 100,000원', color: '#4caf50' }, // Income
-  // Add more events as needed
+  { start: '2024-11-19', end: '2024-11-19', title: '지출: 50,000원', color: '#f44336' }, 
+  { start: '2024-11-20', end: '2024-11-20', title: '수입: 100,000원', color: '#4caf50' }, 
 ]);
 
 const budgetItems = [
@@ -140,6 +141,10 @@ const getStatusClass = (status) => {
 };
 
 const totalBudget = budgetItems.reduce((sum, item) => sum + item.budget, 0);
+
+const toggleEditMode = () => {
+  router.push('/repayment-plan-suggestion'); 
+};
 </script>
 
 <style scoped>
