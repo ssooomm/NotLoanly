@@ -1,11 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import MainView from '../views/MainView.vue';
+import ExpenseAnalysis from '../views/ExpenseAnalysis.vue';
 import LoanInfoNotice from '../views/LoanInfoNotice.vue';
 import LoanInfoNoticeDetail from '../views/LoanInfoNoticeDetail.vue';
 import LoanInfoCollection from '../views/LoanInfoCollection.vue';
 import LoanInput from '../views/LoanInput.vue';
 import LoanComplete from '../views/LoanComplete.vue';
-import ExpenseAnalysis from '../views/ExpenseAnalysis.vue';
 import RepaymentPlanSuggestion from '../views/RepaymentPlanSuggestion.vue';
 import RepaymentPlanSuggestionDetail from '../views/RepaymentPlanSuggestionDetail.vue';
 import RepaymentDashboardSummary from '../views/RepaymentDashboardSummary.vue';
@@ -19,6 +19,11 @@ const routes = [
     path: '/',
     name: 'Main',
     component: MainView,
+  },
+  {
+    path: '/expense-analysis',
+    name: 'ExpenseAnalysis',
+    component: ExpenseAnalysis,
   },
   {
     path: '/loan-info-notice',
@@ -45,11 +50,7 @@ const routes = [
     name: 'LoanComplete',
     component: LoanComplete,
   },
-  {
-    path: '/expense-analysis',
-    name: 'ExpenseAnalysis',
-    component: ExpenseAnalysis,
-  },
+  
   {
     path: '/repayment-plan-suggestion',
     name: 'RepaymentPlanSuggestion',
