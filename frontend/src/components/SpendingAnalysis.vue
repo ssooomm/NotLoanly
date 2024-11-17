@@ -1,12 +1,13 @@
 <template>
   <div class="spending-analysis">
-    <h2>오수민의 월 평균 소비</h2>
-    <h3>{{ totalSpending }}원</h3>
+    <h2>오수민님의 월 평균 소비</h2>
     <div class="doughnutChart">
-      <DoughnutChart v-if="doughnutChartData" :data="doughnutChartData" />
+      <div class="doughnut-wrapper">
+        <DoughnutChart v-if="doughnutChartData" :data="doughnutChartData" />
+        <p class="total-spending">{{ totalSpending.toLocaleString() }} 원</p>
+      </div>
     </div>
 
-    <!-- Category Spending Details -->
     <div class="category-details">
       <div v-for="(amount, index) in categoryAmounts" :key="index" class="category-item">
         <span :style="{ color: doughnutChartData.datasets[0].backgroundColor[index] }">
@@ -26,10 +27,10 @@ import { ref } from 'vue';
 import DoughnutChart from './DoughnutChart.vue';
 import BarChart from './BarChart.vue';
 
-// 데이터 설정
+
 const totalSpending = 1824235;
 
-// Doughnut 차트 데이터
+
 const doughnutChartData = ref({
   labels: ['쇼핑/의류비', '식비', '여가/취미비'],
   datasets: [
@@ -71,6 +72,21 @@ const barChartData = ref({
 .doughnutChart {
   width: 90%;
   margin-left: 20px;
+}
+
+.doughnut-wrapper {
+  position: relative; 
+}
+
+.total-spending {
+  position: absolute; 
+  top: 50%; 
+  left: 50%; 
+  transform: translate(-50%, -50%); 
+  font-size: 18px;
+  font-weight: bold; 
+  margin-top: 25px;
+  color: #080600; 
 }
 
 h2 {
