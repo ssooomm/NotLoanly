@@ -6,7 +6,7 @@ from flask import Blueprint, request, jsonify
 from .services import chat_with_gpt
 from app.models import User  # User 모델 가져오기
 from . import db
-from .models import User
+from .models import User, Categories
 main_routes = Blueprint("main_routes", __name__)
 
 @main_routes.route("/api/hello", methods=["GET"])
@@ -48,6 +48,25 @@ def apply_loan():
             "status": "success",
             "message": "Loan details updated successfully.",
             "updated_user": user.to_dict()
+        })
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": f"An error occurred: {str(e)}"
+        }), 500
+#카테고리 보여주는 GET 요청
+@main_routes.route("/api/categories", methods=["GET"])
+def get_categories():
+    try:
+        # Categories 테이블에서 모든 데이터 조회
+        categories = Categories.query.all()
+
+        # 각 카테고리를 딕셔너리로 변환
+        categories_list = [{"category_id": cat.category_id, "category_name": cat.category_name} for cat in categories]
+
+        return jsonify({
+            "status": "success",
+            "categories": categories_list
         })
     except Exception as e:
         return jsonify({
