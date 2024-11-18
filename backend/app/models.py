@@ -27,6 +27,13 @@ class User(db.Model):
     monthly_repayment_goal = db.Column(db.Integer, nullable=False)
     selected_plan_group_id = db.Column(db.Integer, nullable=True)
     created_at = db.Column(db.TIMESTAMP, server_default=db.func.current_timestamp())
+    
+class Categories(db.Model):
+    __tablename__ = 'categories'
+
+    category_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    category_name = db.Column(db.String(255), nullable=False)
+    
 
     def to_dict(self):
         return {
@@ -42,3 +49,20 @@ class User(db.Model):
             "selected_plan_group_id": self.selected_plan_group_id,
             "created_at": self.created_at
         }
+    
+
+
+class UserExpenses(db.Model):
+    __tablename__ = 'UserExpenses'
+    user_expense_id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, nullable=False)
+    category_id = db.Column(db.Integer, nullable=False)
+    month = db.Column(db.Integer, nullable=False)
+    original_amount = db.Column(db.Integer, nullable=False)
+    is_hard_to_reduce = db.Column(db.Boolean, default=False)
+
+
+class Categories(db.Model):
+    __tablename__ = 'Categories'
+    category_id = db.Column(db.Integer, primary_key=True)
+    category_name = db.Column(db.String(255), nullable=False)

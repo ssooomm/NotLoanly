@@ -117,7 +117,7 @@ const slides = ref([
     width: 100%;
     height: 56px;
     /* border-radius: 28px; */
-    background-color: #007AFF;
+    background-color: #FFCC00;
     color: white;
     border: none;
     font-size: 18px;

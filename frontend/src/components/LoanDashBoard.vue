@@ -93,7 +93,7 @@
               여가비
             </div>
           </div>
-          <div class="change" @click="toggleEditMode">비율 변경 ></div>
+          <div class="change" @click="toggleEditMode">플랜 변경 ></div>
         </div>
         <div class="category" v-for="(item, index) in budgetItems" :key="index">
           <div class="category-header">
@@ -122,17 +122,19 @@
 <script setup>
 import { ref } from "vue";
 import VueCal from "vue-cal";
-import "../../node_modules/vue-cal/dist/vuecal.css"; // Ensure you import the CSS
+import { useRouter } from "vue-router";
+import "../../node_modules/vue-cal/dist/vuecal.css";
 
-const currentAmount = 530000; // 현재 금액
-const totalAmount = 3000000; // 총 목표 금액
-const targetAmount = 500000; // 목표 상환 원금
-const interestAmount = 20000; // 이자 납입액
-const totalPayment = currentAmount + interestAmount; // 총 납부액
-const progressPercentage = ((currentAmount / totalAmount) * 100).toFixed(1); // 진행률
-const expenditure = 1488100; // 지출
-const income = 2835502; // 수입
+const currentAmount = 530000;
+const totalAmount = 3000000;
+const targetAmount = 500000;
+const interestAmount = 20000;
+const totalPayment = currentAmount + interestAmount;
+const progressPercentage = ((currentAmount / totalAmount) * 100).toFixed(1);
+const expenditure = 1488100;
+const income = 2835502;
 
+const router = useRouter();
 const events = ref([
   {
     start: "2024-11-19",
@@ -193,6 +195,10 @@ const getStatusClass = (status) => {
 };
 
 const totalBudget = budgetItems.reduce((sum, item) => sum + item.budget, 0);
+
+const toggleEditMode = () => {
+  router.push("/repayment-plan-suggestion");
+};
 </script>
 
 <style>
@@ -200,49 +206,49 @@ const totalBudget = budgetItems.reduce((sum, item) => sum + item.budget, 0);
   text-align: center;
 }
 
-.progress-container {
+.dashboard .progress-container {
   margin: 20px 0;
 }
 
-.progress-label {
+.dashboard .progress-label {
   display: flex;
   justify-content: space-between;
   margin-bottom: 10px;
 }
 
-.progress-bar {
+.dashboard .progress-bar {
   background: #e0e0e0;
   border-radius: 5px;
   height: 20px;
   position: relative;
 }
 
-.progress {
+.dashboard .progress {
   background: #ffc107; /* 노란색 */
   height: 100%;
   border-radius: 5px;
   transition: width 0.3s ease;
 }
 
-.amounts {
+.dashboard .amounts {
   display: flex;
   justify-content: space-between;
   font-size: 18px;
   margin-top: 5px;
 }
 
-.summary {
+.dashboard .summary {
   margin: 20px 0;
   text-align: left;
 }
 
-.summary-item {
+.dashboard .summary-item {
   display: flex;
   justify-content: space-between;
   margin: 5px 0;
 }
 
-.summary-total {
+.dashboard .summary-total {
   font-weight: bold;
   border-top: 1px solid #e0e0e0;
   padding-top: 10px;
@@ -251,7 +257,7 @@ const totalBudget = budgetItems.reduce((sum, item) => sum + item.budget, 0);
   margin: 5px 0;
 }
 
-.calendar {
+.dashboard .calendar {
   margin: 20px 0;
 }
 
@@ -307,7 +313,7 @@ const totalBudget = budgetItems.reduce((sum, item) => sum + item.budget, 0);
   font-size: 0.6em;
 } */
 
-.financial-info {
+.dashboard .financial-info {
   display: flex;
   justify-content: flex-end;
   margin: 20px 0;
@@ -315,21 +321,21 @@ const totalBudget = budgetItems.reduce((sum, item) => sum + item.budget, 0);
   font-weight: bold;
 }
 
-.expense {
+.dashboard .expense {
   margin-right: 10px;
 }
 
-.plan {
+.dashboard .plan {
   margin: 20px 0;
 }
 
-.budget-container {
+.dashboard .budget-container {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-.budget-bar {
+.dashboard .budget-bar {
   display: flex;
   height: 30px;
   border-radius: 5px;
@@ -338,7 +344,7 @@ const totalBudget = budgetItems.reduce((sum, item) => sum + item.budget, 0);
   width: 70%;
 }
 
-.budget-segment {
+.dashboard .budget-segment {
   height: 100%;
   display: flex;
   align-items: center;
@@ -347,29 +353,29 @@ const totalBudget = budgetItems.reduce((sum, item) => sum + item.budget, 0);
   font-weight: bold;
 }
 
-.change {
+.dashboard .change {
   margin-left: 10px;
   color: rgb(48, 110, 243);
   cursor: pointer;
 }
 
-.category {
+.dashboard .category {
   margin: 15px 0;
 }
 
-.category-header {
+.dashboard .category-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.category-name {
+.dashboard .category-name {
   font-size: 18px;
   margin-bottom: 5px;
   font-weight: bold;
 }
 
-.status {
+.dashboard .status {
   font-size: 14px;
   margin-bottom: 5px;
   padding: 5px 10px;
@@ -377,32 +383,32 @@ const totalBudget = budgetItems.reduce((sum, item) => sum + item.budget, 0);
   color: rgb(255, 255, 255);
 }
 
-.status-safe {
+.dashboard .status-safe {
   background-color: #4caf50;
 }
 
-.status-danger {
+.dashboard .status-danger {
   background-color: #f44336;
 }
 
-.status-warning {
+.dashboard .status-warning {
   background-color: #ffcc00;
 }
 
-.category-bar {
+.dashboard .category-bar {
   background-color: #e0e0e0;
   border-radius: 5px;
   height: 20px;
   position: relative;
 }
 
-.progress {
+.dashboard .progress {
   height: 100%;
   border-radius: 5px;
   transition: width 0.3s ease;
 }
 
-.amounts {
+.dashboard .amounts {
   display: flex;
   justify-content: space-between;
   font-size: 14px;
