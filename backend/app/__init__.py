@@ -8,6 +8,7 @@ from flask import Flask  # Flask 클래스 가져오기
 from flask_sqlalchemy import SQLAlchemy  # SQLAlchemy 가져오기
 from flask_cors import CORS  # CORS 설정용 플러그인
 from flask_socketio import SocketIO
+from flask import Flask, after_this_request
 
 db = SQLAlchemy()  # 데이터베이스 객체 생성
 socketio = SocketIO(cors_allowed_origins="*")  # WebSocket 초기화
@@ -17,6 +18,13 @@ def create_app():
     #__name__은 현재 Python 모듈의 이름
     # 앱 설정 (config.py의 내용을 사용)
     app.config.from_object("app.config.Config")
+
+    @app.before_request
+    def set_default_headers():
+        @after_this_request
+        def add_header(response):
+            response.headers['Content-Type'] = 'application/json; charset=utf-8'
+            return response
 
     # 확장 기능 초기화
     db.init_app(app)  # SQLAlchemy 데이터베이스 초기화

@@ -13,6 +13,8 @@ from . import db
 from .models import User, Categories
 from . import socketio
 from .models import Transactions, Notification
+from .utils import json_response
+
 
 
 main_routes = Blueprint("main_routes", __name__)
@@ -62,25 +64,24 @@ def apply_loan():
             "status": "error",
             "message": f"An error occurred: {str(e)}"
         }), 500
+    
 #카테고리 보여주는 GET 요청
 @main_routes.route("/api/categories", methods=["GET"])
 def get_categories():
     try:
-        # Categories 테이블에서 모든 데이터 조회
         categories = Categories.query.all()
-
-        # 각 카테고리를 딕셔너리로 변환
         categories_list = [{"category_id": cat.category_id, "category_name": cat.category_name} for cat in categories]
 
-        return jsonify({
+        return json_response({
             "status": "success",
             "categories": categories_list
         })
     except Exception as e:
-        return jsonify({
+        return json_response({
             "status": "error",
             "message": f"An error occurred: {str(e)}"
-        }), 500
+        }, status=500)
+
 
 
 @main_routes.route("/api/users", methods=["GET"])
@@ -100,10 +101,15 @@ def repayment_analysis():
 @main_routes.route('/api/dashboard/summary', methods=['GET'])
 def dashboard_summary():
     try:
-        summary = get_dashboard_summary()
+        user_id = request.args.get('user_id', type=int)
+        if not user_id:
+            return jsonify({"status": "error", "message": "User ID is required"}), 400
+
+        summary = get_dashboard_summary(user_id)
         return jsonify({"status": "success", "summary": summary}), 200
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
+
 
 #3-2. 상환 현황 조회
 @main_routes.route('/api/dashboard/repayment-status', methods=['GET'])
