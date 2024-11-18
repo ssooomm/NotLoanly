@@ -1,2 +1,2 @@
-pip install flask flask-cors flask-sqlalchemy openai pymysql cryptography flask-socketio
+pip install flask flask-cors flask-sqlalchemy openai pymysql cryptography flask-socketio 
 
