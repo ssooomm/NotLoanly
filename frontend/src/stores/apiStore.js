@@ -50,7 +50,7 @@ export const useApiStore = defineStore('api', {
 
         // 소비 분석 데이터 조회
         async fetchConsumptionAnalysis(userId) {
-            const response = await fetch(`/api/repayment/analysis?userId=${userId}`);
+            const response = await fetch(`/api/dashboard/consumption-analysis?user_id=${userId}`); // userId 포함
             const data = await response.json();
             this.consumptionAnalysis = data; // 소비 분석 데이터 저장
             return data; // 응답 반환
@@ -91,22 +91,14 @@ export const useApiStore = defineStore('api', {
         },
 
         // 상환 요약 조회
-        async fetchRepaymentStatus() {
-            const response = await fetch('/api/dashboard/summary');
+        async fetchRepaymentStatus(userId) {
+            const response = await fetch(`/api/dashboard/summary?user_id=${userId}`); // 사용자 ID 포함
             const data = await response.json();
             this.repaymentStatus = data.summary; // 상환 현황 저장
             this.repaymentChart = data.repaymentChart; // 월별 상환 데이터 저장
             this.paidAmount = this.repaymentStatus.paidAmount; // 상환한 금액
             this.remainingAmount = this.repaymentStatus.remainingAmount; // 남은 금액
             this.completedPercentage = (this.paidAmount / this.totalAmount) * 100; // 상환 비율 계산
-            return data; // 응답 반환
-        },
-
-        // 소비 분석 조회
-        async fetchConsumptionAnalysis() {
-            const response = await fetch('/api/dashboard/consumption-analysis');
-            const data = await response.json();
-            this.consumptionAnalysis = data; // 소비 분석 데이터 저장
             return data; // 응답 반환
         },
 
