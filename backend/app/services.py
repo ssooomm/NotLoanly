@@ -40,13 +40,15 @@ def get_montyly_expense(user_id, month):
     }
 
 # 3-1. 상환 요약 조회
-def get_dashboard_summary():
+def get_dashboard_summary(user_id):
     summary = []
 
-    # Group transactions by month
+    # Group transactions by month for the given user
     monthly_transactions = db.session.query(
         func.date_format(Transactions.transaction_date, '%Y-%m').label('month'),
         func.sum(Transactions.amount).label('totalSpent')
+    ).filter(
+        Transactions.user_id == user_id  # Filter by user_id
     ).group_by('month').all()
 
     for month, totalSpent in monthly_transactions:
@@ -56,29 +58,40 @@ def get_dashboard_summary():
             Categories.category_name,
             Transactions.description,
             Transactions.amount
-        ).join(Categories, Transactions.category_id == Categories.category_id) \
-         .filter(func.date_format(Transactions.transaction_date, '%Y-%m') == month) \
-         .order_by(Transactions.transaction_date).all()  # 날짜순 정렬 추가
+        ).join(
+            Categories, Transactions.category_id == Categories.category_id
+        ).filter(
+            Transactions.user_id == user_id,  # Filter by user_id
+            func.date_format(Transactions.transaction_date, '%Y-%m') == month
+        ).order_by(Transactions.transaction_date).all()
 
         # Group transactions by category
         categories = db.session.query(
             Categories.category_name.label('category'),
             func.sum(Transactions.amount).label('totalAmount')
-        ).join(Categories, Transactions.category_id == Categories.category_id) \
-         .filter(func.date_format(Transactions.transaction_date, '%Y-%m') == month) \
-         .group_by(Categories.category_name).all()
+        ).join(
+            Categories, Transactions.category_id == Categories.category_id
+        ).filter(
+            Transactions.user_id == user_id,  # Filter by user_id
+            func.date_format(Transactions.transaction_date, '%Y-%m') == month
+        ).group_by(Categories.category_name).all()
 
         summary.append({
             "month": month,
             "totalSpent": totalSpent,
             "categories": [{"category": c.category, "totalAmount": c.totalAmount} for c in categories],
             "transactions": [
-                {"date": t.transaction_date.strftime('%Y-%m-%d'), "category": t.category_name, 
-                 "description": t.description, "amount": t.amount} for t in transactions
+                {
+                    "date": t.transaction_date.strftime('%Y-%m-%d'),
+                    "category": t.category_name,
+                    "description": t.description,
+                    "amount": t.amount
+                } for t in transactions
             ]
         })
 
     return summary
+
 
 
 # 3-2. 상환 현황 조회
