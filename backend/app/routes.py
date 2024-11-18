@@ -56,7 +56,7 @@ def apply_loan():
 
         return jsonify({
             "status": "success",
-            "message": "Loan details updated successfully.",
+            "message": "대출신청이 완료되었습니다.",
             "updated_user": user.to_dict()
         })
     except Exception as e:
@@ -88,14 +88,14 @@ def get_categories():
 def get_users():
     users = User.query.all()
     user_list = [user.to_dict() for user in users]
-    return jsonify(user_list)
+    return json_response(user_list)
 
 # 2-1. 소비 분석 데이터 조회
 @main_routes.route('/api/repayment/analysis', methods=['GET'])
 def repayment_analysis():
     user_id = request.args.get('userId', type=int)
     data = get_montyly_expense(user_id, 10)  # 10월 데이터 조회
-    return jsonify(data)
+    return json_response(data)
 
 # 3-1. 상환 요약 조회 
 @main_routes.route('/api/dashboard/summary', methods=['GET'])
@@ -106,7 +106,7 @@ def dashboard_summary():
             return jsonify({"status": "error", "message": "User ID is required"}), 400
 
         summary = get_dashboard_summary(user_id)
-        return jsonify({"status": "success", "summary": summary}), 200
+        return json_response({"status": "success", "summary": summary}), 200
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
@@ -133,7 +133,7 @@ def consumption_percentage():
         return jsonify({"status": "error", "message": "User ID is required"}), 400
 
     response = get_consumption_percentage(user_id)
-    return jsonify(response), response.get("status", 200)
+    return json_response(response), response.get("status", 200)
 
 
 # 3-4. 소비 분석 조회
@@ -190,7 +190,7 @@ def create_transaction():
 @main_routes.route('/api/notifications/<int:user_id>', methods=['GET'])
 def get_notifications(user_id):
     notifications = Notification.query.filter_by(user_id=user_id).order_by(Notification.sent_at.desc()).all()
-    return jsonify([{
+    return json_response([{
         "notification_id": n.notification_id,
         "message": n.message,
         "sent_at": n.sent_at.strftime("%Y-%m-%d %H:%M:%S")
