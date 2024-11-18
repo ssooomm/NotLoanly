@@ -52,6 +52,9 @@ def get_dashboard_summary(user_id):
     ).group_by('month').all()
 
     for month, totalSpent in monthly_transactions:
+        # Ensure totalSpent is an integer
+        totalSpent = int(totalSpent) if totalSpent is not None else 0
+
         # Fetch transactions for the month, sorted by date
         transactions = db.session.query(
             Transactions.transaction_date,
@@ -76,16 +79,22 @@ def get_dashboard_summary(user_id):
             func.date_format(Transactions.transaction_date, '%Y-%m') == month
         ).group_by(Categories.category_name).all()
 
+        # Convert category amounts to integers
+        categories_data = [
+            {"category": c.category, "totalAmount": int(c.totalAmount) if c.totalAmount is not None else 0}
+            for c in categories
+        ]
+
         summary.append({
             "month": month,
             "totalSpent": totalSpent,
-            "categories": [{"category": c.category, "totalAmount": c.totalAmount} for c in categories],
+            "categories": categories_data,
             "transactions": [
                 {
                     "date": t.transaction_date.strftime('%Y-%m-%d'),
                     "category": t.category_name,
                     "description": t.description,
-                    "amount": t.amount
+                    "amount": int(t.amount)  # Ensure transaction amount is an integer
                 } for t in transactions
             ]
         })
