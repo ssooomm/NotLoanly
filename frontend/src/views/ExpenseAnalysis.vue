@@ -123,7 +123,7 @@
     </div>
 
     <div class="footer">
-      <button class="footer-button">상환 플랜 제안받기</button>
+      <button class="footer-button" @click="navigateToRepaymentPlanSuggestion">상환 플랜 제안받기</button>
     </div>
   </div>
 </template>
@@ -132,12 +132,16 @@
 import { ref } from "vue";
 import DoughnutChart from "../components/DoughnutChart.vue";
 import BarChart from "../components/BarChart.vue";
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 // 데이터 설정
 const totalSpending = 1824235;
 const selectedPeriod = ref(null);
 const customPeriod = ref('');
 
+// Period selection function
 const selectPeriod = (period) => {
   selectedPeriod.value = period;
   if (period !== '직접 입력') {
@@ -188,6 +192,11 @@ const toggleCategory = (category) => {
   } else {
     selectedCategories.value.push(category); // Select
   }
+};
+
+// Function to navigate to repayment plan suggestion
+const navigateToRepaymentPlanSuggestion = () => {
+  router.push('/repayment-plan-suggestion');
 };
 </script>
 
