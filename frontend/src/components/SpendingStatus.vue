@@ -6,22 +6,7 @@
         <DoughnutChart :data="donutChartData" />
         <p class="percentage-text">{{ completedPercentage.toFixed(1) }}%</p>
       </div>
-      <p class="amount-text">상환 금액 530,000</p>
-    </div>
-    <div class="status-circles">
-      <div class="circle-row">
-        <div class="circle active">
-          <img src="@/assets/stamp.png" alt="1개월" class="icon" /> 
-          1개월
-        </div>
-        <div class="circle">2개월</div>
-        <div class="circle">3개월</div>
-      </div>
-      <div class="circle-row">
-        <div class="circle">4개월</div>
-        <div class="circle">5개월</div>
-        <div class="circle">6개월</div>
-      </div>
+      <p class="amount-text">상환 금액 {{ paidAmount.toLocaleString() }} 원</p>
     </div>
     <div class="bar-chart-container">
       <BarChart :data="barChartData" />
@@ -30,33 +15,57 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import DoughnutChart from './DoughnutChart.vue'; 
 import BarChart from './BarChart.vue'; 
+import { useApiStore } from '@/stores/apiStore'; // Pinia 스토어 가져오기
 
-const completedPercentage = 17.3;
+const apiStore = useApiStore(); // Pinia 스토어 인스턴스 생성
+
+const paidAmount = ref(0);
+const totalAmount = 5000000; // 총 대출 금액
+const completedPercentage = ref(0);
 
 const donutChartData = ref({
   labels: ['상환 비율'],
   datasets: [{
-    data: [completedPercentage, 100 - completedPercentage],
+    data: [completedPercentage.value, 100 - completedPercentage.value],
     backgroundColor: ['#ecbf28', '#e0e0e0'],
     borderWidth: 0,
   }]
 });
 
-const monthlyData = [30, 50, 80, 40, 60, 90, 20, 70, 100, 50, 80, 60]; 
+const monthlyData = ref([]); // 월별 상환 데이터
 
 const barChartData = ref({
-  labels: Array.from({ length: 12 }, (_, i) => i + 1), 
+  labels: Array.from({ length: 12 }, (_, i) => `${i + 1}월`), 
   datasets: [{
     label: '월별 상환금액',
-    data: monthlyData,
+    data: monthlyData.value,
     backgroundColor: 'rgba(255, 206, 86, 0.6)', 
     borderColor: 'rgba(255, 206, 86, 1)',
     borderWidth: 1,
   }]
 });
+
+// 상환 현황 데이터 가져오기
+const fetchRepaymentStatus = async () => {
+  await apiStore.fetchRepaymentStatus(); 
+
+  
+  paidAmount.value = apiStore.paidAmount; 
+  completedPercentage.value = (paidAmount.value / totalAmount) * 100; 
+
+  
+  donutChartData.value.datasets[0].data = [completedPercentage.value, 100 - completedPercentage.value];
+
+  // 월별 상환 데이터 업데이트
+  monthlyData.value = apiStore.repaymentChart.map(item => item.paid);
+  barChartData.value.datasets[0].data = monthlyData.value;
+};
+
+// 컴포넌트가 마운트될 때 데이터 가져오기
+onMounted(fetchRepaymentStatus);
 </script>
 
 <style scoped>
@@ -94,46 +103,5 @@ const barChartData = ref({
 .bar-chart-container {
   margin: 20px 0; 
   max-width: 800px;
-}
-
-.status-circles {
-  margin-top: 20px;
-  margin-bottom: 50px;
-}
-
-.circle-row {
-  display: flex;
-  justify-content: space-around;
-  margin-bottom: 10px; /* 간격 조정 */
-}
-
-.circle {
-  width: 70px; 
-  height: 70px; 
-  border-radius: 50%; 
-  background-color: #e0e0e0; 
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative; 
-  font-size: 14px;
-  transition: background-color 0.3s; 
-}
-
-.circle.active {
-  border: 2px solid #ecbf28; 
-  background-color: #fff; 
-}
-
-.circle:hover {
-  background-color: #d0d0d0; 
-}
-
-.icon {
-  width: 45px; 
-  height: 50px; 
-  position: absolute;
-  top: 10px; 
-  left: 10px; 
 }
 </style>

@@ -23,20 +23,20 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import DoughnutChart from './DoughnutChart.vue';
 import BarChart from './BarChart.vue';
+import { useApiStore } from '@/stores/apiStore'; 
 
+const apiStore = useApiStore(); 
 
-const totalSpending = 1824235;
-
-
+const totalSpending = ref(0);
 const doughnutChartData = ref({
-  labels: ['쇼핑/의류비', '식비', '여가/취미비'],
+  labels: [],
   datasets: [
     {
       label: '소비 비율',
-      data: [638465, 241881, 170940],
+      data: [],
       backgroundColor: ['#4bc0c0', '#36a2eb', '#ff6384'],
       hoverOffset: 4,
     },
@@ -44,24 +44,47 @@ const doughnutChartData = ref({
 });
 
 // Calculate category amounts
-const categoryAmounts = doughnutChartData.value.datasets[0].data;
+const categoryAmounts = ref([]);
 
 // Bar 차트 데이터
 const barChartData = ref({
-  labels: ['쇼핑/의류비', '여가/취미비', '식비'],
+  labels: ['나의 소비', '20대 평균'],
   datasets: [
     {
       label: '나의 소비',
-      data: [638465, 170940, 241881],
+      data: [],
       backgroundColor: '#ffcc00',
     },
     {
       label: '20대 평균',
-      data: [700000, 200000, 250000],
+      data: [700000, 200000, 250000], 
       backgroundColor: '#4caf50',
     },
   ],
 });
+
+// 소비 분석 데이터 가져오기
+const fetchConsumptionData = async () => {
+  await apiStore.fetchConsumptionAnalysis(); 
+  const summaryData = apiStore.consumptionAnalysis.summary;
+
+  // 도넛 차트 데이터 설정
+  if (summaryData.length > 0) {
+    const latestMonthData = summaryData[0]; 
+    totalSpending.value = latestMonthData.totalSpent;
+    categoryAmounts.value = latestMonthData.categories.map(category => category.totalAmount); // 카테고리 금액
+
+    
+    doughnutChartData.value.labels = latestMonthData.categories.map(category => category.category);
+    doughnutChartData.value.datasets[0].data = categoryAmounts.value;
+
+    
+    barChartData.value.datasets[0].data = [latestMonthData.totalSpent]; 
+  }
+};
+
+// 컴포넌트가 마운트될 때 데이터 가져오기
+onMounted(fetchConsumptionData);
 </script>
 
 <style scoped>
@@ -70,8 +93,9 @@ const barChartData = ref({
 }
 
 .doughnutChart {
-  width: 90%;
+  width: 85%;
   margin-left: 20px;
+  margin-top: 20px;
 }
 
 .doughnut-wrapper {
@@ -85,7 +109,7 @@ const barChartData = ref({
   transform: translate(-50%, -50%); 
   font-size: 18px;
   font-weight: bold; 
-  margin-top: 25px;
+  margin-top: 2px;
   color: #080600; 
 }
 
