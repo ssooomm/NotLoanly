@@ -2,8 +2,11 @@
   <div>
     <h2>오수민님의 상환현황</h2>
     <div class="chart-container">
-      <DoughnutChart :data="donutChartData" />
-      <p class="amount-text">전체 상환 금액 530,000원</p>
+      <div class="donut-chart-wrapper">
+        <DoughnutChart :data="donutChartData" />
+        <p class="percentage-text">{{ completedPercentage.toFixed(1) }}%</p>
+      </div>
+      <p class="amount-text">상환 금액 530,000</p>
     </div>
     <div class="status-circles">
       <div class="circle-row">
@@ -11,23 +14,13 @@
           <img src="@/assets/stamp.png" alt="1개월" class="icon" /> 
           1개월
         </div>
-        <div class="circle">
-          2개월
-        </div>
-        <div class="circle">
-          3개월
-        </div>
+        <div class="circle">2개월</div>
+        <div class="circle">3개월</div>
       </div>
       <div class="circle-row">
-        <div class="circle">
-          4개월
-        </div>
-        <div class="circle">
-          5개월
-        </div>
-        <div class="circle">
-          6개월
-        </div>
+        <div class="circle">4개월</div>
+        <div class="circle">5개월</div>
+        <div class="circle">6개월</div>
       </div>
     </div>
     <div class="bar-chart-container">
@@ -52,9 +45,7 @@ const donutChartData = ref({
   }]
 });
 
-
 const monthlyData = [30, 50, 80, 40, 60, 90, 20, 70, 100, 50, 80, 60]; 
-
 
 const barChartData = ref({
   labels: Array.from({ length: 12 }, (_, i) => i + 1), 
@@ -76,9 +67,28 @@ const barChartData = ref({
   margin: 30px 0;
 }
 
+.donut-chart-wrapper {
+  position: relative; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  width: 200px; 
+  height: 200px; 
+  margin-left: 10px;
+}
+
+.percentage-text {
+  position: absolute; 
+  margin-top: 30px;
+  font-size: 18px; 
+  font-weight: bold; 
+  color: #ecbf28; 
+}
+
 .amount-text {
   margin-left: 20px; 
-  font-size: 16px; 
+  font-size: 16px;
+  font-weight: bold;
 }
 
 .bar-chart-container {
@@ -94,7 +104,7 @@ const barChartData = ref({
 .circle-row {
   display: flex;
   justify-content: space-around;
-  margin-bottom: 20px; 
+  margin-bottom: 10px; /* 간격 조정 */
 }
 
 .circle {

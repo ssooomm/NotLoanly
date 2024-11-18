@@ -1,10 +1,11 @@
 <template>
   <div class="spending-analysis">
-    <h2>소비 분석</h2>
-    <h3>오수민의 월 평균 소비</h3>
-    <h1>{{ totalSpending }}원</h1>
+    <h2>오수민님의 월 평균 소비</h2>
     <div class="doughnutChart">
-      <DoughnutChart v-if="doughnutChartData" :data="doughnutChartData" />
+      <div class="doughnut-wrapper">
+        <DoughnutChart v-if="doughnutChartData" :data="doughnutChartData" />
+        <p class="total-spending">{{ totalSpending.toLocaleString() }} 원</p>
+      </div>
     </div>
 
     <div class="category-details">
@@ -110,6 +111,15 @@
           직접 입력
         </button>
       </div>
+
+      <div v-if="selectedPeriod === '직접 입력'" class="input-container">
+        <input
+          type="text"
+          v-model="customPeriod"
+          placeholder="기간을 입력하세요 (예: 5개월)"
+          class="custom-input"
+        />
+      </div>
     </div>
 
     <div class="footer">
@@ -125,6 +135,15 @@ import BarChart from "../components/BarChart.vue";
 
 // 데이터 설정
 const totalSpending = 1824235;
+const selectedPeriod = ref(null);
+const customPeriod = ref('');
+
+const selectPeriod = (period) => {
+  selectedPeriod.value = period;
+  if (period !== '직접 입력') {
+    customPeriod.value = ''; // 직접 입력이 아닐 경우 입력 필드 초기화
+  }
+};
 
 // Doughnut 차트 데이터
 const doughnutChartData = ref({
@@ -159,7 +178,6 @@ const barChartData = ref({
 });
 
 const selectedCategories = ref([]);
-const selectedPeriod = ref(null);
 
 // Function to toggle category selection
 const toggleCategory = (category) => {
@@ -171,23 +189,32 @@ const toggleCategory = (category) => {
     selectedCategories.value.push(category); // Select
   }
 };
-
-// Function to select a period
-const selectPeriod = (period) => {
-  selectedPeriod.value = period;
-};
 </script>
 
 <style scoped>
 .spending-analysis {
   text-align: center;
-  padding: 20px;
-  background-color: #fff;
 }
 
 .doughnutChart {
-  width: 90%;
-  margin: 20px auto;
+  width: 80%;
+  margin-left: 40px;
+}
+
+.doughnut-wrapper {
+  position: relative; 
+}
+
+.total-spending {
+  position: absolute; 
+  top: 50%; 
+  left: 50%; 
+  transform: translate(-50%, -50%); 
+  font-size: 18px;
+  font-weight: bold; 
+  margin-top: 25px;
+  margin-right: 30px;
+  color: #080600; 
 }
 
 h2 {
@@ -198,11 +225,6 @@ h2 {
 h3 {
   margin: 20px 0;
   font-size: 18px;
-}
-
-h1 {
-  font-size: 32px;
-  color: #4caf50;
 }
 
 .category-details {
@@ -225,6 +247,36 @@ h1 {
   justify-content: center;
   flex-wrap: wrap;
   margin-top: 10px;
+}
+
+.period-buttons {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 10px;
+}
+
+.period-button {
+  background-color: #f0f0f0;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.period-button.selected {
+  background-color: #ffcc00;
+}
+
+.input-container {
+  margin-top: 10px;
+}
+
+.custom-input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  width: 100%;
 }
 
 .category-button,
