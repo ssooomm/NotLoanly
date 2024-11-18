@@ -28,32 +28,31 @@
       <component :is="activeTabComponent" />
     </div>
   </div>
-  </template>
-  
-  <script setup>
-  import { ref,computed } from 'vue';
-  import LoanDashboard from '../components/LoanDashBoard.vue';
-  import SpendingAnalysis from '../components/SpendingAnalysis.vue';
-  import SpendingStatus from '../components/SpendingStatus.vue';
-  
-  const activeTab = ref('dashboard');
-  
-  const activeTabComponent = computed(() => {
-    switch (activeTab.value) {
-      case 'dashboard':
-        return LoanDashboard;
-      case 'spending':
-        return SpendingStatus;
-      case 'analysis':
-        return SpendingAnalysis;
-      default:
-        return LoanDashboard;
-    }
-  });
-  </script>
+</template>
+
+<script setup>
+import { ref, computed } from "vue";
+import LoanDashboard from "../components/LoanDashBoard.vue";
+import SpendingAnalysis from "../components/SpendingAnalysis.vue";
+import SpendingStatus from "../components/SpendingStatus.vue";
+
+const activeTab = ref("dashboard");
+
+const activeTabComponent = computed(() => {
+  switch (activeTab.value) {
+    case "dashboard":
+      return LoanDashboard;
+    case "spending":
+      return SpendingStatus;
+    case "analysis":
+      return SpendingAnalysis;
+    default:
+      return LoanDashboard;
+  }
+});
+</script>
 
 <style scoped>
-
 .back-button {
   background: none;
   border: none;
@@ -97,6 +96,6 @@
 }
 
 .content {
-  padding: 20px;
+  padding: 20px 0;
 }
 </style>
