@@ -6,8 +6,13 @@ from flask import Blueprint, request, jsonify
 from .services import chat_with_gpt
 from app.models import User  # User 모델 가져오기
 from .services import get_montyly_expense
+from .services import get_dashboard_summary
+from .services import get_repayment_status
+from .services import get_consumption_percentage, get_consumption_analysis
 from . import db
 from .models import User, Categories
+from . import socketio
+from .models import Transactions, Notification
 
 
 main_routes = Blueprint("main_routes", __name__)
@@ -90,3 +95,98 @@ def repayment_analysis():
     user_id = request.args.get('userId', type=int)
     data = get_montyly_expense(user_id, 10)  # 10월 데이터 조회
     return jsonify(data)
+
+# 3-1. 상환 요약 조회 
+@main_routes.route('/api/dashboard/summary', methods=['GET'])
+def dashboard_summary():
+    try:
+        summary = get_dashboard_summary()
+        return jsonify({"status": "success", "summary": summary}), 200
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+#3-2. 상환 현황 조회
+@main_routes.route('/api/dashboard/repayment-status', methods=['GET'])
+def repayment_status():
+    try:
+        # 예: 사용자 ID를 요청 헤더 또는 인증 토큰에서 가져옴 (여기서는 1로 가정)
+        user_id = request.args.get('user_id', type=int, default=1)
+        data = get_repayment_status(user_id)
+        return jsonify(data), 200
+    except ValueError as ve:
+        return jsonify({"error": str(ve)}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# 3-3. 상환 플랜 비율 조회
+@main_routes.route('/api/dashboard/consumption-percentage', methods=['GET'])
+def consumption_percentage():
+    user_id = request.args.get('user_id', type=int)
+
+    if not user_id:
+        return jsonify({"status": "error", "message": "User ID is required"}), 400
+
+    response = get_consumption_percentage(user_id)
+    return jsonify(response), response.get("status", 200)
+
+
+# 3-4. 소비 분석 조회
+@main_routes.route('/api/dashboard/consumption-analysis', methods=['GET'])
+def consumption_analysis():
+    user_id = request.args.get('user_id', type=int)
+    if not user_id:
+        return jsonify({"status": "error", "message": "User ID is required"}), 400
+
+    response = get_consumption_analysis(user_id)
+    return jsonify(response), 200
+
+
+# 4. 거래내역 추가
+@main_routes.route('/api/transactions', methods=['POST'])
+def create_transaction():
+    data = request.json
+
+    # 필수 필드 검증
+    user_id = data.get('user_id')
+    category_id = data.get('category_id')
+    transaction_date = data.get('transaction_date')
+    amount = data.get('amount')
+    description = data.get('description')
+    payment_method = data.get('payment_method')
+
+    if not user_id or not category_id or not transaction_date or not amount:
+        return jsonify({"error": "Missing required fields"}), 400
+
+    try:
+        # 새로운 거래 추가
+        transaction = Transactions(
+            user_id=user_id,
+            category_id=category_id,
+            transaction_date=transaction_date,
+            amount=amount,
+            description=description,
+            payment_method=payment_method
+        )
+        db.session.add(transaction)
+        db.session.commit()
+
+        return jsonify({
+            "message": "Transaction created successfully",
+            "transaction_id": transaction.transaction_id
+        }), 201
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+
+# API: 사용자 알림 가져오기
+@main_routes.route('/api/notifications/<int:user_id>', methods=['GET'])
+def get_notifications(user_id):
+    notifications = Notification.query.filter_by(user_id=user_id).order_by(Notification.sent_at.desc()).all()
+    return jsonify([{
+        "notification_id": n.notification_id,
+        "message": n.message,
+        "sent_at": n.sent_at.strftime("%Y-%m-%d %H:%M:%S")
+    } for n in notifications])
+
