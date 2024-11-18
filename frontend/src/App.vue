@@ -6,13 +6,17 @@
       <v-app-bar-title class="custom-title">{{
         isNotificationsPage ? "알림함" : "I’m not LOANly"
       }}</v-app-bar-title>
-      <v-btn v-if="!isNotificationsPage" icon="mdi-bell-outline" @click="goToNotifications"></v-btn>
+      <v-btn
+        v-if="!isNotificationsPage"
+        icon="mdi-bell-outline"
+        @click="goToNotifications"
+      ></v-btn>
       <v-btn icon="mdi-home"></v-btn>
       <v-app-bar-nav-icon></v-app-bar-nav-icon>
     </v-app-bar>
     <!-- Main -->
     <v-main class="custom-main">
-      <v-container fluid class="custom-container">
+      <v-container fluid class="custom-container" :style="containerStyle">
         <router-view />
       </v-container>
     </v-main>
@@ -50,8 +54,17 @@ const goBack = () => {
   router.back();
 };
 
+// LoanInfoNotice.vue 페이지에서만 적용할 스타일
+const containerStyle = computed(() => {
+  return route.path === "/loan-info-notice" ? { padding: "0 0 24px 0" } : {};
+});
+
 // 푸터 숨김 여부
-const footerHiddenRoutes = ["/loan-input", "/loan-complete", "/loan-info-notice"]; // 푸터를 숨길 라우트 경로 추가
+const footerHiddenRoutes = [
+  "/loan-input",
+  "/loan-complete",
+  "/loan-info-notice",
+]; // 푸터를 숨길 라우트 경로 추가
 
 // 현재 라우트가 footerHiddenRoutes 배열에 있는지 확인
 const hideFooter = computed(() => footerHiddenRoutes.includes(route.path));
@@ -59,7 +72,7 @@ const hideFooter = computed(() => footerHiddenRoutes.includes(route.path));
 
 <style scoped>
 .custom-app-bar {
-  max-width: 400px;
+  max-width: 430px;
   /* Apply the same max-width as mobile-wrapper */
   margin: 0 auto;
   left: 0;
@@ -71,7 +84,7 @@ const hideFooter = computed(() => footerHiddenRoutes.includes(route.path));
 }
 
 .custom-main {
-  padding-top: 50px;
+  padding-top: 64px;
 }
 
 .custom-container {
