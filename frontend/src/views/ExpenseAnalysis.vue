@@ -28,7 +28,6 @@
     <h3>20대 평균 소비 TOP3</h3>
     <BarChart v-if="barChartData" :data="barChartData" />
 
-    <!-- Category Selection -->
     <div class="category-selection">
       <h4>줄이기 어려운 걸 선택해주세요.</h4>
       <p class="info-text">한 가지 이상 선택 가능합니다.</p>
@@ -78,7 +77,7 @@
       </div>
     </div>
 
-    <!-- Period Selection -->
+    
     <div class="period-selection">
       <h4>상환 기간을 선택해주세요.</h4>
       <div class="period-buttons">
@@ -123,7 +122,7 @@
     </div>
 
     <div class="footer">
-      <button class="footer-button">상환 플랜 제안받기</button>
+      <button class="footer-button" @click="navigateToRepaymentPlanSuggestion">상환 플랜 제안받기</button>
     </div>
   </div>
 </template>
@@ -132,20 +131,24 @@
 import { ref } from "vue";
 import DoughnutChart from "../components/DoughnutChart.vue";
 import BarChart from "../components/BarChart.vue";
+import { useRouter } from 'vue-router';
 
-// 데이터 설정
+const router = useRouter();
+
+
 const totalSpending = 1824235;
 const selectedPeriod = ref(null);
 const customPeriod = ref('');
 
+
 const selectPeriod = (period) => {
   selectedPeriod.value = period;
   if (period !== '직접 입력') {
-    customPeriod.value = ''; // 직접 입력이 아닐 경우 입력 필드 초기화
+    customPeriod.value = ''; 
   }
 };
 
-// Doughnut 차트 데이터
+
 const doughnutChartData = ref({
   labels: ["쇼핑/의류비", "식비", "여가/취미비"],
   datasets: [
@@ -160,7 +163,7 @@ const doughnutChartData = ref({
 
 const categoryAmounts = doughnutChartData.value.datasets[0].data;
 
-// Bar 차트 데이터
+
 const barChartData = ref({
   labels: ["쇼핑/의류비", "여가/취미비", "식비"],
   datasets: [
@@ -179,15 +182,20 @@ const barChartData = ref({
 
 const selectedCategories = ref([]);
 
-// Function to toggle category selection
+
 const toggleCategory = (category) => {
   if (selectedCategories.value.includes(category)) {
     selectedCategories.value = selectedCategories.value.filter(
       (c) => c !== category
     ); // Deselect
   } else {
-    selectedCategories.value.push(category); // Select
+    selectedCategories.value.push(category); 
   }
+};
+
+
+const navigateToRepaymentPlanSuggestion = () => {
+  router.push('/repayment-plan-suggestion');
 };
 </script>
 
