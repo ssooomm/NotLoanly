@@ -5,6 +5,7 @@ from . import db
 from .models import User, Categories, UserExpenses, RepaymentPlans, Transactions, Notification
 import json
 from .services import get_montyly_expense, get_repayment_status, get_dashboard_summary, get_consumption_percentage, get_consumption_analysis
+from .services import save_repayment_plan, get_repayment_plans, select_repayment_plan
 from . import db
 from . import socketio
 from .utils import json_response
@@ -91,65 +92,63 @@ def repayment_analysis():
     data = get_montyly_expense(user_id, 10)  # 10월 데이터 조회
     return jsonify(data)
 
-# @main_routes.route('/api/analyze-and-insert-plans', methods=['POST'])
-# def analyze_and_insert_plans():
-#     try:
-#         # 사용자 입력값 수신
-#         data = request.json
-#         user_id = data.get("user_id")
-#         loan_amount = data.get("loan_amount")
-#         interest_rate = data.get("interest_rate", 6.0)  # 기본값 6%
-#         duration = data.get("duration", 6)  # 기본값 6개월
+# 2-2. 줄이기 어려운 카테고리와 상환 기간 저장
+@main_routes.route("/api/repayment/save-plan", methods=["POST"])
+def save_plan():
+    try:
+        data = request.json
+        user_id = data.get("userId")
+        categories = data.get("categories")
+        repayment_period = data.get("repaymentPeriod")
 
-#         if not user_id or not loan_amount:
-#             return jsonify({"status": "error", "message": "필수 필드가 누락되었습니다"}), 400
+        # 필수 값 확인
+        if not user_id or not categories or not repayment_period:
+            return json_response({
+                "status": "error",
+                "message": "userId, categories, and repaymentPeriod are required."
+            }, 400)
 
-#         # 사용자 소비 데이터 가져오기
-#         user_expenses = UserExpenses.query.filter_by(user_id=user_id, month=10).all()  # 10월 데이터
-#         if not user_expenses:
-#             return jsonify({"status": "error", "message": "사용자의 지출 데이터를 찾을 수 없습니다"}), 404
+        # 서비스 호출
+        response, status = save_repayment_plan(user_id, categories, repayment_period)
+        return json_response(response, status)
+    except Exception as e:
+        return json_response({"status": "error", "message": str(e)}, 500)
 
-#         expense_data = [
-#             {
-#                 "category_id": expense.category_id,
-#                 "original_amount": expense.original_amount,
-#                 "is_hard_to_reduce": expense.is_hard_to_reduce
-#             }
-#             for expense in user_expenses
-#         ]
+#2-3. 상환 플랜 리스트 조회
+@main_routes.route("/api/repayment/plans", methods=["GET"])
+def repayment_plans():
+    try:
+        user_id = request.args.get("user_id", type=int)
+        if not user_id:
+            return json_response({"status": "error", "message": "User ID is required"}, 400)
 
-#         # ChatGPT로 분석 요청
-#         prompt = generate_prompt_with_loan_details(expense_data, loan_amount, interest_rate, duration)
-#         gpt_response = call_chatgpt(prompt)
-#         plans = parse_gpt_response(gpt_response)
+        plans = get_repayment_plans(user_id)
+        return json_response({"status": "success", "plans": plans}, 200)
+    except Exception as e:
+        return json_response({"status": "error", "message": str(e)}, 500)
+    
 
-#         print(plans)  # 디버깅용 출력
+# 2-4. 상환 플랜 선택
+@main_routes.route("/api/repayment/select-plan", methods=["POST"])
+def select_plan():
+    try:
+        data = request.json
+        user_id = data.get("userId")
+        plan_id = data.get("planId")
 
-#         # RepaymentPlans 테이블에 저장
-#         for plan in plans:
-#             new_plan = RepaymentPlans(
-#                 user_id=user_id,
-#                 plan_name=plan['plan_name'],
-#                 total_amount=plan['total_amount'],
-#                 duration=plan['duration'],
-#                 details=json.loads(plan['details']),  # JSON 문자열을 파싱하여 저장
-#                 created_at=db.func.current_timestamp()
-#             )
-#             db.session.add(new_plan)
+        try:
+            user_id = int(user_id)
+            plan_id = int(plan_id)
+        except (ValueError, TypeError):
+            return json_response({
+                "status": "error",
+                "message": "userId and planId must be integers."
+            }, 400)
 
-#         db.session.commit()
-        
-        
-
-#         return jsonify({
-#             "status": "success",
-#             "message": "상환 계획이 생성되었습니다",
-#             "plans": plans
-#         }), 201
-
-#     except Exception as e:
-#         db.session.rollback()
-#         return jsonify({"status": "error", "message": str(e)}), 500
+        message = select_repayment_plan(user_id, plan_id)
+        return json_response({"status": "success", "message": message}, 200)
+    except Exception as e:
+        return json_response({"status": "error", "message": str(e)}, 500)
 
 @main_routes.route('/api/analyze-and-insert-plans', methods=['POST'])
 def analyze_and_insert_plans():

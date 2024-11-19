@@ -39,6 +39,128 @@ def get_montyly_expense(user_id, month):
         ]
     }
 
+# 2-2. 줄이기 어려운 카테고리와 상환 기간 저장
+def save_repayment_plan(user_id, categories, repayment_period):
+    try:
+        # 사용자 유효성 검사
+        user = User.query.get(user_id)
+        if not user:
+            return {"status": "error", "message": "User not found"}, 404
+
+        # 상환 기간 업데이트
+        user.repayment_period = repayment_period
+        db.session.commit()
+
+        # monthly_repayment_goal 계산
+        if user.loan_amount and repayment_period:
+            user.monthly_repayment_goal = user.loan_amount // repayment_period  # 정수로 저장
+        else:
+            return {"status": "error", "message": "Invalid loan amount or repayment period"}, 400
+
+        db.session.commit()  # Users 테이블 업데이트
+
+
+        # 카테고리별 줄이기 어려운 항목 업데이트
+        for category in categories:
+            category_name = category["category"]
+            is_hard_to_reduce = category["isHardToReduce"]
+
+            # 카테고리 ID 가져오기
+            category_obj = Categories.query.filter_by(category_name=category_name).first()
+            if not category_obj:
+                return {"status": "error", "message": f"Category '{category_name}' not found"}, 404
+
+            # UserExpenses 업데이트 또는 생성
+            user_expense = UserExpenses.query.filter_by(
+                user_id=user_id,
+                category_id=category_obj.category_id
+            ).first()
+
+            if user_expense:
+                user_expense.is_hard_to_reduce = is_hard_to_reduce
+            else:
+                new_expense = UserExpenses(
+                    user_id=user_id,
+                    category_id=category_obj.category_id,
+                    month=11,  # 기본값으로 '0' (전체)
+                    original_amount=0,  # 초기 값 0
+                    is_hard_to_reduce=is_hard_to_reduce
+                )
+                db.session.add(new_expense)
+
+        db.session.commit()
+
+        return {"status": "success", "message": "상환 계획이 저장되었습니다."}, 200
+    except Exception as e:
+        db.session.rollback()
+        return {"status": "error", "message": str(e)}, 500
+
+
+#2-3. 상환 플랜 리스트 조회
+def get_repayment_plans(user_id):
+    """
+    Fetch repayment plans for a specific user with suggested savings per category.
+    """
+    # Query repayment plans for the user
+    plans = db.session.query(RepaymentPlans).filter_by(user_id=user_id).all()
+    if not plans:
+        return []
+
+    plans_data = []
+    for plan in plans:
+        try:
+            # Parse plan details
+            plan_details = plan.details if isinstance(plan.details, list) else json.loads(plan.details)
+
+            # Enrich plan details with category names
+            categories = []
+            for detail in plan_details:
+                category = db.session.query(Categories).filter_by(category_id=detail["category_id"]).first()
+                if category:
+                    categories.append({
+                        "categoryId": category.category_id,
+                        "categoryName": category.category_name,
+                        "suggestedSaving": detail.get("reduced_amount", 0),
+                        "savingPercentage": detail.get("saving_percentage", 0.0)
+                    })
+
+            # Add plan information
+            plans_data.append({
+                "planId": plan.plan_id,
+                "monthlyPayment": plan.total_amount // plan.duration,
+                "duration": plan.duration,
+                "description": plan.plan_name,
+                "categories": categories,
+                "hashtags" : plan.hashtags
+            })
+        except Exception as e:
+            print(f"Error processing plan {plan.plan_id}: {e}")
+            continue
+
+    return plans_data
+
+# 2-4. 상환 플랜 선택
+def select_repayment_plan(user_id, plan_id):
+    """
+    Select a repayment plan for the given user.
+    """
+
+    user = db.session.query(User).filter_by(user_id=user_id).first()
+    if not user:
+        raise ValueError("User not found.")
+
+    plan = db.session.query(RepaymentPlans).filter_by(plan_id=plan_id).first()
+    if not plan:
+        raise ValueError("Repayment plan not found.")
+
+    if plan.user_id != user_id:
+        raise ValueError("The selected plan does not belong to this user.")
+
+    user.selected_plan_group_id = plan.plan_id
+    db.session.commit()
+
+    return "선택한 상환 플랜이 시작되었습니다."
+
 
 # 3-1. 상환 요약 조회
 def get_dashboard_summary(user_id):
@@ -150,7 +272,6 @@ def get_repayment_status(user_id):
 
 # 3-3. 상환 플랜 비율 조회
 def get_consumption_percentage(user_id):
-    from sqlalchemy import inspect
     # 사용자와 선택된 플랜 가져오기
     user = db.session.query(User).filter(User.user_id == user_id).first()
 
@@ -164,13 +285,15 @@ def get_consumption_percentage(user_id):
 
     if not plan:
         return {"status": "error", "message": "Repayment plan not found"}, 404
-    
 
-    # 플랜 이름과 상세 데이터(details)
+    # 플랜 정보
     plan_name = plan.plan_name
-    plan_details = plan.details
+    total_amount = plan.total_amount
+    duration = plan.duration
+    hashtags = plan.hashtags
 
-    # 만약 plan.details가 이미 Python 리스트라면 json.loads를 생략
+    # 플랜 상세 데이터 (details)
+    plan_details = plan.details
     if isinstance(plan_details, str):
         try:
             plan_details = json.loads(plan_details)
@@ -192,13 +315,18 @@ def get_consumption_percentage(user_id):
                 "saving_percentage": saving_percentage
             })
 
+    # 최종 응답 데이터
     return {
         "status": "success",
         "data": {
             "selectedPlanName": plan_name,
-            "categories": categories
+            "total_amount": total_amount,
+            "duration": duration,
+            "categories": categories,
+            "hashtags": hashtags
         }
     }
+
 
 # 3-4. 소비 분석 조회
 def get_consumption_analysis(user_id):
