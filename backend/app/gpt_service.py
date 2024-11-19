@@ -44,7 +44,7 @@ def call_chatgpt(prompt):
         response = openai.ChatCompletion.create(
             ## model="gpt-3.5-turbo",
             model="gpt-4o",
-            model="gpt-4o",
+
             messages=[
                 {"role": "system", "content": "당신은 재무 계획 전문가입니다."},
                 {"role": "user", "content": prompt}
