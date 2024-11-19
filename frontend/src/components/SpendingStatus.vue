@@ -6,7 +6,7 @@
         <DoughnutChart :data="donutChartData" />
         <p class="percentage-text">{{ completedPercentage.toFixed(1) }}%</p>
       </div>
-      <p class="amount-text">상환 금액 530,000</p>
+      <p class="amount-text">상환 금액 {{ repaymentStatus.paidAmount }}</p>
     </div>
     <div class="status-circles">
       <div class="circle-row">
@@ -30,33 +30,88 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import DoughnutChart from './DoughnutChart.vue'; 
 import BarChart from './BarChart.vue'; 
+import { useApiStore } from '@/stores/apiStore';
 
-const completedPercentage = 17.3;
+const apiStore = useApiStore();
+const userId = 1;
+
+const repaymentStatus = ref({
+  paidAmount: "0",
+  remainingAmount: "0",
+  totalAmount: 0,
+});
+
+const completedPercentage = ref(0);
 
 const donutChartData = ref({
   labels: ['상환 비율'],
   datasets: [{
-    data: [completedPercentage, 100 - completedPercentage],
+    data: [0, 100],
     backgroundColor: ['#ecbf28', '#e0e0e0'],
     borderWidth: 0,
   }]
 });
 
-const monthlyData = [30, 50, 80, 40, 60, 90, 20, 70, 100, 50, 80, 60]; 
-
 const barChartData = ref({
-  labels: Array.from({ length: 12 }, (_, i) => i + 1), 
+  labels: [],
   datasets: [{
     label: '월별 상환금액',
-    data: monthlyData,
+    data: [],
     backgroundColor: 'rgba(255, 206, 86, 0.6)', 
     borderColor: 'rgba(255, 206, 86, 1)',
     borderWidth: 1,
   }]
 });
+
+// 상환 현황 및 차트 데이터 가져오기
+const fetchRepaymentData = async () => {
+  try {
+    const data = await apiStore.fetchRepaymentStatus(userId);
+    repaymentStatus.value = data.repaymentStatus;
+    
+    // 문자열을 숫자로 변환하여 계산
+    const paidAmount = parseInt(repaymentStatus.value.paidAmount);
+    const totalAmount = parseInt(repaymentStatus.value.totalAmount);
+    completedPercentage.value = (paidAmount / totalAmount) * 100;
+
+    // 도넛 차트 데이터 업데이트
+    donutChartData.value = {
+      labels: ['상환 비율'],
+      datasets: [{
+        data: [completedPercentage.value, 100 - completedPercentage.value],
+        backgroundColor: ['#ecbf28', '#e0e0e0'],
+        borderWidth: 0,
+      }]
+    };
+
+    // 월별 상환 데이터 업데이트
+    const monthlyData = data.repaymentChart.map(item => parseInt(item.paid));
+    const monthlyLabels = data.repaymentChart.map(item => {
+      const month = item.month.split('-')[1].replace(/^0+/, '');
+      return `${month}월`;
+    });
+
+    barChartData.value = {
+      labels: monthlyLabels,
+      datasets: [{
+        label: '월별 상환금액',
+        data: monthlyData,
+        backgroundColor: 'rgba(255, 206, 86, 0.6)', 
+        borderColor: 'rgba(255, 206, 86, 1)',
+        borderWidth: 1,
+      }]
+    };
+
+  } catch (error) {
+    console.error('Failed to fetch repayment data:', error);
+  }
+};
+
+// 컴포넌트가 마운트될 때 데이터 가져오기
+onMounted(fetchRepaymentData);
 </script>
 
 <style scoped>

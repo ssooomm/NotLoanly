@@ -4,7 +4,7 @@
     <div class="body">
       <div class="progress-container">
         <div class="progress-label">
-          <span>0월 상환 진행률</span>
+          <span>11월 상환 진행률</span>
           <span>1/6 개월</span>
           <span>{{ progressPercentage }}%</span>
         </div>
@@ -35,8 +35,14 @@
       </section>
       <section class="calendar">
         <div class="financial-info">
-          <p class="expense">지출: {{ expenditure }}원</p>
-          <p class="income">수입: {{ income }}원</p>
+          <p class="expense">
+            지출: <span class="red-text">{{ formatAmount(expenditure) }}</span
+            >원
+          </p>
+          <p class="income">
+            수입: <span class="blue-text">{{ formatAmount(income) }}</span
+            >원
+          </p>
         </div>
         <vue-cal
           xsmall
@@ -50,50 +56,32 @@
           class="vuecal--yellow-theme"
           style="height: 400px"
         >
-          <!-- <template
-            ><div
-              v-for="event in events"
-              :key="event.start"
-              :class="getEventClass(event.content)"
-            >
-              <span>{{ event.title }}</span>
-            </div></template
-          > -->
         </vue-cal>
       </section>
       <section class="plan">
-        <h2>식비 절약 플랜</h2>
+        <div class="plan-header">
+          <h2 class="plan-title">식비 절약 플랜</h2>
+          <div class="change" @click="toggleEditMode">플랜 변경 ></div>
+        </div>
         <div class="budget-container">
           <div class="budget-bar">
             <div
+              v-for="(item, index) in budgetItems"
+              :key="index"
               class="budget-segment"
               :style="{
-                width: (budgetItems[0].budget / totalBudget) * 100 + '%',
-                backgroundColor: '#f44336',
+                width: (item.budget / totalBudget) * 100 + '%',
+                backgroundColor:
+                  item.status === 'danger'
+                    ? '#f44336'
+                    : item.status === 'warning'
+                    ? '#ffcc00'
+                    : '#4caf50',
               }"
             >
-              식비
-            </div>
-            <div
-              class="budget-segment"
-              :style="{
-                width: (budgetItems[1].budget / totalBudget) * 100 + '%',
-                backgroundColor: '#ffcc00',
-              }"
-            >
-              쇼핑비
-            </div>
-            <div
-              class="budget-segment"
-              :style="{
-                width: (budgetItems[2].budget / totalBudget) * 100 + '%',
-                backgroundColor: '#4caf50',
-              }"
-            >
-              여가비
+              {{ item.name }}
             </div>
           </div>
-          <div class="change" @click="toggleEditMode">플랜 변경 ></div>
         </div>
         <div class="category" v-for="(item, index) in budgetItems" :key="index">
           <div class="category-header">
@@ -105,13 +93,15 @@
           <div class="category-bar">
             <div
               class="progress"
-              :style="{ width: (item.spent / item.budget) * 100 + '%' }"
+              :style="{
+                width: calculateProgressWidth(item.spent, item.budget),
+              }"
               :class="item.status"
             ></div>
           </div>
           <div class="amounts">
-            <span>{{ item.spent }}원</span>
-            <span>/ {{ item.budget }}원</span>
+            <span>{{ formatAmount(item.spent) }}원</span>
+            <span>/ {{ formatAmount(item.budget) }}원</span>
           </div>
         </div>
       </section>
@@ -120,51 +110,127 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed, onMounted } from "vue";
 import VueCal from "vue-cal";
 import { useRouter } from "vue-router";
+import { useApiStore } from "@/stores/apiStore";
 import "../../node_modules/vue-cal/dist/vuecal.css";
 
-const currentAmount = 530000;
-const totalAmount = 3000000;
-const targetAmount = 500000;
-const interestAmount = 20000;
-const totalPayment = currentAmount + interestAmount;
-const progressPercentage = ((currentAmount / totalAmount) * 100).toFixed(1);
-const expenditure = 1488100;
-const income = 2835502;
-
 const router = useRouter();
-const events = ref([
-  {
-    start: "2024-11-19",
-    end: "2024-11-19",
-    title: "-50,000",
-    content: "expenditure",
-    class: "expenditure-event",
-  }, // Expenditure
-  {
-    start: "2024-11-20",
-    end: "2024-11-20",
-    title: "+100,000",
-    content: "income",
-    class: "income-event",
-  }, // Income
-  {
-    start: "2024-11-20",
-    end: "2024-11-20",
-    title: "-30,000",
-    content: "expenditure",
-    class: "expenditure-event",
-  }, // Expenditure
-  // Add more events as needed
-]);
+const apiStore = useApiStore();
 
-const budgetItems = [
-  { name: "식비", spent: 70000, budget: 200000, status: "safe" },
-  { name: "쇼핑비", spent: 100000, budget: 150000, status: "danger" },
-  { name: "여가비", spent: 50000, budget: 280000, status: "warning" },
-];
+// ref 변수들 선언
+const currentAmount = ref(0);
+const totalAmount = ref(0);
+const targetAmount = ref(0);
+const interestAmount = ref(0);
+const totalPayment = ref(0);
+const progressPercentage = ref(0);
+const expenditure = ref(0);
+const income = ref(0);
+const budgetItems = ref([]);
+const events = ref([]);
+
+// 금액 포맷팅 함수
+const formatAmount = (amount) => {
+  return new Intl.NumberFormat("ko-KR").format(amount);
+};
+
+// Progress width 계산 함수
+const calculateProgressWidth = (spent, budget) => {
+  const percentage = (spent / budget) * 100;
+  return Math.min(percentage, 100) + "%";
+};
+
+// 상태 계산 헬퍼 함수
+const calculateStatus = (spent, budget) => {
+  const ratio = (spent / budget) * 100;
+  if (ratio <= 50) return "safe";
+  if (ratio < 80) return "warning";
+  return "danger";
+};
+
+// 데이터 가져오기
+const fetchData = async () => {
+  try {
+    // 상환 상태 데이터 가져오기
+    await apiStore.fetchRepaymentStatus(1);
+    
+    // 현재 날짜로 현재 월 구하기
+    const today = new Date();
+    const currentMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+    
+    // 현재 월의 상환 데이터 찾기
+    const currentMonthData = apiStore.repaymentChart.find(item => item.month === currentMonth);
+    
+    if (currentMonthData) {
+      // 이번 달 갚아야 할 금액 (paid)
+      targetAmount.value = Number(currentMonthData.paid);
+      
+      // 이자 금액
+      interestAmount.value = Number(currentMonthData.interest);
+      
+      // 총 납부액 (원금 + 이자)
+      totalPayment.value = targetAmount.value + interestAmount.value;
+    }
+
+    // 상환 현황 데이터 설정
+    currentAmount.value = Number(apiStore.paidAmount);
+    totalAmount.value = Number(apiStore.totalAmount);
+    progressPercentage.value = Number(apiStore.completedPercentage.toFixed(1));
+
+    // 소비 데이터 가져오기
+    const data = await apiStore.fetchRepaymentSummary(1);
+    expenditure.value = apiStore.totalSpent;
+    income.value = apiStore.income;
+
+    // 소비 분석 데이터 가져오기
+    const consumptionData = await apiStore.fetchConsumptionAnalysis(1);
+
+    // budgetItems 업데이트
+    if (consumptionData && consumptionData.categories) {
+      budgetItems.value = consumptionData.categories.map((category) => ({
+        name: category.category,
+        spent: category.amount,
+        budget: category.suggestedReducedAmount,
+        status: calculateStatus(
+          category.amount,
+          category.suggestedReducedAmount
+        ),
+      }));
+    }
+    console.log(budgetItems);
+
+    // 달력 이벤트 데이터 처리
+    if (data.summary && data.summary.length > 0) {
+      // VueCal에 표시할 이벤트 배열
+      let allEvents = [];
+      
+      // 각 월별 데이터를 순회하면서 이벤트 생성
+      data.summary.forEach(monthData => {
+        if (monthData.transactions) {
+          const monthEvents = monthData.transactions.map(transaction => ({
+            start: transaction.date, // "2024-11-01" 형식
+            end: transaction.date,
+            title: transaction.category === "소득"
+              ? `+${formatAmount(transaction.amount)}`
+              : `-${formatAmount(transaction.amount)}`,
+            class: transaction.category === "소득" ? "income-event" : "expense-event"
+          }));
+          allEvents = [...allEvents, ...monthEvents];
+        }
+      });
+
+      // 모든 월의 이벤트를 events에 설정
+      events.value = allEvents;
+    }
+  } catch (error) {
+    console.error("Failed to fetch data:", error);
+  }
+};
+
+// 컴포넌트 마운트 시 데이터 가져오기
+onMounted(fetchData);
 
 // Function to get status text
 const getStatusText = (status) => {
@@ -194,223 +260,14 @@ const getStatusClass = (status) => {
   }
 };
 
-const totalBudget = budgetItems.reduce((sum, item) => sum + item.budget, 0);
+const totalBudget = computed(() =>
+  budgetItems.value.reduce((sum, item) => sum + item.budget, 0)
+);
 
 const toggleEditMode = () => {
   router.push("/repayment-plan-suggestion");
 };
 </script>
-
 <style>
-.dashboard {
-  text-align: center;
-}
-
-.dashboard .progress-container {
-  margin: 20px 0;
-}
-
-.dashboard .progress-label {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 10px;
-}
-
-.dashboard .progress-bar {
-  background: #e0e0e0;
-  border-radius: 5px;
-  height: 20px;
-  position: relative;
-}
-
-.dashboard .progress {
-  background: #ffc107; /* 노란색 */
-  height: 100%;
-  border-radius: 5px;
-  transition: width 0.3s ease;
-}
-
-.dashboard .amounts {
-  display: flex;
-  justify-content: space-between;
-  font-size: 18px;
-  margin-top: 5px;
-}
-
-.dashboard .summary {
-  margin: 20px 0;
-  text-align: left;
-}
-
-.dashboard .summary-item {
-  display: flex;
-  justify-content: space-between;
-  margin: 5px 0;
-}
-
-.dashboard .summary-total {
-  font-weight: bold;
-  border-top: 1px solid #e0e0e0;
-  padding-top: 10px;
-  display: flex;
-  justify-content: space-between;
-  margin: 5px 0;
-}
-
-.dashboard .calendar {
-  margin: 20px 0;
-}
-
-/* vuecal Yellow theme */
-.vuecal--yellow-theme .vuecal__menu,
-.vuecal--yellow-theme .vuecal__cell-events-count {
-  background-color: rgba(255, 179, 0, 0.8);
-}
-
-.vuecal--yellow-theme .vuecal__menu {
-  color: #fff;
-}
-
-.vuecal--yellow-theme .vuecal__title-bar {
-  background-color: rgba(255, 179, 0, 0.8);
-}
-
-.vuecal--yellow-theme .vuecal__cell--today,
-.vuecal--yellow-theme .vuecal__cell--current {
-  background-color: rgba(255, 236, 202, 0.4);
-}
-
-.vuecal--yellow-theme .vuecal__cell--selected {
-  background-color: rgba(255, 179, 0, 0.4);
-}
-
-.vuecal--yellow-theme .vuecal__cell--selected:before {
-  border-color: rgba(235, 216, 182, 0.5);
-}
-
-.vuecal--yellow-theme .vuecal__event-title {
-  padding: 0 2px;
-  font-size: 0.6em;
-}
-
-/* Uncomment the following block if you want the event background color */
-.vuecal--yellow-theme .vuecal__event {
-  /* background-color: #ffd54f; */
-  padding: 0 2px;
-  font-size: 0.85em;
-}
-
-.expenditure-event {
-  color: red;
-}
-
-.income-event {
-  color: blue;
-}
-
-/* .vuecal--yellow-theme .vuecal__event-title {
-  padding: 0 2px;
-  font-size: 0.6em;
-} */
-
-.dashboard .financial-info {
-  display: flex;
-  justify-content: flex-end;
-  margin: 20px 0;
-  color: #ecb91f;
-  font-weight: bold;
-}
-
-.dashboard .expense {
-  margin-right: 10px;
-}
-
-.dashboard .plan {
-  margin: 20px 0;
-}
-
-.dashboard .budget-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.dashboard .budget-bar {
-  display: flex;
-  height: 30px;
-  border-radius: 5px;
-  margin-bottom: 20px;
-  margin-top: 20px;
-  width: 70%;
-}
-
-.dashboard .budget-segment {
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-weight: bold;
-}
-
-.dashboard .change {
-  margin-left: 10px;
-  color: rgb(48, 110, 243);
-  cursor: pointer;
-}
-
-.dashboard .category {
-  margin: 15px 0;
-}
-
-.dashboard .category-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.dashboard .category-name {
-  font-size: 18px;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-.dashboard .status {
-  font-size: 14px;
-  margin-bottom: 5px;
-  padding: 5px 10px;
-  border-radius: 10px;
-  color: rgb(255, 255, 255);
-}
-
-.dashboard .status-safe {
-  background-color: #4caf50;
-}
-
-.dashboard .status-danger {
-  background-color: #f44336;
-}
-
-.dashboard .status-warning {
-  background-color: #ffcc00;
-}
-
-.dashboard .category-bar {
-  background-color: #e0e0e0;
-  border-radius: 5px;
-  height: 20px;
-  position: relative;
-}
-
-.dashboard .progress {
-  height: 100%;
-  border-radius: 5px;
-  transition: width 0.3s ease;
-}
-
-.dashboard .amounts {
-  display: flex;
-  justify-content: space-between;
-  font-size: 14px;
-}
+@import "./LoanDashBoard.css";
 </style>
