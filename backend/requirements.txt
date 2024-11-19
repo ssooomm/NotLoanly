@@ -1,2 +1,2 @@
-pip install flask flask-cors flask-sqlalchemy openai pymysql cryptography flask-socketio python-dotenv
+pip install flask flask-cors flask-sqlalchemy openai==0.28.0 pymysql cryptography flask-socketio python-dotenv
 
