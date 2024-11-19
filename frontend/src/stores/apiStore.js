@@ -7,6 +7,7 @@ export const useApiStore = defineStore('api', {
         categories: [],
         repaymentPlans: [],
         repaymentStatus: {},
+        repaymentChart: [],
         consumptionAnalysis: {},
         notifications: [],
         message: '',
@@ -14,7 +15,6 @@ export const useApiStore = defineStore('api', {
         paidAmount: 0, // 상환한 총 금액
         remainingAmount: 0, // 남은 상환 금액
         completedPercentage: 0, // 상환 비율
-        repaymentChart: [],
     }),
     actions: {
         // 대출 신청
@@ -68,6 +68,25 @@ export const useApiStore = defineStore('api', {
             return data; // 응답 반환
         },
 
+        async fetchRepaymentStatus(userId) {
+            try {
+                const response = await fetch(`/api/dashboard/repayment-status?user_id=${userId}`); // 사용자 ID 포함
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json();
+                this.repaymentStatus = data.repaymentStatus; // 상환 현황 저장
+                this.repaymentChart = data.repaymentChart; // 월별 상환 데이터 저장
+                this.paidAmount = this.repaymentStatus.paidAmount; // 상환한 금액
+                this.remainingAmount = this.repaymentStatus.remainingAmount; // 남은 금액
+                this.completedPercentage = (this.paidAmount / this.totalAmount) * 100; // 상환 비율 계산
+                return data; // 응답 반환
+            } catch (error) {
+                console.error('Error fetching repayment status:', error);
+                throw error; // 에러를 호출한 곳으로 전달
+            }
+        },
+
         // 상환 플랜 리스트 조회
         async fetchRepaymentPlans(userId) {
             const response = await fetch(`/api/repayment/plans?userId=${userId}`);
@@ -91,26 +110,55 @@ export const useApiStore = defineStore('api', {
         },
 
         // 상환 요약 조회
-        async fetchRepaymentStatus(userId) {
-            const response = await fetch(`/api/dashboard/summary?user_id=${userId}`); // 사용자 ID 포함
-            const data = await response.json();
-            this.repaymentStatus = data.summary; // 상환 현황 저장
-            this.repaymentChart = data.repaymentChart; // 월별 상환 데이터 저장
-            this.paidAmount = this.repaymentStatus.paidAmount; // 상환한 금액
-            this.remainingAmount = this.repaymentStatus.remainingAmount; // 남은 금액
-            this.completedPercentage = (this.paidAmount / this.totalAmount) * 100; // 상환 비율 계산
-            return data; // 응답 반환
+        async fetchRepaymentSummary(userId) {
+            try {
+                const response = await fetch(`/api/dashboard/summary?user_id=${userId}`);
+                const data = await response.json();
+                
+                // summary 데이터 저장
+                this.summary = data.summary;
+                
+                const latestMonth = data.summary[data.summary.length - 1];
+                
+                this.totalSpent = latestMonth.totalSpent;
+                
+                const incomeCategory = latestMonth.categories.find(cat => cat.category === "소득");
+                this.income = incomeCategory ? incomeCategory.totalAmount : 0;
+                
+                const budgetCategories = latestMonth.categories.filter(cat => 
+                    ["식비", "쇼핑", "여가"].includes(cat.category)
+                );
+                
+                // 예산 설정 (각 카테고리별 목표치)
+                const budgetTargets = {
+                    "식비": 200000,
+                    "쇼핑": 150000,
+                    "여가": 280000
+                };
+
+                this.categories = budgetCategories.map(cat => ({
+                    name: cat.category,
+                    spent: cat.totalAmount,
+                    budget: budgetTargets[cat.category],
+                    status: this.calculateStatus(cat.totalAmount, budgetTargets[cat.category])
+                }));
+
+                return data;
+            } catch (error) {
+                console.error('Error fetching summary data:', error);
+                throw error;
+            }
         },
 
-        // 사용자 알림 조회
+       
         async fetchNotifications(userId) {
             const response = await fetch(`/api/notifications/${userId}`);
             const notifications = await response.json();
-            this.notifications = notifications; // 알림 목록 저장
-            return notifications; // 응답 반환
+            this.notifications = notifications; 
+            return notifications; 
         },
 
-        // 새 알림 생성
+       
         async createNotification(userId, message) {
             const response = await fetch('/api/notifications', {
                 method: 'POST',
@@ -120,6 +168,14 @@ export const useApiStore = defineStore('api', {
             const data = await response.json();
             this.message = data.message; // "Notification created"
             return data; // 응답 반환
-        }
+        },
+
+
+        calculateStatus(spent, budget) {
+            const ratio = spent / budget;
+            if (ratio < 0.6) return 'safe';
+            if (ratio < 0.8) return 'warning';
+            return 'danger';
+        },
     }
 });

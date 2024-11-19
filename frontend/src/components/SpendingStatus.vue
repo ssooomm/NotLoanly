@@ -6,7 +6,22 @@
         <DoughnutChart :data="donutChartData" />
         <p class="percentage-text">{{ completedPercentage.toFixed(1) }}%</p>
       </div>
-      <p class="amount-text">상환 금액 {{ paidAmount.toLocaleString() }} 원</p>
+      <p class="amount-text">상환 금액 {{ repaymentStatus.paidAmount }}</p>
+    </div>
+    <div class="status-circles">
+      <div class="circle-row">
+        <div class="circle active">
+          <img src="@/assets/stamp.png" alt="1개월" class="icon" /> 
+          1개월
+        </div>
+        <div class="circle">2개월</div>
+        <div class="circle">3개월</div>
+      </div>
+      <div class="circle-row">
+        <div class="circle">4개월</div>
+        <div class="circle">5개월</div>
+        <div class="circle">6개월</div>
+      </div>
     </div>
     <div class="bar-chart-container">
       <BarChart :data="barChartData" />
@@ -18,54 +33,85 @@
 import { ref, onMounted } from 'vue';
 import DoughnutChart from './DoughnutChart.vue'; 
 import BarChart from './BarChart.vue'; 
-import { useApiStore } from '@/stores/apiStore'; // Pinia 스토어 가져오기
+import { useApiStore } from '@/stores/apiStore';
 
-const apiStore = useApiStore(); // Pinia 스토어 인스턴스 생성
+const apiStore = useApiStore();
+const userId = 1;
 
-const paidAmount = ref(0);
-const totalAmount = 5000000; // 총 대출 금액
+const repaymentStatus = ref({
+  paidAmount: "0",
+  remainingAmount: "0",
+  totalAmount: 0,
+});
+
 const completedPercentage = ref(0);
 
 const donutChartData = ref({
   labels: ['상환 비율'],
   datasets: [{
-    data: [completedPercentage.value, 100 - completedPercentage.value],
+    data: [0, 100],
     backgroundColor: ['#ecbf28', '#e0e0e0'],
     borderWidth: 0,
   }]
 });
 
-const monthlyData = ref([]); // 월별 상환 데이터
-
 const barChartData = ref({
-  labels: Array.from({ length: 12 }, (_, i) => `${i + 1}월`), 
+  labels: [],
   datasets: [{
     label: '월별 상환금액',
-    data: monthlyData.value,
+    data: [],
     backgroundColor: 'rgba(255, 206, 86, 0.6)', 
     borderColor: 'rgba(255, 206, 86, 1)',
     borderWidth: 1,
   }]
 });
 
-// 상환 현황 데이터 가져오기
-const fetchRepaymentStatus = async () => {
-  await apiStore.fetchRepaymentStatus(); 
+// 상환 현황 및 차트 데이터 가져오기
+const fetchRepaymentData = async () => {
+  try {
+    const data = await apiStore.fetchRepaymentStatus(userId);
+    repaymentStatus.value = data.repaymentStatus;
+    
+    // 문자열을 숫자로 변환하여 계산
+    const paidAmount = parseInt(repaymentStatus.value.paidAmount);
+    const totalAmount = parseInt(repaymentStatus.value.totalAmount);
+    completedPercentage.value = (paidAmount / totalAmount) * 100;
 
-  
-  paidAmount.value = apiStore.paidAmount; 
-  completedPercentage.value = (paidAmount.value / totalAmount) * 100; 
+    // 도넛 차트 데이터 업데이트
+    donutChartData.value = {
+      labels: ['상환 비율'],
+      datasets: [{
+        data: [completedPercentage.value, 100 - completedPercentage.value],
+        backgroundColor: ['#ecbf28', '#e0e0e0'],
+        borderWidth: 0,
+      }]
+    };
 
-  
-  donutChartData.value.datasets[0].data = [completedPercentage.value, 100 - completedPercentage.value];
+    // 월별 상환 데이터 업데이트
+    const monthlyData = data.repaymentChart.map(item => parseInt(item.paid));
+    const monthlyLabels = data.repaymentChart.map(item => {
+      const month = item.month.split('-')[1].replace(/^0+/, '');
+      return `${month}월`;
+    });
 
-  // 월별 상환 데이터 업데이트
-  monthlyData.value = apiStore.repaymentChart.map(item => item.paid);
-  barChartData.value.datasets[0].data = monthlyData.value;
+    barChartData.value = {
+      labels: monthlyLabels,
+      datasets: [{
+        label: '월별 상환금액',
+        data: monthlyData,
+        backgroundColor: 'rgba(255, 206, 86, 0.6)', 
+        borderColor: 'rgba(255, 206, 86, 1)',
+        borderWidth: 1,
+      }]
+    };
+
+  } catch (error) {
+    console.error('Failed to fetch repayment data:', error);
+  }
 };
 
 // 컴포넌트가 마운트될 때 데이터 가져오기
-onMounted(fetchRepaymentStatus);
+onMounted(fetchRepaymentData);
 </script>
 
 <style scoped>
@@ -103,5 +149,46 @@ onMounted(fetchRepaymentStatus);
 .bar-chart-container {
   margin: 20px 0; 
   max-width: 800px;
+}
+
+.status-circles {
+  margin-top: 20px;
+  margin-bottom: 50px;
+}
+
+.circle-row {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 10px; /* 간격 조정 */
+}
+
+.circle {
+  width: 70px; 
+  height: 70px; 
+  border-radius: 50%; 
+  background-color: #e0e0e0; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative; 
+  font-size: 14px;
+  transition: background-color 0.3s; 
+}
+
+.circle.active {
+  border: 2px solid #ecbf28; 
+  background-color: #fff; 
+}
+
+.circle:hover {
+  background-color: #d0d0d0; 
+}
+
+.icon {
+  width: 45px; 
+  height: 50px; 
+  position: absolute;
+  top: 10px; 
+  left: 10px; 
 }
 </style>
