@@ -51,6 +51,15 @@ def save_repayment_plan(user_id, categories, repayment_period):
         user.repayment_period = repayment_period
         db.session.commit()
 
+        # monthly_repayment_goal 계산
+        if user.loan_amount and repayment_period:
+            user.monthly_repayment_goal = user.loan_amount // repayment_period  # 정수로 저장
+        else:
+            return {"status": "error", "message": "Invalid loan amount or repayment period"}, 400
+
+        db.session.commit()  # Users 테이블 업데이트
+
+
         # 카테고리별 줄이기 어려운 항목 업데이트
         for category in categories:
             category_name = category["category"]
