@@ -8,7 +8,9 @@ from app.models import User  # User 모델 가져오기
 from .services import get_montyly_expense
 from .services import get_dashboard_summary
 from .services import get_repayment_status
-from .services import get_consumption_percentage, get_consumption_analysis
+from .services import get_consumption_percentage, get_consumption_analysis, save_repayment_plan
+from .services import select_repayment_plan
+from .services import get_repayment_plans
 from . import db
 from .models import User, Categories
 from . import socketio
@@ -96,6 +98,65 @@ def repayment_analysis():
     user_id = request.args.get('userId', type=int)
     data = get_montyly_expense(user_id, 10)  # 10월 데이터 조회
     return json_response(data)
+
+# 2-2. 줄이기 어려운 카테고리와 상환 기간 저장
+@main_routes.route("/api/repayment/save-plan", methods=["POST"])
+def save_plan():
+    try:
+        data = request.json
+        user_id = data.get("userId")
+        categories = data.get("categories")
+        repayment_period = data.get("repaymentPeriod")
+
+        # 필수 값 확인
+        if not user_id or not categories or not repayment_period:
+            return json_response({
+                "status": "error",
+                "message": "userId, categories, and repaymentPeriod are required."
+            }, 400)
+
+        # 서비스 호출
+        response, status = save_repayment_plan(user_id, categories, repayment_period)
+        return json_response(response, status)
+    except Exception as e:
+        return json_response({"status": "error", "message": str(e)}, 500)
+
+#2-3. 상환 플랜 리스트 조회
+@main_routes.route("/api/repayment/plans", methods=["GET"])
+def repayment_plans():
+    try:
+        user_id = request.args.get("user_id", type=int)
+        if not user_id:
+            return json_response({"status": "error", "message": "User ID is required"}, 400)
+
+        plans = get_repayment_plans(user_id)
+        return json_response({"status": "success", "plans": plans}, 200)
+    except Exception as e:
+        return json_response({"status": "error", "message": str(e)}, 500)
+    
+
+# 2-4. 상환 플랜 선택
+@main_routes.route("/api/repayment/select-plan", methods=["POST"])
+def select_plan():
+    try:
+        data = request.json
+        user_id = data.get("userId")
+        plan_id = data.get("planId")
+
+        try:
+            user_id = int(user_id)
+            plan_id = int(plan_id)
+        except (ValueError, TypeError):
+            return json_response({
+                "status": "error",
+                "message": "userId and planId must be integers."
+            }, 400)
+
+        message = select_repayment_plan(user_id, plan_id)
+        return json_response({"status": "success", "message": message}, 200)
+    except Exception as e:
+        return json_response({"status": "error", "message": str(e)}, 500)
+
 
 # 3-1. 상환 요약 조회 
 @main_routes.route('/api/dashboard/summary', methods=['GET'])
