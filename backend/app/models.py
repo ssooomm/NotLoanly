@@ -55,7 +55,7 @@ class Categories(db.Model):
 
 
 class RepaymentPlans(db.Model):
-    __tablename__ = 'repayment_plans'
+    __tablename__ = 'repaymentPlans'
 
     plan_id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id', ondelete="CASCADE"), nullable=False)
@@ -63,6 +63,7 @@ class RepaymentPlans(db.Model):
     total_amount = db.Column(db.Integer, nullable=False)
     duration = db.Column(db.Integer, nullable=False)
     details = db.Column(db.JSON, nullable=False)
+    hashtags = db.Column(db.Text, nullable=False)  # hashtags 필드 추가
     created_at = db.Column(db.TIMESTAMP, nullable=False)
 
     def to_dict(self):
@@ -73,8 +74,10 @@ class RepaymentPlans(db.Model):
             "total_amount": self.total_amount,
             "duration": self.duration,
             "details": self.details,
+            "hashtags": self.hashtags,  # to_dict에 hashtags 포함
             "created_at": self.created_at
         }
+
 
 
 # RepaymentHistory 테이블

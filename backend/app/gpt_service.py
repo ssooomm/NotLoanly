@@ -15,6 +15,7 @@ load_dotenv()
 
 # 환경 변수에서 API 키 읽기
 openai.api_key = os.getenv("OPENAI_API_KEY")
+
 def parse_gpt_response(response_text):
     try:
         # JSON 배열을 추출하기 위해 기본 JSON 패턴 사용
