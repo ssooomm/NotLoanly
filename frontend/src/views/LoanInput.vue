@@ -8,7 +8,7 @@
       </div>
     </v-col>
     <!-- 대출 금액 입력 폼 -->
-    <v-form @submit.prevent>
+    <v-form @submit.prevent="handleConfirm">
       <v-col class="pa-5">
         <v-text-field
           required
@@ -33,11 +33,11 @@
       <v-col>
         <v-row class="pa-5" justify="space-between">
           <h3>상품명</h3>
-          <span>{{ product.name }}</span>
+          <span>KB 비상금 대출</span>
         </v-row>
         <v-row class="pa-5" justify="space-between">
           <h3>대출금리</h3>
-          <span>연 {{ product.interestRate }}%</span>
+          <span>연 {{ interestRate }}%</span>
         </v-row>
       </v-col>
     </v-form>
@@ -50,6 +50,7 @@
 import ConfirmButton from "@/components/ConfirmButton.vue";
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
+import axios from "axios";
 
 const router = useRouter();
 
@@ -67,7 +68,6 @@ const validateAmount = () => {
 
   // 금액이 비어있는지 확인
   if (parsedAmount === 0) {
-    alert("대출 금액을 입력해주세요.");
     return false;
   }
 
@@ -119,23 +119,42 @@ const displayAmount = computed(() => {
   return parsedAmount.slice(0, -4);
 });
 
-// 상품 정보
-const product = ref({
-  name: "KB 비상금 대출",
-  interestRate: 5.69,
-});
+// KB 비상금 대출 금리 정보
+const interestRate = ref(5.69);
 
 // 확인 버튼 클릭 시 이벤트
-const handleConfirm = () => {
-  if (validateAmount()) {
-    router.push({
-      path: "/loan-complete",
-      query: {
-        loanAmount: amount.value,
-        productName: product.value.name,
-      },
-    });
-  }
+const handleConfirm = async () => {
+  // 백 연결 전 테스트용 코드
+  router.push({
+    path: "/loan-complete",
+    state: {
+      loanAmount: amount.value,
+    },
+  });
+  // if (validateAmount()) {
+  //   try {
+  //     const response = await axios.post("/api/loan/apply", {
+  //       user_id: 1, // 실제로 로그인된 사용자 ID를 사용해야 함
+  //       loan_amount: amount.value,
+  //       interest_rate: interestRate.value,
+  //     });
+
+  //     if (response.status === 200) {
+  //       console.log("대출 신청이 완료되었습니다.");
+  //       router.push({
+  //         path: "/loan-complete",
+  //         state: {
+  //           loanAmount: amount.value,
+  //         },
+  //       });
+  //     }
+  //   } catch (error) {
+  //     console.error("대출 신청 중 오류 발생:", error);
+  //     alert("대출 신청에 실패했습니다. 다시 시도해 주세요.");
+  //   }
+  // } else {
+  //   alert("대출 금액을 입력해주세요.");
+  // }
 };
 </script>
 

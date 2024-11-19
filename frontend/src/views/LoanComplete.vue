@@ -35,7 +35,7 @@
           <v-divider class="border-opacity-100"></v-divider>
           <v-row class="pa-5" justify="space-between">
             <h3>상품명</h3>
-            <span>{{ productName }}</span>
+            <span>KB 비상금 대출</span>
           </v-row>
           <v-divider class="border-opacity-25"></v-divider>
           <v-row class="pa-5" justify="space-between">
@@ -53,14 +53,27 @@
 
 <script setup>
 import ConfirmButton from "@/components/ConfirmButton.vue";
-import { ref, onMounted, onBeforeUnmount } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import { useRoute } from "vue-router";
 
 const route = useRoute();
-const productName = route.query.productName;
-const loanAmount = route.query.loanAmount;
+const loanAmount = ref(0);
 
-const displayAmount = new Intl.NumberFormat("ko-KR").format(loanAmount);
+onMounted(() => {
+  const { loanAmount: stateLoanAmount } = history.state || {};
+  loanAmount.value = stateLoanAmount || 0;
+
+  window.addEventListener("resize", handleResize);
+  handleResize(); // 초기 로드 시 크기 확인
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener("resize", handleResize);
+});
+
+const displayAmount = computed(() => {
+  return new Intl.NumberFormat("ko-KR").format(loanAmount.value);
+});
 
 const title = "You're LOANly? I'm not LOANly!";
 const formattedTitle = ref(title);
@@ -72,15 +85,6 @@ const handleResize = () => {
     formattedTitle.value = title;
   }
 };
-
-onMounted(() => {
-  window.addEventListener("resize", handleResize);
-  handleResize(); // 초기 로드 시 크기 확인
-});
-
-onBeforeUnmount(() => {
-  window.removeEventListener("resize", handleResize);
-});
 
 const handleConfirm = () => {
   // 비상금 충전 완료 페이지에서 확인 버튼 클릭 시
