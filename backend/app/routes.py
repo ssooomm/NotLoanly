@@ -91,6 +91,66 @@ def repayment_analysis():
     data = get_montyly_expense(user_id, 10)  # 10월 데이터 조회
     return jsonify(data)
 
+# @main_routes.route('/api/analyze-and-insert-plans', methods=['POST'])
+# def analyze_and_insert_plans():
+#     try:
+#         # 사용자 입력값 수신
+#         data = request.json
+#         user_id = data.get("user_id")
+#         loan_amount = data.get("loan_amount")
+#         interest_rate = data.get("interest_rate", 6.0)  # 기본값 6%
+#         duration = data.get("duration", 6)  # 기본값 6개월
+
+#         if not user_id or not loan_amount:
+#             return jsonify({"status": "error", "message": "필수 필드가 누락되었습니다"}), 400
+
+#         # 사용자 소비 데이터 가져오기
+#         user_expenses = UserExpenses.query.filter_by(user_id=user_id, month=10).all()  # 10월 데이터
+#         if not user_expenses:
+#             return jsonify({"status": "error", "message": "사용자의 지출 데이터를 찾을 수 없습니다"}), 404
+
+#         expense_data = [
+#             {
+#                 "category_id": expense.category_id,
+#                 "original_amount": expense.original_amount,
+#                 "is_hard_to_reduce": expense.is_hard_to_reduce
+#             }
+#             for expense in user_expenses
+#         ]
+
+#         # ChatGPT로 분석 요청
+#         prompt = generate_prompt_with_loan_details(expense_data, loan_amount, interest_rate, duration)
+#         gpt_response = call_chatgpt(prompt)
+#         plans = parse_gpt_response(gpt_response)
+
+#         print(plans)  # 디버깅용 출력
+
+#         # RepaymentPlans 테이블에 저장
+#         for plan in plans:
+#             new_plan = RepaymentPlans(
+#                 user_id=user_id,
+#                 plan_name=plan['plan_name'],
+#                 total_amount=plan['total_amount'],
+#                 duration=plan['duration'],
+#                 details=json.loads(plan['details']),  # JSON 문자열을 파싱하여 저장
+#                 created_at=db.func.current_timestamp()
+#             )
+#             db.session.add(new_plan)
+
+#         db.session.commit()
+        
+        
+
+#         return jsonify({
+#             "status": "success",
+#             "message": "상환 계획이 생성되었습니다",
+#             "plans": plans
+#         }), 201
+
+#     except Exception as e:
+#         db.session.rollback()
+#         return jsonify({"status": "error", "message": str(e)}), 500
+
 @main_routes.route('/api/analyze-and-insert-plans', methods=['POST'])
 def analyze_and_insert_plans():
     try:
@@ -126,18 +186,26 @@ def analyze_and_insert_plans():
         print(plans)  # 디버깅용 출력
 
         # RepaymentPlans 테이블에 저장
-        for plan in plans:
-            new_plan = RepaymentPlans(
-                user_id=user_id,
-                plan_name=plan['plan_name'],
-                total_amount=plan['total_amount'],
-                duration=plan['duration'],
-                details=json.loads(plan['details']),  # JSON 문자열을 파싱하여 저장
-                created_at=db.func.current_timestamp()
-            )
-            db.session.add(new_plan)
+        try:
+            for plan in plans:
+                new_plan = RepaymentPlans(
+                    user_id=user_id,
+                    plan_name=plan['plan_name'],
+                    total_amount=plan['total_amount'],
+                    duration=plan['duration'],
+                    details=json.loads(plan['details']),  # JSON 문자열을 파싱하여 저장
+                    hashtags=", ".join(plan['hashtags']),  # hashtags 추가 처리
+                    created_at=db.func.current_timestamp()
+                )
+                db.session.add(new_plan)
+            
+            db.session.commit()
+            print("데이터가 성공적으로 커밋되었습니다.")  # 디버깅 로그 추가
 
-        db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            print(f"커밋 중 오류 발생: {e}")  # 에러 메시지 출력
+            return jsonify({"status": "error", "message": str(e)}), 500
 
         return jsonify({
             "status": "success",
@@ -146,8 +214,8 @@ def analyze_and_insert_plans():
         }), 201
 
     except Exception as e:
-        db.session.rollback()
         return jsonify({"status": "error", "message": str(e)}), 500
+
 
 # 3-1. 상환 요약 조회 
 @main_routes.route('/api/dashboard/summary', methods=['GET'])
