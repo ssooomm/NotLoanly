@@ -2,16 +2,29 @@ from . import db
 from datetime import datetime
 
 # class User(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     name = db.Column(db.String(80), nullable=False)
-#     email = db.Column(db.String(120), unique=True, nullable=False)
+#     __tablename__ = 'users'
 
-#     # to_dict 메서드는 클래스 내부에 정확히 들여쓰기되어 있어야 합니다.
+#     user_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+#     name = db.Column(db.Text, nullable=False)
+#     monthly_income = db.Column(db.Integer, nullable=False)
+#     monthly_expense = db.Column(db.Integer, nullable=False)
+#     available_funds = db.Column(db.Integer, nullable=False)  # MySQL에선 GENERATED ALWAYS AS 지원 필요
+#     loan_amount = db.Column(db.Integer, nullable=False)
+#     interest_rate = db.Column(db.Float, nullable=False)
+#     repayment_period = db.Column(db.Integer, nullable=False)
+#     created_at = db.Column(db.TIMESTAMP, server_default=db.func.current_timestamp())
+
 #     def to_dict(self):
 #         return {
-#             "id": self.id,
+#             "user_id": self.user_id,
 #             "name": self.name,
-#             "email": self.email
+#             "monthly_income": self.monthly_income,
+#             "monthly_expense": self.monthly_expense,
+#             "available_funds": self.available_funds,
+#             "loan_amount": self.loan_amount,
+#             "interest_rate": self.interest_rate,
+#             "repayment_period": self.repayment_period,
+#             "created_at": self.created_at
 #         }
 
 class User(db.Model):
@@ -21,7 +34,6 @@ class User(db.Model):
     name = db.Column(db.Text, nullable=False)
     monthly_income = db.Column(db.Integer, nullable=False)
     monthly_expense = db.Column(db.Integer, nullable=False)
-    available_funds = db.Column(db.Integer, nullable=False)  # MySQL에선 GENERATED ALWAYS AS 지원 필요
     loan_amount = db.Column(db.Integer, nullable=False)
     interest_rate = db.Column(db.Float, nullable=False)
     repayment_period = db.Column(db.Integer, nullable=False)
@@ -29,14 +41,24 @@ class User(db.Model):
     selected_plan_group_id = db.Column(db.Integer, nullable=True)
     created_at = db.Column(db.TIMESTAMP, server_default=db.func.current_timestamp())
 
+    @property
+    def available_funds(self):
+        """
+        계산된 필드: 사용 가능 자금
+        MySQL의 GENERATED ALWAYS AS에 대응.
+        """
+        return self.monthly_income - self.monthly_expense
 
     def to_dict(self):
+        """
+        User 객체를 딕셔너리로 변환
+        """
         return {
             "user_id": self.user_id,
             "name": self.name,
             "monthly_income": self.monthly_income,
             "monthly_expense": self.monthly_expense,
-            "available_funds": self.available_funds,
+            "available_funds": self.available_funds,  # 계산된 값 반환
             "loan_amount": self.loan_amount,
             "interest_rate": self.interest_rate,
             "repayment_period": self.repayment_period,
@@ -44,11 +66,11 @@ class User(db.Model):
             "selected_plan_group_id": self.selected_plan_group_id,
             "created_at": self.created_at
         }
-    
+
 
 
 class UserExpenses(db.Model):
-    __tablename__ = 'UserExpenses'
+    __tablename__ = 'userExpenses'
     user_expense_id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, nullable=False)
     category_id = db.Column(db.Integer, nullable=False)
@@ -68,21 +90,22 @@ class UserExpenses(db.Model):
 
 
 class Categories(db.Model):
-    __tablename__ = 'Categories'
+    __tablename__ = 'categories'
     category_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     category_name = db.Column(db.String(255), nullable=False)
 
 
 class RepaymentPlans(db.Model):
-    __tablename__ = 'RepaymentPlans'
+    __tablename__ = 'repaymentPlans'
 
-    plan_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('Users.user_id', ondelete="CASCADE"), nullable=False)
+    plan_id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id', ondelete="CASCADE"), nullable=False)
     plan_name = db.Column(db.Text, nullable=False)
     total_amount = db.Column(db.Integer, nullable=False)
     duration = db.Column(db.Integer, nullable=False)
     details = db.Column(db.JSON, nullable=False)
-    created_at = db.Column(db.TIMESTAMP, default=datetime.utcnow)
+    hashtags = db.Column(db.Text, nullable=False)  # hashtags 필드 추가
+    created_at = db.Column(db.TIMESTAMP, nullable=False)
 
     def to_dict(self):
         return {
@@ -92,13 +115,15 @@ class RepaymentPlans(db.Model):
             "total_amount": self.total_amount,
             "duration": self.duration,
             "details": self.details,
+            "hashtags": self.hashtags,  # to_dict에 hashtags 포함
             "created_at": self.created_at
         }
 
 
+
 # RepaymentHistory 테이블
 class RepaymentHistory(db.Model):
-    __tablename__ = 'RepaymentHistory'
+    __tablename__ = 'repaymentHistory'
 
     repayment_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('Users.user_id', ondelete="CASCADE"), nullable=False)
@@ -119,7 +144,7 @@ class RepaymentHistory(db.Model):
 
 
 class Transactions(db.Model):
-    __tablename__ = 'Transactions'
+    __tablename__ = 'transactions'
 
     transaction_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id', ondelete="CASCADE"), nullable=False)
@@ -144,7 +169,7 @@ class Transactions(db.Model):
 
 # Notification 테이블
 class Notification(db.Model):
-    __tablename__ = 'Notification'
+    __tablename__ = 'notification'
 
     notification_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('Users.user_id', ondelete="CASCADE"), nullable=False)

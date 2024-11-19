@@ -7,10 +7,8 @@ from .models import UserExpenses, Categories
 from .models import Transactions
 from .models import User, RepaymentHistory, RepaymentPlans
 from . import db
-
-
-# OpenAI API 키 설정
-openai.api_key = "your-openai-api-key"
+import json
+import re
 
 def chat_with_gpt(message):
     try:
@@ -23,6 +21,8 @@ def chat_with_gpt(message):
         return response["choices"][0]["message"]["content"]
     except Exception as e:
         return f"Error: {e}"
+
+
 
 
 # 2-1. 소비 분석 데이터 조회
@@ -39,6 +39,7 @@ def get_montyly_expense(user_id, month):
         ]
     }
 
+
 # 3-1. 상환 요약 조회
 def get_dashboard_summary(user_id):
     summary = []
@@ -48,7 +49,8 @@ def get_dashboard_summary(user_id):
         func.date_format(Transactions.transaction_date, '%Y-%m').label('month'),
         func.sum(Transactions.amount).label('totalSpent')
     ).filter(
-        Transactions.user_id == user_id  # Filter by user_id
+        Transactions.user_id == user_id,  # Filter by user_id
+        ~Transactions.category_id.in_([1, 2])  # Exclude category_id 1 and 2
     ).group_by('month').all()
 
     for month, totalSpent in monthly_transactions:
@@ -258,7 +260,7 @@ def get_consumption_analysis(user_id):
         november_amount = november_expenses_dict.get(category_id, 0)
 
         # 절약 비율 계산
-        saving_percentage = (suggested_reduced_amount / reduced_amount) * 100 if reduced_amount else 0
+        saving_percentage = (november_amount / suggested_reduced_amount) * 100 if reduced_amount else 0
 
         # 카테고리 이름 가져오기
         category = db.session.query(Categories).filter(Categories.category_id == category_id).first()
