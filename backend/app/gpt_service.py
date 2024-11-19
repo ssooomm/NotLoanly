@@ -42,7 +42,8 @@ def parse_gpt_response(response_text):
 def call_chatgpt(prompt):
     try:
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            # model="gpt-3.5-turbo",
+            model="gpt-4o",
             messages=[
                 {"role": "system", "content": "당신은 재무 계획 전문가입니다."},
                 {"role": "user", "content": prompt}
