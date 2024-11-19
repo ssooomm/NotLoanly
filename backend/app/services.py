@@ -49,7 +49,8 @@ def get_dashboard_summary(user_id):
         func.date_format(Transactions.transaction_date, '%Y-%m').label('month'),
         func.sum(Transactions.amount).label('totalSpent')
     ).filter(
-        Transactions.user_id == user_id  # Filter by user_id
+        Transactions.user_id == user_id,  # Filter by user_id
+        ~Transactions.category_id.in_([1, 2])  # Exclude category_id 1 and 2
     ).group_by('month').all()
 
     for month, totalSpent in monthly_transactions:
@@ -259,7 +260,7 @@ def get_consumption_analysis(user_id):
         november_amount = november_expenses_dict.get(category_id, 0)
 
         # 절약 비율 계산
-        saving_percentage = (suggested_reduced_amount / reduced_amount) * 100 if reduced_amount else 0
+        saving_percentage = (november_amount / suggested_reduced_amount) * 100 if reduced_amount else 0
 
         # 카테고리 이름 가져오기
         category = db.session.query(Categories).filter(Categories.category_id == category_id).first()
