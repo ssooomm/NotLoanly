@@ -12,10 +12,10 @@ CREATE TABLE Users (
     monthly_income INTEGER NOT NULL,            -- 월 수입
     monthly_expense INTEGER NOT NULL,           -- 월 지출
     available_funds INTEGER GENERATED ALWAYS AS (monthly_income - monthly_expense) STORED, -- 사용 가능 자금
-    loan_amount INTEGER NOT NULL,               -- 대출 금액
-    interest_rate REAL NOT NULL,                -- 대출 이자율
-    repayment_period INTEGER NOT NULL,          -- 상환 기간 (개월)
-    monthly_repayment_goal INTEGER NOT NULL,    -- 월별 상환 목표
+    loan_amount INTEGER,               -- 대출 금액
+    interest_rate REAL,                -- 대출 이자율
+    repayment_period INTEGER,          -- 상환 기간 (개월)
+    monthly_repayment_goal INTEGER,    -- 월별 상환 목표
     selected_plan_group_id INTEGER DEFAULT NULL,-- 선택된 플랜 그룹 ID (NULL 가능)
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- 생성일
 );
