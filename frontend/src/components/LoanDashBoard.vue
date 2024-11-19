@@ -119,14 +119,13 @@ import "../../node_modules/vue-cal/dist/vuecal.css";
 const router = useRouter();
 const apiStore = useApiStore();
 
-const currentAmount = 530000;
-const totalAmount = 3000000;
-const targetAmount = 500000;
-const interestAmount = 20000;
-const totalPayment = currentAmount + interestAmount;
-const progressPercentage = ((currentAmount / totalAmount) * 100).toFixed(1);
-
-// 반응형 데이터 설정 - 초기값 설정
+// ref 변수들 선언
+const currentAmount = ref(0);
+const totalAmount = ref(0);
+const targetAmount = ref(0);
+const interestAmount = ref(0);
+const totalPayment = ref(0);
+const progressPercentage = ref(0);
 const expenditure = ref(0);
 const income = ref(0);
 const budgetItems = ref([]);
@@ -137,23 +136,9 @@ const formatAmount = (amount) => {
   return new Intl.NumberFormat("ko-KR").format(amount);
 };
 
-// 달력 이벤트 변환 함수
-const convertTransactionsToEvents = (transactions) => {
-  return transactions.map((transaction) => ({
-    start: transaction.date,
-    end: transaction.date,
-    title:
-      transaction.category === "소득"
-        ? `+${formatAmount(transaction.amount)}`
-        : `-${formatAmount(transaction.amount)}`,
-    class: transaction.category === "소득" ? "income-event" : "expense-event",
-  }));
-};
-
 // Progress width 계산 함수
 const calculateProgressWidth = (spent, budget) => {
   const percentage = (spent / budget) * 100;
-  // 100%를 초과하지 않도록 제한
   return Math.min(percentage, 100) + "%";
 };
 
@@ -168,6 +153,33 @@ const calculateStatus = (spent, budget) => {
 // 데이터 가져오기
 const fetchData = async () => {
   try {
+    // 상환 상태 데이터 가져오기
+    await apiStore.fetchRepaymentStatus(1);
+    
+    // 현재 날짜로 현재 월 구하기
+    const today = new Date();
+    const currentMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+    
+    // 현재 월의 상환 데이터 찾기
+    const currentMonthData = apiStore.repaymentChart.find(item => item.month === currentMonth);
+    
+    if (currentMonthData) {
+      // 이번 달 갚아야 할 금액 (paid)
+      targetAmount.value = Number(currentMonthData.paid);
+      
+      // 이자 금액
+      interestAmount.value = Number(currentMonthData.interest);
+      
+      // 총 납부액 (원금 + 이자)
+      totalPayment.value = targetAmount.value + interestAmount.value;
+    }
+
+    // 상환 현황 데이터 설정
+    currentAmount.value = Number(apiStore.paidAmount);
+    totalAmount.value = Number(apiStore.totalAmount);
+    progressPercentage.value = Number(apiStore.completedPercentage.toFixed(1));
+
+    // 소비 데이터 가져오기
     const data = await apiStore.fetchRepaymentSummary(1);
     expenditure.value = apiStore.totalSpent;
     income.value = apiStore.income;
@@ -178,7 +190,7 @@ const fetchData = async () => {
     // budgetItems 업데이트
     if (consumptionData && consumptionData.categories) {
       budgetItems.value = consumptionData.categories.map((category) => ({
-        name: category.category === "쇼핑" ? "쇼핑비" : category.category,
+        name: category.category,
         spent: category.amount,
         budget: category.suggestedReducedAmount,
         status: calculateStatus(
@@ -187,11 +199,30 @@ const fetchData = async () => {
         ),
       }));
     }
+    console.log(budgetItems);
 
-    // 최신 달의 거래 내역을 이벤트로 변환
-    const latestMonth = data.summary[data.summary.length - 1];
-    if (latestMonth && latestMonth.transactions) {
-      events.value = convertTransactionsToEvents(latestMonth.transactions);
+    // 달력 이벤트 데이터 처리
+    if (data.summary && data.summary.length > 0) {
+      // VueCal에 표시할 이벤트 배열
+      let allEvents = [];
+      
+      // 각 월별 데이터를 순회하면서 이벤트 생성
+      data.summary.forEach(monthData => {
+        if (monthData.transactions) {
+          const monthEvents = monthData.transactions.map(transaction => ({
+            start: transaction.date, // "2024-11-01" 형식
+            end: transaction.date,
+            title: transaction.category === "소득"
+              ? `+${formatAmount(transaction.amount)}`
+              : `-${formatAmount(transaction.amount)}`,
+            class: transaction.category === "소득" ? "income-event" : "expense-event"
+          }));
+          allEvents = [...allEvents, ...monthEvents];
+        }
+      });
+
+      // 모든 월의 이벤트를 events에 설정
+      events.value = allEvents;
     }
   } catch (error) {
     console.error("Failed to fetch data:", error);
@@ -237,7 +268,6 @@ const toggleEditMode = () => {
   router.push("/repayment-plan-suggestion");
 };
 </script>
-
 <style>
 @import "./LoanDashBoard.css";
 </style>

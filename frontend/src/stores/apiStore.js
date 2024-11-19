@@ -15,6 +15,7 @@ export const useApiStore = defineStore('api', {
         paidAmount: 0, // 상환한 총 금액
         remainingAmount: 0, // 남은 상환 금액
         completedPercentage: 0, // 상환 비율
+        summary: [], // 월별 소비 요약 데이터 추가
     }),
     actions: {
         // 대출 신청
@@ -117,33 +118,21 @@ export const useApiStore = defineStore('api', {
                 
                 // summary 데이터 저장
                 this.summary = data.summary;
-                
-                const latestMonth = data.summary[data.summary.length - 1];
-                
-                this.totalSpent = latestMonth.totalSpent;
-                
-                const incomeCategory = latestMonth.categories.find(cat => cat.category === "소득");
-                this.income = incomeCategory ? incomeCategory.totalAmount : 0;
-                
-                const budgetCategories = latestMonth.categories.filter(cat => 
-                    ["식비", "쇼핑", "여가"].includes(cat.category)
-                );
-                
-                // 예산 설정 (각 카테고리별 목표치)
-                const budgetTargets = {
-                    "식비": 200000,
-                    "쇼핑": 150000,
-                    "여가": 280000
-                };
-
-                this.categories = budgetCategories.map(cat => ({
-                    name: cat.category,
-                    spent: cat.totalAmount,
-                    budget: budgetTargets[cat.category],
-                    status: this.calculateStatus(cat.totalAmount, budgetTargets[cat.category])
-                }));
-
+        
+                // 현재 월의 데이터 찾기
+                const today = new Date();
+                const currentMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+                const currentMonthData = data.summary.find(month => month.month === currentMonth);
+        
+                if (currentMonthData) {
+                    // 현재 월의 총 지출과 소득 저장
+                    this.totalSpent = currentMonthData.totalSpent;
+                    const incomeCategory = currentMonthData.categories.find(cat => cat.category === "소득");
+                    this.income = incomeCategory ? incomeCategory.totalAmount : 0;
+                }
+        
                 return data;
+                
             } catch (error) {
                 console.error('Error fetching summary data:', error);
                 throw error;
