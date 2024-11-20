@@ -1,6 +1,32 @@
 from . import db
 from datetime import datetime
 
+# class User(db.Model):
+#     __tablename__ = 'users'
+
+#     user_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+#     name = db.Column(db.Text, nullable=False)
+#     monthly_income = db.Column(db.Integer, nullable=False)
+#     monthly_expense = db.Column(db.Integer, nullable=False)
+#     available_funds = db.Column(db.Integer, nullable=False)  # MySQL에선 GENERATED ALWAYS AS 지원 필요
+#     loan_amount = db.Column(db.Integer, nullable=False)
+#     interest_rate = db.Column(db.Float, nullable=False)
+#     repayment_period = db.Column(db.Integer, nullable=False)
+#     created_at = db.Column(db.TIMESTAMP, server_default=db.func.current_timestamp())
+
+#     def to_dict(self):
+#         return {
+#             "user_id": self.user_id,
+#             "name": self.name,
+#             "monthly_income": self.monthly_income,
+#             "monthly_expense": self.monthly_expense,
+#             "available_funds": self.available_funds,
+#             "loan_amount": self.loan_amount,
+#             "interest_rate": self.interest_rate,
+#             "repayment_period": self.repayment_period,
+#             "created_at": self.created_at
+#         }
+
 class User(db.Model):
     __tablename__ = 'users'
 
@@ -8,24 +34,39 @@ class User(db.Model):
     name = db.Column(db.Text, nullable=False)
     monthly_income = db.Column(db.Integer, nullable=False)
     monthly_expense = db.Column(db.Integer, nullable=False)
-    available_funds = db.Column(db.Integer, nullable=False)  # MySQL에선 GENERATED ALWAYS AS 지원 필요
     loan_amount = db.Column(db.Integer, nullable=False)
     interest_rate = db.Column(db.Float, nullable=False)
     repayment_period = db.Column(db.Integer, nullable=False)
+    monthly_repayment_goal = db.Column(db.Integer, nullable=False)
+    selected_plan_group_id = db.Column(db.Integer, nullable=True)
     created_at = db.Column(db.TIMESTAMP, server_default=db.func.current_timestamp())
 
+    @property
+    def available_funds(self):
+        """
+        계산된 필드: 사용 가능 자금
+        MySQL의 GENERATED ALWAYS AS에 대응.
+        """
+        return self.monthly_income - self.monthly_expense
+
     def to_dict(self):
+        """
+        User 객체를 딕셔너리로 변환
+        """
         return {
             "user_id": self.user_id,
             "name": self.name,
             "monthly_income": self.monthly_income,
             "monthly_expense": self.monthly_expense,
-            "available_funds": self.available_funds,
+            "available_funds": self.available_funds,  # 계산된 값 반환
             "loan_amount": self.loan_amount,
             "interest_rate": self.interest_rate,
             "repayment_period": self.repayment_period,
+            "monthly_repayment_goal": self.monthly_repayment_goal,
+            "selected_plan_group_id": self.selected_plan_group_id,
             "created_at": self.created_at
         }
+
 
 
 class UserExpenses(db.Model):
@@ -52,7 +93,13 @@ class Categories(db.Model):
     __tablename__ = 'categories'
     category_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     category_name = db.Column(db.String(255), nullable=False)
-
+    
+     # 객체를 딕셔너리로 변환
+    def to_dict(self):
+        return {
+            "category_id": self.category_id,
+            "category_name": self.category_name,
+        }
 
 class RepaymentPlans(db.Model):
     __tablename__ = 'repaymentPlans'
@@ -85,7 +132,7 @@ class RepaymentHistory(db.Model):
     __tablename__ = 'repaymentHistory'
 
     repayment_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('Users.user_id', ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id', ondelete="CASCADE"), nullable=False)
     repayment_date = db.Column(db.Date, nullable=False)
     repayment_amount = db.Column(db.Integer, nullable=False)
     remaining_balance = db.Column(db.Integer, nullable=False)
@@ -131,7 +178,7 @@ class Notification(db.Model):
     __tablename__ = 'notification'
 
     notification_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('Users.user_id', ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id', ondelete="CASCADE"), nullable=False)
     message = db.Column(db.Text, nullable=False)
     sent_at = db.Column(db.TIMESTAMP, default=datetime.utcnow)
 
