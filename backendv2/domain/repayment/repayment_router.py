@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from database import get_db
 from domain.repayment import repayment_schema, repayment_crud
-
+from domain.common.common_schema import PostResponse
 router = APIRouter(
     prefix="/api/repayment",
 )
@@ -12,7 +12,7 @@ router = APIRouter(
 # 2-1. - 사용 보류
 
 # 2-2. 줄이기 어려운 카테고리와 상환 기간 저장
-@router.post("/save-plan", response_model=repayment_schema.ResponseModel)
+@router.post("/save-plan", response_model=PostResponse)
 async def save_plan(
         plan: repayment_schema.RepaymentPlanRequest,
         db: Session = Depends(get_db)
@@ -82,7 +82,7 @@ async def repayment_plan_detail(
 
 
 # 2-4. 상환 플랜 선택
-@router.post("/select-plan", response_model=repayment_schema.ResponseModel)
+@router.post("/select-plan", response_model=PostResponse)
 async def repayment_plan_select(
         user_id: int = Query(1, description="User ID to fetch plans for"),
         plan_id: int = Query(1, description="plan ID to fetch plans for"),
