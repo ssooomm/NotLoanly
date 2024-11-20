@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
 # 2-2. 줄이기 어려운 카테고리와 상환 기간 저장
 class RepaymentPlanRequest(BaseModel):
@@ -12,19 +12,11 @@ class ResponseModel(BaseModel):
     message: str
 
 #2-3. 상환 플랜 리스트 조회
-class CategoryDetail(BaseModel):
-    categoryId: int
-    reducedAmount: float
-    savingPercentage: float
-
 class RepaymentPlan(BaseModel):
     planId: int
-    monthlyPayment: int
+    planName: str
+    totalAmount: int
     duration: int
-    description: str
-    categories: List[CategoryDetail]
+    details: Dict[str,Any]
     hashtags: str
 
-class RepaymentPlansListResponse(BaseModel):
-    status: str
-    plans: List[RepaymentPlan]

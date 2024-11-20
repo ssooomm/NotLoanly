@@ -33,13 +33,12 @@ async def save_plan(
 
 #2-3. 상환 플랜 리스트 조회
 @router.get(
-    "/plans",
-    response_model=repayment_schema.RepaymentPlansListResponse
+    "/plans"
 )
 async def get_repayment_plans(
-    user_id: int = Query(..., description="User ID to fetch plans for"),
+    user_id: int = Query(1, description="User ID to fetch plans for"),
     db: Session = Depends(get_db)
-) -> repayment_schema.RepaymentPlansListResponse:
+):
     try:
         plans = repayment_crud.get_repayment_plans(db, user_id)
         return {
