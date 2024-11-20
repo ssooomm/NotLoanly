@@ -103,7 +103,7 @@ INSERT INTO Categories (category_name) VALUES
 INSERT INTO Users (name, monthly_income, monthly_expense, loan_amount, interest_rate, loan_date, repayment_period, monthly_repayment_goal, selected_plan_group_id) 
 VALUES 
 ('최민호', 2500000, 1500000, 3000000, 6.0,'2024-10-09', 3, 1015000, 3),
-('김민주', 2000000, 1500000, 2000000, 7.0,'2024-09-11', 6, 345000, 3);
+('김민주', 2000000, 1500000, 2000000, 7.0,'2024-09-11', 6, 345000, 6);
 
 
 
