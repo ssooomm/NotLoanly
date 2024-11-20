@@ -107,7 +107,7 @@ class Transactions(db.Model):
 
     transaction_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id', ondelete="CASCADE"), nullable=False)
-    category_id = db.Column(db.Integer, db.ForeignKey('Categories.category_id', ondelete="CASCADE"), nullable=False)
+    category_id = db.Column(db.Integer, db.ForeignKey('categories.category_id', ondelete="CASCADE"), nullable=False)
     transaction_date = db.Column(db.Date, nullable=False)
     amount = db.Column(db.Integer, nullable=False)
     description = db.Column(db.Text, nullable=True)

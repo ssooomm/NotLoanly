@@ -160,12 +160,13 @@ def analyze_and_insert_plans():
         loan_amount = data.get("loan_amount")
         interest_rate = data.get("interest_rate", 6.0)  # 기본값 6%
         duration = data.get("duration", 6)  # 기본값 6개월
+        month = data.get("month", 10)  # 요청 데이터에서 월을 받음, 기본값 10월
 
         if not user_id or not loan_amount:
             return jsonify({"status": "error", "message": "필수 필드가 누락되었습니다"}), 400
 
         # 사용자 소비 데이터 가져오기
-        user_expenses = UserExpenses.query.filter_by(user_id=user_id, month=10).all()  # 10월 데이터
+        user_expenses = UserExpenses.query.filter_by(user_id=user_id, month=month).all()  # 요청한 월의 데이터
         if not user_expenses:
             return jsonify({"status": "error", "message": "사용자의 지출 데이터를 찾을 수 없습니다"}), 404
 
