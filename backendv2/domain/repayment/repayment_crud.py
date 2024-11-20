@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from models import User, Categories, UserExpenses, RepaymentPlans
 from domain.repayment.repayment_schema import *
-from domain.user.user_crud import get_user
+from domain.common.common_crud import get_user
 
 # 2-2. 줄이기 어려운 카테고리와 상환 기간 저장
 def save_repayment_plan(
