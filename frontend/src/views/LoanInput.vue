@@ -50,9 +50,10 @@
 import ConfirmButton from "@/components/ConfirmButton.vue";
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
-import axios from "axios";
+import { useApiStore } from "../stores/apiStore";
 
 const router = useRouter();
+const apiStore = useApiStore();
 
 // 대출 금액
 const minAmount = 500000; // 50만원
@@ -120,41 +121,34 @@ const displayAmount = computed(() => {
 });
 
 // KB 비상금 대출 금리 정보
-const interestRate = ref(5.69);
+const interestRate = ref(6.0);
 
 // 확인 버튼 클릭 시 이벤트
 const handleConfirm = async () => {
-  // 백 연결 전 테스트용 코드
-  router.push({
-    path: "/loan-complete",
-    state: {
-      loanAmount: amount.value,
-    },
-  });
-  // if (validateAmount()) {
-  //   try {
-  //     const response = await axios.post("/api/loan/apply", {
-  //       user_id: 1, // 실제로 로그인된 사용자 ID를 사용해야 함
-  //       loan_amount: amount.value,
-  //       interest_rate: interestRate.value,
-  //     });
+  if (validateAmount()) {
+    try {
+      const response = await apiStore.applyForLoan(
+        1,
+        amount.value,
+        interestRate.value
+      );
 
-  //     if (response.status === 200) {
-  //       console.log("대출 신청이 완료되었습니다.");
-  //       router.push({
-  //         path: "/loan-complete",
-  //         state: {
-  //           loanAmount: amount.value,
-  //         },
-  //       });
-  //     }
-  //   } catch (error) {
-  //     console.error("대출 신청 중 오류 발생:", error);
-  //     alert("대출 신청에 실패했습니다. 다시 시도해 주세요.");
-  //   }
-  // } else {
-  //   alert("대출 금액을 입력해주세요.");
-  // }
+      if (response.status === "success") {
+        console.log("대출 신청이 완료되었습니다.");
+        router.push({
+          path: "/loan-complete",
+          state: {
+            loanAmount: amount.value,
+          },
+        });
+      }
+    } catch (error) {
+      console.error("대출 신청 중 오류 발생:", error);
+      alert("대출 신청에 실패했습니다. 다시 시도해 주세요.");
+    }
+  } else {
+    alert("대출 금액을 입력해주세요.");
+  }
 };
 </script>
 
