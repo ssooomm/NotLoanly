@@ -1,10 +1,18 @@
+from typing import Dict
+
 from domain.dashboard.dashboard_schema import *
-from models import Transactions, User, Categories, RepaymentHistory, RepaymentPlans, UserExpenses
+from domain.repayment.repayment_schema import Plan_Details
+from models import Transactions, Categories, RepaymentHistory, UserExpenses
 
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from domain.notification import notification_schema, notification_crud
+from domain.common.common_crud import get_user
+from domain.repayment.repayment_crud import get_repayment_plan
+from fastapi import HTTPException
 import json
+
+from datetime import datetime
+
 
 # 3-1. 상환 요약 조회
 def get_dashboard_summary(db: Session, user_id: int) -> SummaryResponse:
@@ -83,9 +91,9 @@ def get_dashboard_summary(db: Session, user_id: int) -> SummaryResponse:
 
 
 # 3-2. 상환 현황 조회
-def get_repayment_status(db: Session, user_id: int) -> RepaymentStatusResponse:
+def get_repayment_status(db: Session, user_id: int):  # -> RepaymentStatusResponse
     # 사용자 대출 정보 가져오기
-    user = db.query(User).filter(User.user_id == user_id).first()
+    user = get_user(db, user_id)
     if not user:
         raise ValueError("User not found")
 
@@ -135,7 +143,7 @@ def get_repayment_status(db: Session, user_id: int) -> RepaymentStatusResponse:
 # 3-3 상환 플랜 비율 조회
 def get_consumption_percentage(db: Session, user_id: int):
     # 사용자 조회
-    user = db.query(User).filter(User.user_id == user_id).first()
+    user = get_user(db, user_id)
     if not user:
         return {"status": "error", "message": "User not found"}, 404
 
@@ -143,7 +151,8 @@ def get_consumption_percentage(db: Session, user_id: int):
         return {"status": "error", "message": "No repayment plan selected for the user"}, 404
 
     # 플랜 조회
-    plan = db.query(RepaymentPlans).filter(RepaymentPlans.plan_id == user.selected_plan_group_id).first()
+    plan = get_repayment_plan(db, user.selected_plan_group_id, user_id)
+    # plan = db.query(RepaymentPlans).filter(RepaymentPlans.plan_id == user.selected_plan_group_id).first()
     if not plan:
         return {"status": "error", "message": "Repayment plan not found"}, 404
 
@@ -184,7 +193,7 @@ def get_consumption_percentage(db: Session, user_id: int):
 # 3-4. 소비 분석 조회
 def get_consumption_analysis(db: Session, user_id: int):
     # 사용자 조회
-    user = db.query(User).filter(User.user_id == user_id).first()
+    user = get_user(db, user_id)
     if not user:
         return {"status": "error", "message": "User not found"}, 404
 
@@ -192,62 +201,66 @@ def get_consumption_analysis(db: Session, user_id: int):
         return {"status": "error", "message": "No repayment plan selected for the user"}, 404
 
     # 플랜 조회
-    plan = db.query(RepaymentPlans).filter(RepaymentPlans.plan_id == user.selected_plan_group_id).first()
+    plan = get_repayment_plan(db, user.selected_plan_group_id, user_id)
     if not plan:
         return {"status": "error", "message": "Repayment plan not found"}, 404
+    plan_details = plan.details
 
-    # 플랜 세부 정보 파싱
-    try:
-        plan_details = json.loads(plan.details) if isinstance(plan.details, str) else plan.details
-    except json.JSONDecodeError:
-        return {"status": "error", "message": "Invalid JSON format in plan details"}, 500
+    # 현재 서버 시간의 월 추출
+    current_month = datetime.now().month
+    expenses = get_user_expenses_by_month(db, user_id, current_month)
+    if not expenses:
+        return {"status": "error", "message": "Expenses not found"}, 404
 
-    if not isinstance(plan_details, list):
-        return {"status": "error", "message": "Invalid plan details format"}, 500
-
-    # 10월과 11월 소비 데이터 조회
-    october_expenses = db.query(UserExpenses.category_id, UserExpenses.original_amount).filter(
-        UserExpenses.user_id == user_id, UserExpenses.month == 10
-    ).all()
-
-    november_expenses = db.query(UserExpenses.category_id, UserExpenses.original_amount).filter(
-        UserExpenses.user_id == user_id, UserExpenses.month == 11
-    ).all()
-
-    # 소비 데이터를 딕셔너리로 변환
-    october_expenses_dict = {expense.category_id: expense.original_amount for expense in october_expenses}
-    november_expenses_dict = {expense.category_id: expense.original_amount for expense in november_expenses}
-
-    # 소비 분석 데이터 생성
-    categories_data = []
-    for entry in plan_details:
-        category_id = entry.get("category_id")
-        reduced_amount = entry.get("reduced_amount", 0)
-
-        # 10월 소비 금액 및 절약 목표 계산
-        october_amount = october_expenses_dict.get(category_id, 0)
-        suggested_reduced_amount = max(october_amount - reduced_amount, 0)
-
-        # 11월 소비 금액 가져오기
-        november_amount = november_expenses_dict.get(category_id, 0)
-
-        # 절약 비율 계산
-        saving_percentage = (november_amount / suggested_reduced_amount) * 100 if suggested_reduced_amount else 0
-
-        # 카테고리 이름 가져오기
-        category = db.query(Categories).filter(Categories.category_id == category_id).first()
-        category_name = category.category_name if category else "Unknown"
-
-
-        categories_data.append({
-            "category": category_name,
-            "amount": november_amount,
-            "suggestedReducedAmount": suggested_reduced_amount,
-            "savingPercentage": round(saving_percentage, 2)
-        })
+    categories = generate_categories_summary(expenses, plan_details)
 
     return {
-        "month": "2024-11",
-        "totalAmount": sum(november_expenses_dict.values()),
-        "categories": categories_data
+        "month": current_month,
+        "totalAmount": sum(expense["total_amount"] for expense in expenses),
+        "categories": categories
     }
+
+
+# user_id와 month에 해당하는 UserExpenses 데이터를 조회
+def get_user_expenses_by_month(db: Session, user_id: int, month: int):
+    expenses = db.query(
+        UserExpenses.category_id,
+        UserExpenses.original_amount
+    ).filter(
+        UserExpenses.user_id == user_id,
+        UserExpenses.month == month
+    ).all()
+
+    # 결과를 딕셔너리 형태로 변환
+    return [
+        {"category_id": category_id, "total_amount": original_amount}
+        for category_id, original_amount in expenses
+    ]
+
+
+def generate_categories_summary(expenses, plan_details):
+    # expenses를 딕셔너리로 변환하여 빠르게 접근할 수 있도록 설정
+    expenses_dict = {expense["category_id"]: expense["total_amount"] for expense in expenses}
+
+    # 결과 리스트 생성
+    categories = []
+
+    for plan in plan_details:
+        category_id = plan["category_id"]
+        reduced_amount = plan["reduced_amount"]
+        original_amount = plan["original_amount"]
+        saving_percentage = round(plan["saving_percentage"], 2)
+
+        # expenses에서 category_id에 해당하는 total_amount 가져오기
+        amount = expenses_dict.get(category_id, 0)  # 기본값은 0
+        suggested_reduced_amount = original_amount - reduced_amount
+
+        # 결과에 추가
+        categories.append({
+            "category_id": category_id,
+            "amount": amount,
+            "suggestedReducedAmount": suggested_reduced_amount,
+            "savingPercentage": saving_percentage
+        })
+
+    return categories
