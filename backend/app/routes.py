@@ -116,17 +116,36 @@ def save_plan():
         return json_response({"status": "error", "message": str(e)}, 500)
 
 #2-3. 상환 플랜 리스트 조회
-@main_routes.route("/api/repayment/plans", methods=["GET"])
-def repayment_plans():
+@main_routes.route('/api/repayment/plans', methods=['GET'])
+def get_repayment_plans():
     try:
-        user_id = request.args.get("user_id", type=int)
+        # 사용자 ID를 쿼리 파라미터에서 가져오기
+        user_id = request.args.get('user_id', type=int)
         if not user_id:
-            return json_response({"status": "error", "message": "User ID is required"}, 400)
+            return jsonify({"status": "error", "message": "User ID is required"}), 400
 
-        plans = get_repayment_plans(user_id)
-        return json_response({"status": "success", "plans": plans}, 200)
+        # 사용자에 대한 모든 상환 플랜 조회
+        plans = db.session.query(RepaymentPlans).filter_by(user_id=user_id).all()
+
+        if not plans:
+            return jsonify({"status": "success", "message": "No repayment plans found for this user."}), 200
+
+        # 플랜 데이터 구성
+        plans_data = []
+        for plan in plans:
+            plans_data.append({
+                "plan_id": plan.plan_id,
+                "plan_name": plan.plan_name,
+                "total_amount": plan.total_amount,
+                "duration": plan.duration,
+                "details": plan.details,  # JSON 문자열로 저장된 경우, 필요시 json.loads()로 변환 가능
+                "hashtags": plan.hashtags
+            })
+
+        return jsonify({"status": "success", "plans": plans_data}), 200
+
     except Exception as e:
-        return json_response({"status": "error", "message": str(e)}, 500)
+        return jsonify({"status": "error", "message": str(e)}), 500
     
 
 # 2-4. 상환 플랜 선택
@@ -232,7 +251,7 @@ def dashboard_summary():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
-#3-2. 상환 현황 조회
+#3-2. ��환 현황 조회
 @main_routes.route('/api/dashboard/repayment-status', methods=['GET'])
 def repayment_status():
     try:

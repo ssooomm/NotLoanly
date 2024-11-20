@@ -1,6 +1,5 @@
 -- 기존 데이터베이스가 존재하면 삭제
 DROP DATABASE IF EXISTS notLoanly;
-
 -- 새로운 데이터베이스 생성
 CREATE DATABASE notLoanly;
 USE notLoanly;
@@ -111,18 +110,18 @@ INSERT INTO Transactions (user_id, category_id, transaction_date, amount, descri
 (2, 1, '2024-08-01', 2000000, '급여 입금', 'Bank Transfer'),
 (2, 3, '2024-08-01', 500000, '저축/투자', 'Bank Transfer'),
 (2, 4, '2024-08-02', 600000, '월세', 'Bank Transfer'),
-(2, 5, '2024-08-03', 70000, '식료품 구매', 'Card'),
-(2, 6, '2024-08-04', 30000, '대중교통 충전', 'Card'),
+(2, 5, '2024-08-03', 200000, '식료품 구매', 'Card'),
+(2, 6, '2024-08-04', 30000, '대중교통 충전', 'Card'), 
 (2, 7, '2024-08-05', 20000, '생활용품 구매', 'Cash'),
-(2, 8, '2024-08-06', 50000, '영화 관람', 'Card'),
-(2, 9, '2024-08-07', 60000, '병원비', 'Card'),
-(2, 10, '2024-08-08', 80000, '부모님 선물', 'Cash'),
-(2, 5, '2024-08-10', 40000, '외식', 'Card'),
-(2, 4, '2024-08-12', 35000, '휴대폰 요금', 'Bank Transfer'),
-(2, 2, '2024-08-15', 120000, '보험료 납부', 'Bank Transfer'),
-(2, 6, '2024-08-18', 20000, '택시 이용', 'Cash'),
-(2, 8, '2024-08-20', 25000, '전시회 관람', 'Card'),
-(2, 7, '2024-08-22', 80000, '의류 구매', 'Card'),
+(2, 8, '2024-08-06', 50000, '영화 관람', 'Card'), 
+(2, 9, '2024-08-07', 60000, '병원비', 'Card'), 
+(2, 10, '2024-08-08', 80000, '부모님 선물', 'Cash'), 
+(2, 5, '2024-08-10', 50000, '외식', 'Card'), 
+(2, 4, '2024-08-12', 35000, '휴대폰 요금', 'Bank Transfer'), 
+(2, 2, '2024-08-15', 120000, '보험료 납부', 'Bank Transfer'), 
+(2, 6, '2024-08-18', 40000, '택시 이용', 'Cash'),
+(2, 8, '2024-08-20', 25000, '전시회 관람', 'Card'), 
+(2, 7, '2024-08-22', 130000, '의류 구매', 'Card'), 
 (2, 9, '2024-08-25', 45000, '정기 검진 비용', 'Card'),
 (2, 10, '2024-08-28', 15000, '기부', 'Cash');
 
@@ -133,21 +132,22 @@ INSERT INTO Transactions (user_id, category_id, transaction_date, amount, descri
 (1, 1, '2024-09-01', 2500000, '급여 입금', 'Bank Transfer'),
 (1, 3, '2024-09-01', 1000000, '저축/투자', 'Bank Transfer'),
 (1, 4, '2024-09-02', 500000, '월세', 'Bank Transfer'),
-(1, 5, '2024-09-03', 100000, '식료품 구매', 'Card'), -- 증가
+(1, 5, '2024-09-03', 200000, '식료품 구매', 'Card'), -- 증가
 (1, 6, '2024-09-04', 50000, '대중교통 충전', 'Card'), -- 증가
 (1, 7, '2024-09-05', 50000, '생활용품 구매', 'Cash'), -- 증가
 (1, 8, '2024-09-06', 80000, '콘서트 티켓 구매', 'Card'), -- 증가
-(1, 9, '2024-09-07', 80000, '요가 수업 등록', 'Card'), -- 증가
-(1, 10, '2024-09-08', 100000, '부모님 선물', 'Cash'), -- 증가
-(1, 5, '2024-09-10', 70000, '외식', 'Card'), -- 증가
+(1, 8, '2024-09-07', 80000, '요가 수업 등록', 'Card'), -- 증가
+(1, 10, '2024-09-08', 50000, '부모님 선물', 'Cash'), -- 증가
+(1, 5, '2024-09-10', 40000, '외식', 'Card'), -- 증가
 (1, 4, '2024-09-12', 50000, '휴대폰 요금', 'Bank Transfer'), -- 증가
-(1, 2, '2024-09-15', 120000, '보험료 납부', 'Bank Transfer'), -- 증가
+(1, 2, '2024-09-15', 100000, '보험료 납부', 'Bank Transfer'), -- 증가
 (1, 6, '2024-09-18', 35000, '택시 이용', 'Cash'), -- 증가
 (1, 8, '2024-09-20', 50000, '전시회 관람', 'Card'), -- 증가
-(1, 7, '2024-09-22', 120000, '의류 구매', 'Card'), -- 증가
-(1, 9, '2024-09-25', 70000, '치과 진료비', 'Card'), -- 증가
+(1, 7, '2024-09-22', 150000, '의류 구매', 'Card'), -- 증가
+(1, 9, '2024-09-25', 40000, '치과 진료비', 'Card'), -- 증가
 (1, 10, '2024-09-28', 25000, '기부', 'Cash'); -- 증가
 
+-- ^까지 완성
 -- Transactions 테이블에 데이터 삽입 (김민주 - 유저 2)
 INSERT INTO Transactions (user_id, category_id, transaction_date, amount, description, payment_method) VALUES
 (2, 1, '2024-09-01', 2000000, '급여 입금', 'Bank Transfer'),
@@ -188,6 +188,28 @@ INSERT INTO Transactions (user_id, category_id, transaction_date, amount, descri
 (1, 7, '2024-10-25', 90000, '의류 구매', 'Card'),
 (1, 9, '2024-10-28', 50000, '치과 진료비', 'Card'),
 (1, 10, '2024-10-30', 20000, '기부', 'Cash');
+
+INSERT INTO Transactions (user_id, category_id, transaction_date, amount, description, payment_method) VALUES
+(1, 1, '2024-10-01', 2500000, '급여 입금', 'Bank Transfer'),
+(1, 3, '2024-10-01', 1000000, '저축/투자', 'Bank Transfer'),
+(1, 4, '2024-10-02', 500000, '월세', 'Bank Transfer'), -- 증가
+(1, 5, '2024-10-03', 105000, '식료품 구매', 'Card'), -- 증가
+(1, 6, '2024-10-04', 50000, '대중교통 충전', 'Card'), -- 증가
+(1, 7, '2024-10-05', 40000, '생활용품 구매', 'Cash'), -- 증가
+(1, 8, '2024-10-06', 75000, '콘서트 티켓 구매', 'Card'), -- 증가
+(1, 9, '2024-10-07', 85000, '요가 수업 등록', 'Card'), -- 증가
+(1, 10, '2024-10-08', 110000, '부모님 선물', 'Cash'), -- 증가
+(1, 1, '2024-10-09', 3000000, 'KB비상금 대출', 'Bank Transfer'),
+(1, 10, '2024-10-10', 400000, '경조사비 (1차)', 'Cash'),
+(1, 10, '2024-10-12', 400000, '경조사비 (2차)', 'Cash'),
+(1, 10, '2024-10-15', 400000, '경조사비 (3차)', 'Cash'),
+(1, 10, '2024-10-18', 300000, '경조사비 (4차)', 'Cash'),
+(1, 10, '2024-10-20', 1500000, '이사 비용', 'Bank Transfer'),
+(1, 6, '2024-10-22', 30000, '택시 이용', 'Cash'), -- 증가
+(1, 8, '2024-10-23', 35000, '전시회 관람', 'Card'), -- 증가
+(1, 7, '2024-10-25', 100000, '의류 구매', 'Card'), -- 증가
+(1, 9, '2024-10-28', 60000, '치과 진료비', 'Card'), -- 증가
+(1, 10, '2024-10-30', 30000, '기부', 'Cash'); -- 증가
 -- Transactions 테이블에 데이터 삽입 (김민주 - 유저 2)
 INSERT INTO Transactions (user_id, category_id, transaction_date, amount, description, payment_method) VALUES
 (2, 1, '2024-10-01', 2000000, '급여 입금', 'Bank Transfer'),
@@ -232,43 +254,6 @@ INSERT INTO Transactions (user_id, category_id, transaction_date, amount, descri
 (2, 10, '2024-11-15', 80000, '부모님 선물', 'Cash'),
 (2, 4, '2024-11-18', 35000, '휴대폰 요금', 'Bank Transfer'),
 (2, 6, '2024-11-20', 15000, '택시 이용', 'Cash');
-
-INSERT INTO RepaymentPlans (user_id, plan_name, total_amount, duration, details)
-VALUES
-(1, 
- '저축/투자 조정 플랜', 
- 515000, 
- 6, 
- '[
-    {"category_id": 3, "reduced_amount": 400000, "saving_percentage": 40},
-    {"category_id": 4, "reduced_amount": 53000, "saving_percentage": 10},
-    {"category_id": 5, "reduced_amount": 27000, "saving_percentage": 10},
-    {"category_id": 6, "reduced_amount": 7000, "saving_percentage": 10}
- ]'
-),
-(1, 
- '주거 및 통신 유지 플랜', 
- 515000, 
- 6, 
- '[
-    {"category_id": 3, "reduced_amount": 250000, "saving_percentage": 25},
-    {"category_id": 5, "reduced_amount": 81000, "saving_percentage": 30},
-    {"category_id": 6, "reduced_amount": 14000, "saving_percentage": 20},
-    {"category_id": 8, "reduced_amount": 17500, "saving_percentage": 50}
- ]'
-),
-(1, 
- '골고루 절약 플랜', 
- 515000, 
- 6, 
- '[
-    {"category_id": 3, "reduced_amount": 300000, "saving_percentage": 30},
-    {"category_id": 4, "reduced_amount": 106000, "saving_percentage": 20},
-    {"category_id": 5, "reduced_amount": 27000, "saving_percentage": 10},
-    {"category_id": 6, "reduced_amount": 7000, "saving_percentage": 10},
-    {"category_id": 7, "reduced_amount": 22000, "saving_percentage": 20}
- ]'
-);
 
 INSERT INTO RepaymentHistory (user_id, repayment_date, repayment_amount, remaining_balance, description)
 VALUES
