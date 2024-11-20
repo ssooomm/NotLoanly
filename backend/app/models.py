@@ -93,7 +93,13 @@ class Categories(db.Model):
     __tablename__ = 'categories'
     category_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     category_name = db.Column(db.String(255), nullable=False)
-
+    
+     # 객체를 딕셔너리로 변환
+    def to_dict(self):
+        return {
+            "category_id": self.category_id,
+            "category_name": self.category_name,
+        }
 
 class RepaymentPlans(db.Model):
     __tablename__ = 'repaymentPlans'
@@ -126,7 +132,7 @@ class RepaymentHistory(db.Model):
     __tablename__ = 'repaymentHistory'
 
     repayment_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('Users.user_id', ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id', ondelete="CASCADE"), nullable=False)
     repayment_date = db.Column(db.Date, nullable=False)
     repayment_amount = db.Column(db.Integer, nullable=False)
     remaining_balance = db.Column(db.Integer, nullable=False)
@@ -148,7 +154,7 @@ class Transactions(db.Model):
 
     transaction_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id', ondelete="CASCADE"), nullable=False)
-    category_id = db.Column(db.Integer, db.ForeignKey('Categories.category_id', ondelete="CASCADE"), nullable=False)
+    category_id = db.Column(db.Integer, db.ForeignKey('categories.category_id', ondelete="CASCADE"), nullable=False)
     transaction_date = db.Column(db.Date, nullable=False)
     amount = db.Column(db.Integer, nullable=False)
     description = db.Column(db.Text, nullable=True)
@@ -172,7 +178,7 @@ class Notification(db.Model):
     __tablename__ = 'notification'
 
     notification_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('Users.user_id', ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id', ondelete="CASCADE"), nullable=False)
     message = db.Column(db.Text, nullable=False)
     sent_at = db.Column(db.TIMESTAMP, default=datetime.utcnow)
 
