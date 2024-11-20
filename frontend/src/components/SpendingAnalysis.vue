@@ -79,7 +79,7 @@ const fetchConsumptionData = async () => {
     if (lastMonthData) {
       // 소득, 금융, 대출 상환을 제외한 실제 소비 카테고리만 필터링
       const spendingCategories = lastMonthData.categories.filter(cat => 
-        !["소득","대출 상환"].includes(cat.category)
+        !["소득","대출 상환","대출 소비"].includes(cat.category)
       );
 
       totalSpending.value = spendingCategories.reduce((sum, cat) => sum + cat.totalAmount, 0);
