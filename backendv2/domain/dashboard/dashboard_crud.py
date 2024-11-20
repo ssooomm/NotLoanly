@@ -3,7 +3,7 @@ from models import Transactions, User, Categories, RepaymentHistory, RepaymentPl
 
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-
+from domain.notification import notification_schema, notification_crud
 import json
 
 # 3-1. 상환 요약 조회
@@ -237,6 +237,7 @@ def get_consumption_analysis(db: Session, user_id: int):
         # 카테고리 이름 가져오기
         category = db.query(Categories).filter(Categories.category_id == category_id).first()
         category_name = category.category_name if category else "Unknown"
+
 
         categories_data.append({
             "category": category_name,
