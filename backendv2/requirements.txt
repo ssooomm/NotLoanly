@@ -2,3 +2,8 @@
 #uvicorn main:app --reload
 
 pip install fastapi flask flask-cors flask-socketio openai==0.28.0 sqlalchemy pymysql cryptography python-dotenv uvicorn
+
+
+가상 환경 생성 및 활성화
+python -m venv venv
+.\venv\Scripts\activate  # Windows
