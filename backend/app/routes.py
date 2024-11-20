@@ -6,6 +6,7 @@ from .models import User, Categories, UserExpenses, RepaymentPlans, Transactions
 import json
 from .services import get_montyly_expense, get_repayment_status, get_dashboard_summary, get_consumption_percentage, get_consumption_analysis
 from .services import save_repayment_plan, get_repayment_plans, select_repayment_plan
+from .services import create_transaction_service
 from . import db
 from . import socketio
 from .utils import json_response
@@ -269,6 +270,9 @@ def consumption_analysis():
 # 4. 거래내역 추가
 @main_routes.route('/api/transactions', methods=['POST'])
 def create_transaction():
+    """
+    거래내역 생성 API
+    """
     data = request.json
 
     # 필수 필드 검증
@@ -280,31 +284,22 @@ def create_transaction():
     payment_method = data.get('payment_method')
 
     if not user_id or not category_id or not transaction_date or not amount:
-        return jsonify({"error": "Missing required fields"}), 400
+        return json_response({"error": "Missing required fields"}), 400
 
-    try:
-        # 새로운 거래 추가
-        transaction = Transactions(
-            user_id=user_id,
-            category_id=category_id,
-            transaction_date=transaction_date,
-            amount=amount,
-            description=description,
-            payment_method=payment_method
-        )
-        db.session.add(transaction)
-        db.session.commit()
+    # 서비스 호출
+    result, status_code = create_transaction_service(
+        user_id=user_id,
+        category_id=category_id,
+        transaction_date=transaction_date,
+        amount=amount,
+        description=description,
+        payment_method=payment_method
+    )
 
-        return jsonify({
-            "message": "Transaction created successfully"
-        }), 201
-
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({"status": "error", "message": str(e)}), 500
+    return jsonify(result), status_code
 
 
-# API: 사용자 알림 가져오기
+# 5-1. API: 사용자 알림 가져오기
 @main_routes.route('/api/notifications/<int:user_id>', methods=['GET'])
 def get_notifications(user_id):
     notifications = Notification.query.filter_by(user_id=user_id).order_by(Notification.sent_at.desc()).all()
@@ -319,3 +314,4 @@ def get_notifications(user_id):
         "notifications": notification_list
     }), 200
 
+# 5-2. 새 알림 생성
