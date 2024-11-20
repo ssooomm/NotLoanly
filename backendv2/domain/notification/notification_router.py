@@ -40,22 +40,6 @@ async def get_notifications(
         "notifications": notifications
     }
 
-# async def notification_event_generator(user_id: int):
-#     try:
-#         while True:
-#             if len(notifications) > 0:
-#                 filtered_notifications = [msg for msg in notifications if msg["user_id"] == user_id]
-#                 for notification in filtered_notifications:
-#                     print(f"Sending message to user {user_id}: {notification['message']}")  # 디버깅 로그
-#                     yield f"data: {notification['message']}\n\n"
-#                     notifications.remove(notification)  # 큐에서 제거
-#             else:
-#                 # 유지 메시지
-#                 yield f"data: keep-alive\n\n"
-#             await asyncio.sleep(1)  # 1초마다 확인
-#     except Exception as e:
-#         print(f"Error in notification_event_generator: {e}")
-#         yield f"data: Error occurred: {str(e)}\n\n"
 
 
 async def notification_event_generator(user_id: int):
@@ -69,9 +53,6 @@ async def notification_event_generator(user_id: int):
                     # JSON 형식으로 직렬화하여 스트림 전송
                     yield f"data: {json.dumps(notification)}\n\n"
                     notifications.remove(notification)  # 큐에서 제거
-            else:
-                # 유지 메시지
-                yield f"data: {json.dumps({'message': 'keep-alive'})}\n\n"
             await asyncio.sleep(1)  # 1초마다 확인
     except Exception as e:
         print(f"Error in notification_event_generator: {e}")
