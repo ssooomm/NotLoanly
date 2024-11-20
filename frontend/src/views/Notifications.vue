@@ -9,7 +9,7 @@
       <div v-for="(notification, index) in notifications" :key="index" class="notification">
         <div class="notification-header">
           <img src="@/assets/logo.png" alt="Logo" class="notification-logo">
-          <span class="notification-date">{{ notification.date }}</span>
+          <span class="notification-date">{{ formatDate(notification.sent_at) }}</span>
         </div>
         <div class="notification-text">
           <p class="bold-text">I'm Not LOANly</p>
@@ -21,55 +21,48 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import { useApiStore } from '@/stores/apiStore'; // Import the API store
 
 const activeTab = ref('notLoanly'); // Set "NotLoanly" as the default active tab
 
-const notifications = ref([
-  { date: '2024.10.30', message: '오*민님, 쇼핑 부분에서 계획보다 10% 더 사용했습니다.' },
-  { date: '2024.10.25', message: '오*민님, 쇼핑 부분에서 100% 사용했습니다. 조금만 줄이면 목표가 더 가까워집니다!' },
-  { date: '2024.10.18', message: '오*민님, 쇼핑 부분에서 80% 사용했습니다. 한 발짝만 더 절약해볼까요?' },
-]);
+const apiStore = useApiStore(); // Access the API store
+
+// Use computed property to get notifications from the store
+const notifications = computed(() => apiStore.notifications);
+
+// Function to format the date
+function formatDate(dateString) {
+  const options = {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  };
+  return new Date(dateString).toLocaleString('ko-KR', options);
+}
+
+// Fetch notifications when the component is mounted
+onMounted(async () => {
+  const userId = 1; // Replace with actual user ID
+  try {
+    await apiStore.fetchNotifications(userId);
+  } catch (error) {
+    console.error('Error fetching notifications:', error);
+  }
+});
 </script>
 
 <style scoped>
 .main-container {
-  width: 393px;
-  height: 928px;
+  max-width: 430px; /* 모바일 화면 기준 최대 너비 */
+  width: 100%; /* 가로 길이를 화면 너비에 맞춤 */
+  height: 100vh; /* 뷰포트 높이에 맞춤 */
+  overflow-y: auto; /* 화면이 넘칠 경우 세로 스크롤 활성화 */
   margin: 0 auto;
   text-align: center;
-}
-
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px;
-  background-color: #fff;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.back-button {
-  background: none;
-  border: none;
-  font-size: 20px;
-  cursor: pointer;
-}
-
-.title {
-  flex-grow: 1;
-  font-size: 18px;
-  font-weight: bold;
-  margin-left: 40px;
-}
-
-.icons {
-  display: flex;
-  gap: 10px;
-}
-
-.icon {
-  cursor: pointer;
+  background-color: #ffffff; /* 배경색 추가 */
 }
 
 .tabs {
@@ -84,15 +77,18 @@ const notifications = ref([
   text-align: center;
   border: none;
   background: none;
-  cursor: default; /* Make other tabs unclickable */
+  cursor: default; /* 비활성 탭에 클릭 방지 */
 }
 
 .tab.active {
-  border-bottom: 2px solid #fbc02d; /* Active tab underline */
+  border-bottom: 2px solid #fbc02d; /* 활성 탭 강조 */
 }
 
 .content {
   padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px; /* 알림 간격 설정 */
 }
 
 .notification {
@@ -109,6 +105,7 @@ const notifications = ref([
 .notification-logo {
   width: 40px;
   height: 40px;
+  border-radius: 50%; /* 이미지 둥글게 */
 }
 
 .notification-date {
@@ -121,7 +118,7 @@ const notifications = ref([
   border-radius: 8px;
   text-align: left;
   margin-top: 5px;
-  padding: 20px;
+  padding: 15px; /* 내부 여백 줄임 */
 }
 
 .notification-text p {
@@ -135,5 +132,12 @@ const notifications = ref([
 
 .bold-text {
   font-weight: bold;
+}
+
+/* 모바일 화면에 맞게 최대 높이 설정 */
+@media (max-height: 812px) {
+  .main-container {
+    height: 100%;
+  }
 }
 </style>

@@ -3,32 +3,34 @@
 import { defineStore } from 'pinia';
 
 export const useApiStore = defineStore('api', {
-  state: () => ({
-    categories: [],
-    repaymentPlans: [],
-    repaymentStatus: {},
-    repaymentChart: [],
-    consumptionAnalysis: {},
-    notifications: [],
-    message: '',
-    totalAmount: 5000000, // 총 대출 금액
-    paidAmount: 0, // 상환한 총 금액
-    remainingAmount: 0, // 남은 상환 금액
-    completedPercentage: 0, // 상환 비율
-    summary: [], // 월별 소비 요약 데이터 추가
-  }),
-  actions: {
-    // 대출 신청
-    async applyForLoan(userId, loanAmount, interestRate) {
-      const response = await fetch('/api/loan/apply', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: userId, loan_amount: loanAmount, interest_rate: interestRate }),
-      });
-      const data = await response.json();
-      this.message = data.message; // "상환 계획이 저장되었습니다."
-      return data; // 응답 반환
-    },
+    state: () => ({
+        categories: [],
+        repaymentPlans: [],
+        repaymentStatus: {},
+        repaymentChart: [],
+        consumptionAnalysis: {},
+        notifications: [],
+        showAlert: false, // 알림 표시 여부
+        alertMessage: '', // 알림 메시지
+        message: '',
+        totalAmount: 5000000, // 총 대출 금액
+        paidAmount: 0, // 상환한 총 금액
+        remainingAmount: 0, // 남은 상환 금액
+        completedPercentage: 0, // 상환 비율
+        summary: [], // 월별 소비 요약 데이터 추가
+    }),
+    actions: {
+        // 대출 신청
+        async applyForLoan(userId, loanAmount, interestRate) {
+            const response = await fetch('/api/loan/apply', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: userId, loan_amount: loanAmount, interest_rate: interestRate }),
+            });
+            const data = await response.json();
+            this.message = data.message; // "상환 계획이 저장되었습니다."
+            return data; // 응답 반환
+        },
 
     // 상환 플랜 제안
     async suggestRepaymentPlan() {
@@ -170,5 +172,73 @@ export const useApiStore = defineStore('api', {
       if (ratio < 0.8) return 'warning';
       return 'danger';
     },
+
+        // 사용자 알림 조회
+        async fetchNotifications(userId) {
+            try {
+                const response = await fetch(`/api/notification/notifications/${userId}`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' },
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error fetching notifications: ${response.status}`);
+                }
+
+                const data = await response.json();
+                if (data.status === 'success') {
+                    this.notifications = data.notifications; // 알림 목록 저장
+                }
+                return data;
+            } catch (error) {
+                console.error('Error fetching notifications:', error);
+                throw error; // 에러를 호출한 곳으로 전달
+            }
+        },
+
+        // SSE 연결 설정
+        connectSSE(userId) {
+            const streamUrl = `http://127.0.0.1:8000/api/notification/stream/${userId}`;
+            const eventSource = new EventSource(streamUrl);
+
+            // SSE 연결 성공
+            eventSource.onopen = () => {
+                console.log("SSE connection opened.");
+            };
+
+            // SSE 데이터 수신
+            eventSource.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data); // JSON 파싱
+                    console.log("New Event:", data);
+
+                    // 알림 메시지 처리
+                    if (data.message) {
+                        this.alertMessage = data.message; // 메시지 저장
+                        this.showAlert = true; // 알림 표시
+
+                        // 5초 후 알림 숨김
+                        setTimeout(() => {
+                            this.showAlert = false;
+                        }, 150000);
+
+                        // 알림 목록에 추가
+                        this.notifications.unshift({
+                            message: data.message,
+                            date: new Date().toISOString(), // 현재 시간 저장
+                        });
+                    }
+                } catch (e) {
+                    console.error("Error parsing event data:", e);
+                }
+            };
+
+            // SSE 오류 처리
+            eventSource.onerror = (error) => {
+                console.error("Error occurred in SSE stream:", error);
+                eventSource.close(); // 연결 닫기
+            };
+        },
+
   }
 });
