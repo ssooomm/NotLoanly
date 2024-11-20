@@ -38,7 +38,7 @@ class User(Base):
 
 
 class Categories(Base):
-    __tablename__ = 'Categories'
+    __tablename__ = 'categories'
     category_id = Column(Integer, primary_key=True, autoincrement=True)
     category_name = Column(String(255), nullable=False)
 
@@ -145,7 +145,7 @@ class Notification(Base):
     __tablename__ = 'notification'
 
     notification_id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey('Users.user_id', ondelete="CASCADE"), nullable=False)
+    user_id = Column(Integer, ForeignKey('users.user_id', ondelete="CASCADE"), nullable=False)
     message = Column(Text, nullable=False)
     sent_at = Column(TIMESTAMP, server_default=func.current_timestamp())
 

@@ -79,7 +79,10 @@ def generate_prompt_with_loan_details(user_expenses, loan_amount, interest_rate,
     plans_and_hashtags = {
         "쇼핑 절약 플랜": ["#있는거쓰자", "#같은거입어", "#ootd:스티브잡스", "#옷장을열어봐"],
         "식비 절약 플랜": ["#냉장고파먹기", "#배달금지", "#백종원레시피"],
-        "문화생활 절약 플랜": ["#산책가자", "#친구OTT같이보자", "#집에서노래나듣자"]
+        "문화생활 절약 플랜": ["#산책가자", "#친구OTT같이보자", "#집에서노래나듣자"],
+        "술/유흥 절약 플랜": ["#혼자 놀자", "#건강을 생각해", "#인생에 해롭다"],
+        "교통비 절약 플랜": ["#걸어다니자", "#대중교통을 이용하자", "#내가 바로 환경지킴이"],
+        "저축/투자 조정 플랜": ["#상환 먼저 하자", "#투자는 나중에", "#이자 줄이기"]
     }
 
     # 프롬프트 생성
@@ -100,7 +103,7 @@ def generate_prompt_with_loan_details(user_expenses, loan_amount, interest_rate,
 1. 각 플랜의 `details`에서 `reduced_amount`의 합계는 반드시 `total_amount`인 {monthly_payment:,}원이 되어야 합니다.
 2. `category_id = 3`는 각 플랜에서 `total_amount`의 최소 40% 이상을 차지해야 합니다.
 3. 남은 금액은 다른 카테고리에서 `original_amount`를 초과하지 않는 선에서 균등 분배하세요.
-4. 모든 `saving_percentage` 값은 50%를 초과하지 않도록 제한하세요.
+4. 모든 `saving_percentage` 값은 90%를 초과하지 않도록 제한하세요.
 5. 가능한 잔여 금액(합계가 정확히 맞지 않는 경우)은 마지막 항목에서 조정하여 합계를 정확히 맞추세요.
 6. details에는 요소가 3개에서 4개로 구성되어야한다.
 
@@ -113,8 +116,8 @@ def generate_prompt_with_loan_details(user_expenses, loan_amount, interest_rate,
         "total_amount": {monthly_payment},
         "duration": {duration},
         "details": [
-            {{"category_id": 3, "reduced_amount": 400000, "saving_percentage": 40}},
-            {{"category_id": 4, "reduced_amount": 115000, "saving_percentage": 20}}
+            {{"category_id": 3,"original_amount": 1000000,"reduced_amount": 400000, "saving_percentage": 40}},
+            {{"category_id": 4,"original_amount": 1000000, "reduced_amount": 115000, "saving_percentage": 20}}
         ],
         "hashtags": ["#있는거쓰자", "#같은거입어", "#ootd:스티브잡스"]
     }}
