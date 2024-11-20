@@ -16,7 +16,7 @@ router = APIRouter(
 async def save_plan(
         plan: repayment_schema.RepaymentPlanRequest,
         db: Session = Depends(get_db)
-) -> repayment_schema.ResponseModel:
+):
     try:
         message = repayment_crud.save_repayment_plan(
             db, plan
