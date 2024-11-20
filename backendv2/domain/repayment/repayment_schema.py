@@ -15,11 +15,17 @@ class ExpenseData(BaseModel):
     is_hard_to_reduce: bool
 
 
+class Plan_Details(BaseModel):
+    category_id: int
+    reduced_amount: int
+    original_amount: int
+    saving_percentage: float
+
 class Plan(BaseModel):
     plan_name: str
     total_amount: float
     duration: int
-    details: Dict[str, Any]
+    details: List[Plan_Details]
     hashtags: List[str]
 
 
@@ -44,4 +50,5 @@ class RepaymentPlan(BaseModel):
     duration: int
     details: Dict[str,Any]
     hashtags: str
+
 
