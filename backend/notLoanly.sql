@@ -13,6 +13,7 @@ CREATE TABLE Users (
     available_funds INTEGER GENERATED ALWAYS AS (monthly_income - monthly_expense) STORED, -- 사용 가능 자금
     loan_amount INTEGER,               -- 대출 금액
     interest_rate REAL,                -- 대출 이자율
+    loan_date TIMESTAMP,
     repayment_period INTEGER,          -- 상환 기간 (개월)
     monthly_repayment_goal INTEGER,    -- 월별 상환 목표
     selected_plan_group_id INTEGER DEFAULT NULL,-- 선택된 플랜 그룹 ID (NULL 가능)
@@ -99,31 +100,12 @@ INSERT INTO Categories (category_name) VALUES
 ('기타');
 
 -- Users 테이블에 데이터 삽입
-INSERT INTO Users (name, monthly_income, monthly_expense, loan_amount, interest_rate, repayment_period, monthly_repayment_goal, selected_plan_group_id) 
+INSERT INTO Users (name, monthly_income, monthly_expense, loan_amount, interest_rate, loan_date, repayment_period, monthly_repayment_goal, selected_plan_group_id) 
 VALUES 
-('최민호', 2500000, 1500000, 3000000, 6.0, null, null, null),
-('김민주', 2000000, 1500000, 2000000, 7.0, null, null, NULL);
+('최민호', 2500000, 1500000, 3000000, 6.0,'2024-10-09', 3, 1015000, 3),
+('김민주', 2000000, 1500000, 2000000, 7.0,'2024-09-11', 6, 345000, 6);
 
--- ****************************** 8월 ****************************** 
--- Transactions 테이블에 데이터 삽입 (김민주 - 유저 2) -- 줄이기전 
-INSERT INTO Transactions (user_id, category_id, transaction_date, amount, description, payment_method) VALUES
-(2, 1, '2024-08-01', 2000000, '급여 입금', 'Bank Transfer'),
-(2, 3, '2024-08-01', 500000, '저축/투자', 'Bank Transfer'),
-(2, 4, '2024-08-02', 600000, '월세', 'Bank Transfer'),
-(2, 5, '2024-08-03', 200000, '식료품 구매', 'Card'),
-(2, 6, '2024-08-04', 30000, '대중교통 충전', 'Card'), 
-(2, 7, '2024-08-05', 20000, '생활용품 구매', 'Cash'),
-(2, 8, '2024-08-06', 50000, '영화 관람', 'Card'), 
-(2, 9, '2024-08-07', 60000, '병원비', 'Card'), 
-(2, 10, '2024-08-08', 80000, '부모님 선물', 'Cash'), 
-(2, 5, '2024-08-10', 50000, '외식', 'Card'), 
-(2, 4, '2024-08-12', 35000, '휴대폰 요금', 'Bank Transfer'), 
-(2, 2, '2024-08-15', 120000, '보험료 납부', 'Bank Transfer'), 
-(2, 6, '2024-08-18', 40000, '택시 이용', 'Cash'),
-(2, 8, '2024-08-20', 25000, '전시회 관람', 'Card'), 
-(2, 7, '2024-08-22', 130000, '의류 구매', 'Card'), 
-(2, 9, '2024-08-25', 45000, '정기 검진 비용', 'Card'),
-(2, 10, '2024-08-28', 15000, '기부', 'Cash');
+
 
 
 -- ****************************** 9월 ****************************** 
@@ -146,25 +128,6 @@ INSERT INTO Transactions (user_id, category_id, transaction_date, amount, descri
 (1, 7, '2024-09-22', 150000, '의류 구매', 'Card'), -- 증가
 (1, 9, '2024-09-25', 40000, '약 구매', 'Card'), -- 증가
 (1, 10, '2024-09-28', 25000, '기부', 'Cash'); -- 증가
-
--- ^까지 완성
--- Transactions 테이블에 데이터 삽입 (김민주 - 유저 2 #9월) 이달을 줄여야함 
-INSERT INTO Transactions (user_id, category_id, transaction_date, amount, description, payment_method) VALUES
-(2, 1, '2024-09-01', 2000000, '급여 입금', 'Bank Transfer'),
-(2, 3, '2024-09-01', 500000, '저축/투자', 'Bank Transfer'),
-(2, 4, '2024-09-02', 600000, '월세', 'Bank Transfer'),
-(2, 5, '2024-09-03', 40000, '식료품 구매', 'Card'),
-(2, 6, '2024-09-04', 30000, '대중교통 충전', 'Card'),
-(2, 7, '2024-09-05', 20000, '생활용품 구매', 'Cash'),
-(2, 1, '2024-09-11', 2000000, 'KB비상금 대출', 'Bank Transfer'),
-(2, 2, '2024-09-12', 2000000, '고양이 병원비', 'Bank Transfer'),
-(2, 8, '2024-09-15', 25000, '영화 티켓 구매', 'Card'),
-(2, 4, '2024-09-20', 35000, '휴대폰 요금', 'Bank Transfer'),
-(2, 6, '2024-09-22', 20000, '택시 이용', 'Cash'),
-(2, 7, '2024-09-25', 80000, '의류 구매', 'Card'),
-(2, 9, '2024-09-29', 45000, '정기 검진 비용', 'Card'),
-(2, 10, '2024-09-30', 15000, '기부', 'Cash');
-
 -- ****************************** 10월 ****************************** 
 -- Transactions 테이블에 데이터 삽입 (최민호 - 유저 1 #10월) 이때부터 줄여야함 250 150 100 300 40 40 40 30 150
 INSERT INTO Transactions (user_id, category_id, transaction_date, amount, description, payment_method) VALUES
@@ -190,24 +153,6 @@ INSERT INTO Transactions (user_id, category_id, transaction_date, amount, descri
 (1, 9, '2024-10-28', 200000, '치과 진료비', 'Card'), 
 (1, 10, '2024-10-30', 30000, '기부', 'Cash'); 
 
-
--- Transactions 테이블에 데이터 삽입 (김민주 - 유저 2 #10월 본격적 줄이기)
-INSERT INTO Transactions (user_id, category_id, transaction_date, amount, description, payment_method) VALUES
-(2, 1, '2024-10-01', 2000000, '급여 입금', 'Bank Transfer'),
-(2, 3, '2024-10-01', 500000, '저축/투자', 'Bank Transfer'),
-(2, 4, '2024-10-02', 600000, '월세', 'Bank Transfer'),
-(2, 5, '2024-10-03', 100000, '식료품 구매', 'Card'),
-(2, 6, '2024-10-04', 50000, '대중교통 충전', 'Card'),
-(2, 7, '2024-10-05', 40000, '생활용품 구매', 'Cash'),
-(2, 8, '2024-10-06', 25000, '영화 티켓 구매', 'Card'),
-(2, 9, '2024-10-10', 80000, '치과 진료비', 'Card'),
-(2, 5, '2024-10-12', 30000, '외식', 'Card'),
-(2, 6, '2024-10-15', 15000, '택시 이용', 'Cash'),
-(2, 4, '2024-10-18', 35000, '휴대폰 요금', 'Bank Transfer'),
-(2, 10, '2024-10-28', 25000, '기부', 'Cash'),
-(2, 7, '2024-10-29', 300000, '가전제품 구매', 'Card'),
-(2, 8, '2024-10-30', 200000, '레저 활동', 'Cash');
-
 -- Transactions 테이블에 데이터 삽입 (유저 1 - 최민호)
 INSERT INTO Transactions (user_id, category_id, transaction_date, amount, description, payment_method) VALUES
 (1, 1, '2024-11-01', 2500000, '급여 입금', 'Bank Transfer'),
@@ -221,18 +166,82 @@ INSERT INTO Transactions (user_id, category_id, transaction_date, amount, descri
 (1, 4, '2024-11-15', 50000, '휴대폰 요금', 'Bank Transfer'),
 (1, 8, '2024-11-20', 30000, '전시회 관람', 'Card');
 
+
+
+-- ****************************** 8월 ****************************** 
+-- Transactions 테이블에 데이터 삽입 (김민주 - 유저 2) -- 줄이기전 
+INSERT INTO Transactions (user_id, category_id, transaction_date, amount, description, payment_method) VALUES
+(2, 1, '2024-08-01', 2000000, '급여 입금', 'Bank Transfer'),
+(2, 3, '2024-08-01', 500000, '저축/투자', 'Bank Transfer'),
+(2, 4, '2024-08-02', 300000, '월세', 'Bank Transfer'), -- -300000
+(2, 5, '2024-08-03', 300000, '식료품 구매', 'Card'),
+(2, 6, '2024-08-04', 30000, '대중교통 충전', 'Card'), 
+(2, 7, '2024-08-04', 120000, '의류 구매', 'Card'),
+(2, 7, '2024-08-05', 20000, '생활용품 구매', 'Cash'),
+(2, 8, '2024-08-06', 50000, '영화 관람', 'Card'), 
+(2, 6, '2024-08-07', 40000, '택시 이용', 'Cash'),
+(2, 9, '2024-08-07', 60000, '병원비', 'Card'), 
+(2, 10, '2024-08-08', 80000, '부모님 선물', 'Cash'), 
+(2, 5, '2024-08-10', 80000, '배달음식', 'Card'), 
+(2, 5, '2024-08-10', 50000, '외식', 'Card'), 
+(2, 4, '2024-08-12', 35000, '휴대폰 요금', 'Bank Transfer'), 
+(2, 6, '2024-08-18', 40000, '택시 이용', 'Cash'),
+(2, 8, '2024-08-20', 25000, '전시회 관람', 'Card'), 
+(2, 7, '2024-08-22', 130000, '의류 구매', 'Card'),
+(2, 7, '2024-08-21', 80000, '의류 구매', 'Card'),
+(2, 9, '2024-08-25', 50000, '정기 검진 비용', 'Card'),
+(2, 10, '2024-08-28', 10000, '기부', 'Cash');
+
+-- Transactions 테이블에 데이터 삽입 (김민주 - 유저 2 #9월) 이달을 줄여야함 
+INSERT INTO Transactions (user_id, category_id, transaction_date, amount, description, payment_method) VALUES
+(2, 1, '2024-09-01', 2000000, '급여 입금', 'Bank Transfer'),
+(2, 3, '2024-09-01', 500000, '저축/투자', 'Bank Transfer'),
+(2, 4, '2024-09-02', 300000, '월세', 'Bank Transfer'), -- 300000
+(2, 5, '2024-09-03', 300000, '식료품 구매', 'Card'),
+(2, 6, '2024-09-04', 30000, '대중교통 충전', 'Card'),
+(2, 7, '2024-09-05', 20000, '생활용품 구매', 'Cash'),
+(2, 1, '2024-09-11', 2000000, 'KB비상금 대출', 'Bank Transfer'),
+(2, 2, '2024-09-12', 2000000, '고양이 병원비', 'Bank Transfer'),
+(2, 5, '2024-09-14', 80000, '배달음식', 'Card'),
+(2, 8, '2024-09-15', 25000, '영화 티켓 구매', 'Card'),
+(2, 4, '2024-09-20', 35000, '휴대폰 요금', 'Bank Transfer'),
+(2, 6, '2024-09-22', 20000, '택시 이용', 'Cash'),
+(2, 7, '2024-09-25', 130000, '의류 구매', 'Card'),
+(2, 9, '2024-09-29', 45000, '정기 검진 비용', 'Card'),
+(2, 10, '2024-09-30', 15000, '기부', 'Cash');
+
+INSERT INTO Transactions (user_id, category_id, transaction_date, amount, description, payment_method) VALUES 
+(2, 1, '2024-10-01', 2000000, '급여 입금', 'Bank Transfer'),
+(2, 3, '2024-10-01', 400000, '저축/투자', 'Bank Transfer'),
+(2, 4, '2024-10-02', 300000, '월세', 'Bank Transfer'),
+(2, 5, '2024-10-03', 250000, '식료품 구매', 'Card'),
+(2, 6, '2024-10-04', 50000, '대중교통 충전', 'Card'),
+(2, 7, '2024-10-04', 120000, '의류 구매', 'Card'),
+(2, 7, '2024-10-05', 20000, '생활용품 구매', 'Cash'),
+(2, 8, '2024-10-06', 50000, '영화 관람', 'Card'),
+(2, 9, '2024-10-07', 50000, '병원비', 'Card'),
+(2, 5, '2024-10-17', 40000, '배달음식', 'Card'),
+(2, 10, '2024-10-08', 80000, '부모님 선물', 'Cash'),
+(2, 5, '2024-10-10', 40000, '외식', 'Card'),
+(2, 7, '2024-10-11', 45000, '의류 구매', 'Card'),
+(2, 4, '2024-10-12', 35000, '휴대폰 요금', 'Bank Transfer'),
+(2, 8, '2024-10-20', 25000, '전시회 관람', 'Card'),
+(2, 7, '2024-10-22', 80000, '의류 구매', 'Card'),
+(2, 9, '2024-10-25', 60000, '정기 검진 비용', 'Card'),
+(2, 10, '2024-10-28', 10000, '기부', 'Cash');
+
 -- Transactions 테이블에 데이터 삽입 (유저 2 - 김민주)
 INSERT INTO Transactions (user_id, category_id, transaction_date, amount, description, payment_method) VALUES
 (2, 1, '2024-11-01', 2000000, '급여 입금', 'Bank Transfer'),
-(2, 3, '2024-11-01', 500000, '저축/투자', 'Bank Transfer'),
-(2, 4, '2024-11-02', 600000, '월세', 'Bank Transfer'),
+(2, 3, '2024-11-01', 400000, '저축/투자', 'Bank Transfer'),
+(2, 4, '2024-11-02', 300000, '월세', 'Bank Transfer'),
 (2, 5, '2024-11-03', 40000, '식료품 구매', 'Card'),
 (2, 6, '2024-11-04', 30000, '대중교통 충전', 'Card'),
 (2, 7, '2024-11-05', 20000, '생활용품 구매', 'Cash'),
 (2, 9, '2024-11-07', 50000, '병원비 (정기 검진)', 'Card'),
 (2, 8, '2024-11-09', 25000, '공연 관람', 'Card'),
 (2, 5, '2024-11-12', 30000, '외식', 'Card'),
-(2, 10, '2024-11-15', 80000, '부모님 선물', 'Cash'),
+(2, 10, '2024-11-15',80000, '부모님 선물', 'Cash'),
 (2, 4, '2024-11-18', 35000, '휴대폰 요금', 'Bank Transfer'),
 (2, 6, '2024-11-20', 15000, '택시 이용', 'Cash');
 
@@ -279,18 +288,64 @@ INSERT INTO RepaymentPlans (user_id, plan_name, total_amount, duration, details,
  '#산책가자, #친구야 OTT 같이보자, #집에서 노래나 듣자'
 );
 
+INSERT INTO RepaymentPlans (user_id, plan_name, total_amount, duration, details, hashtags) VALUES
+(2, 
+ '쇼핑 절약 플랜', 
+ 345000, 
+ 6, 
+ '[
+    {\"category_id\": 3, \"original_amount\": 500000, \"reduced_amount\": 100000, \"saving_percentage\": 20.00}, 
+    {\"category_id\": 5, \"original_amount\": 430000, \"reduced_amount\": 80000, \"saving_percentage\": 18.60}, 
+    {\"category_id\": 6, \"original_amount\": 110000, \"reduced_amount\": 20000, \"saving_percentage\": 18.18}, 
+    {\"category_id\": 7, \"original_amount\": 350000, \"reduced_amount\": 135000, \"saving_percentage\": 38.57}, 
+    {\"category_id\": 9, \"original_amount\": 110000, \"reduced_amount\": 10000, \"saving_percentage\": 9.09}
+ ]',
+ '#같은 거 입어, #ootd: 스티브 잡스, #옷장을 열어봐'
+),
+(2, 
+ '식비 절약 플랜', 
+ 345000, 
+ 6, 
+ '[
+    {\"category_id\": 3, \"original_amount\": 500000, \"reduced_amount\": 0, \"saving_percentage\": 0.00}, 
+    {\"category_id\": 5, \"original_amount\": 430000, \"reduced_amount\": 180000, \"saving_percentage\": 41.86}, 
+    {\"category_id\": 6, \"original_amount\": 110000, \"reduced_amount\": 20000, \"saving_percentage\": 18.18}, 
+    {\"category_id\": 7, \"original_amount\": 350000, \"reduced_amount\": 135000, \"saving_percentage\": 38.57}, 
+    {\"category_id\": 9, \"original_amount\": 110000, \"reduced_amount\": 10000, \"saving_percentage\": 9.09}
+ ]',
+ '#냉장고 파먹기, #배달 금지!, #백종원 레시피'
+),
+(2, 
+ '교통비 절약 플랜', 
+ 345000, 
+ 6, 
+ '[
+    {\"category_id\": 3, \"original_amount\": 500000, \"reduced_amount\": 100000, \"saving_percentage\": 20.00}, 
+    {\"category_id\": 5, \"original_amount\": 430000, \"reduced_amount\": 100000, \"saving_percentage\": 23.26}, 
+    {\"category_id\": 6, \"original_amount\": 110000, \"reduced_amount\": 60000, \"saving_percentage\": 54.55}, 
+    {\"category_id\": 7, \"original_amount\": 350000, \"reduced_amount\": 85000, \"saving_percentage\": 24.29}, 
+    {\"category_id\": 9, \"original_amount\": 110000, \"reduced_amount\": 0, \"saving_percentage\": 0.00}
+ ]',
+ '#걸어다니자, #대중교통을 이용하자, #내가 바로 환경 지킴이'
+);
+
 INSERT INTO RepaymentHistory (user_id, repayment_date, repayment_amount, remaining_balance, description)
 VALUES
 -- 사용자 1 상환기록
-(1, '2024-11-30', 50000, 2900000, '첫 번째 상환'),
+(1, '2024-11-09', 1015000, 2000000, '첫 번째 상환'),
 -- 사용자 2 상환기록
-(2, '2024-10-09', 50000, 2950000, '첫 번째 상환'),
-(2, '2024-11-09', 30000, 1970000, '두 번째 상환');
+(2, '2024-10-11', 345000, 1655000, '첫 번째 상환'),
+(2, '2024-11-11', 345000, 1340000, '두 번째 상환');
 
 INSERT INTO Notification (user_id, message)
 VALUES
 (1, '대출 상환일이 다가오고 있습니다. 2024-11-09까지 상환을 완료하세요.'),
-(2, '대출 상환이 완료되었습니다. 잔액은 1,970,000원입니다.');
+(2, '대출 상환일이 다가오고 있습니다. 2024-10-09까지 상환을 완료하세요.'),
+(2, '대출 상환일이 다가오고 있습니다. 2024-11-09까지 상환을 완료하세요.'),
+
+(1, '11월 대출 상환이 완료되었습니다. 잔액은 2,000,000원입니다.'),
+(2, '10월 대출 상환이 완료되었습니다. 잔액은 1,655,000원입니다.'),
+(2, '11월 대출 상환이 완료되었습니다. 잔액은 1,340,000원입니다.');
 
 
 -- UserExpenses 계산 및 데이터 삽입
@@ -320,7 +375,6 @@ BEGIN
     WHERE user_id = NEW.user_id
       AND category_id = NEW.category_id
       AND month = MONTH(NEW.transaction_date);
-
     -- 기존 데이터가 있으면 업데이트, 없으면 새로 삽입
     IF existing_expense_id IS NOT NULL THEN
         UPDATE UserExpenses

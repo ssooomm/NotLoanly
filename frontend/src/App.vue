@@ -95,8 +95,14 @@ const footerHiddenRoutes = [
   "/loan-info-notice",
 ]; // 푸터를 숨길 라우트 경로 추가
 
-// 현재 라우트가 footerHiddenRoutes 배열에 있는지 확인
-const hideFooter = computed(() => footerHiddenRoutes.includes(route.path));
+const hideFooter = computed(() => {
+  // 현재 라우트가 repayment-plan-suggestion에 대한 동적 패턴과 일치하는지 확인
+  const isRepaymentPlanRoute = /^\/repayment-plan-suggestion\/\d+$/.test(
+    route.path
+  );
+
+  return footerHiddenRoutes.includes(route.path) || isRepaymentPlanRoute;
+});
 </script>
 
 <style scoped>
