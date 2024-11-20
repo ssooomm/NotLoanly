@@ -9,7 +9,7 @@ def apply_loan(
         req: LoanApplicationRequest
 ):
     # 사용자 찾기
-    user = get_user(req.user_id)
+    user = get_user(db, req.user_id)
     if not user:
         raise HTTPException(
             status_code=404,
