@@ -116,8 +116,8 @@ def generate_prompt_with_loan_details(user_expenses, loan_amount, interest_rate,
         "total_amount": {monthly_payment},
         "duration": {duration},
         "details": [
-            {{"category_id": 3, "reduced_amount": 400000, "saving_percentage": 40}},
-            {{"category_id": 4, "reduced_amount": 115000, "saving_percentage": 20}}
+            {{"category_id": 3,"original_amount": 1000000,"reduced_amount": 400000, "saving_percentage": 40}},
+            {{"category_id": 4,"original_amount": 1000000, "reduced_amount": 115000, "saving_percentage": 20}}
         ],
         "hashtags": ["#있는거쓰자", "#같은거입어", "#ootd:스티브잡스"]
     }}
