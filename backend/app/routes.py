@@ -6,6 +6,7 @@ from .models import User, Categories, UserExpenses, RepaymentPlans, Transactions
 import json
 from .services import get_montyly_expense, get_repayment_status, get_dashboard_summary, get_consumption_percentage, get_consumption_analysis
 from .services import save_repayment_plan, get_repayment_plans, select_repayment_plan
+from .services import create_transaction_service
 from . import db
 from . import socketio
 from .utils import json_response
@@ -115,17 +116,36 @@ def save_plan():
         return json_response({"status": "error", "message": str(e)}, 500)
 
 #2-3. 상환 플랜 리스트 조회
-@main_routes.route("/api/repayment/plans", methods=["GET"])
-def repayment_plans():
+@main_routes.route('/api/repayment/plans', methods=['GET'])
+def get_repayment_plans():
     try:
-        user_id = request.args.get("user_id", type=int)
+        # 사용자 ID를 쿼리 파라미터에서 가져오기
+        user_id = request.args.get('user_id', type=int)
         if not user_id:
-            return json_response({"status": "error", "message": "User ID is required"}, 400)
+            return jsonify({"status": "error", "message": "User ID is required"}), 400
 
-        plans = get_repayment_plans(user_id)
-        return json_response({"status": "success", "plans": plans}, 200)
+        # 사용자에 대한 모든 상환 플랜 조회
+        plans = db.session.query(RepaymentPlans).filter_by(user_id=user_id).all()
+
+        if not plans:
+            return jsonify({"status": "success", "message": "No repayment plans found for this user."}), 200
+
+        # 플랜 데이터 구성
+        plans_data = []
+        for plan in plans:
+            plans_data.append({
+                "plan_id": plan.plan_id,
+                "plan_name": plan.plan_name,
+                "total_amount": plan.total_amount,
+                "duration": plan.duration,
+                "details": plan.details,  # JSON 문자열로 저장된 경우, 필요시 json.loads()로 변환 가능
+                "hashtags": plan.hashtags
+            })
+
+        return jsonify({"status": "success", "plans": plans_data}), 200
+
     except Exception as e:
-        return json_response({"status": "error", "message": str(e)}, 500)
+        return jsonify({"status": "error", "message": str(e)}), 500
     
 
 # 2-4. 상환 플랜 선택
@@ -159,12 +179,13 @@ def analyze_and_insert_plans():
         loan_amount = data.get("loan_amount")
         interest_rate = data.get("interest_rate", 6.0)  # 기본값 6%
         duration = data.get("duration", 6)  # 기본값 6개월
+        month = data.get("month", 10)  # 요청 데이터에서 월을 받음, 기본값 10월
 
         if not user_id or not loan_amount:
             return jsonify({"status": "error", "message": "필수 필드가 누락되었습니다"}), 400
 
         # 사용자 소비 데이터 가져오기
-        user_expenses = UserExpenses.query.filter_by(user_id=user_id, month=10).all()  # 10월 데이터
+        user_expenses = UserExpenses.query.filter_by(user_id=user_id, month=month).all()  # 요청한 월의 데이터
         if not user_expenses:
             return jsonify({"status": "error", "message": "사용자의 지출 데이터를 찾을 수 없습니다"}), 404
 
@@ -230,7 +251,7 @@ def dashboard_summary():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
-#3-2. 상환 현황 조회
+#3-2. ��환 현황 조회
 @main_routes.route('/api/dashboard/repayment-status', methods=['GET'])
 def repayment_status():
     try:
@@ -269,6 +290,9 @@ def consumption_analysis():
 # 4. 거래내역 추가
 @main_routes.route('/api/transactions', methods=['POST'])
 def create_transaction():
+    """
+    거래내역 생성 API
+    """
     data = request.json
 
     # 필수 필드 검증
@@ -280,31 +304,22 @@ def create_transaction():
     payment_method = data.get('payment_method')
 
     if not user_id or not category_id or not transaction_date or not amount:
-        return jsonify({"error": "Missing required fields"}), 400
+        return json_response({"error": "Missing required fields"}), 400
 
-    try:
-        # 새로운 거래 추가
-        transaction = Transactions(
-            user_id=user_id,
-            category_id=category_id,
-            transaction_date=transaction_date,
-            amount=amount,
-            description=description,
-            payment_method=payment_method
-        )
-        db.session.add(transaction)
-        db.session.commit()
+    # 서비스 호출
+    result, status_code = create_transaction_service(
+        user_id=user_id,
+        category_id=category_id,
+        transaction_date=transaction_date,
+        amount=amount,
+        description=description,
+        payment_method=payment_method
+    )
 
-        return jsonify({
-            "message": "Transaction created successfully"
-        }), 201
-
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({"status": "error", "message": str(e)}), 500
+    return jsonify(result), status_code
 
 
-# API: 사용자 알림 가져오기
+# 5-1. API: 사용자 알림 가져오기
 @main_routes.route('/api/notifications/<int:user_id>', methods=['GET'])
 def get_notifications(user_id):
     notifications = Notification.query.filter_by(user_id=user_id).order_by(Notification.sent_at.desc()).all()
@@ -319,3 +334,4 @@ def get_notifications(user_id):
         "notifications": notification_list
     }), 200
 
+# 5-2. 새 알림 생성

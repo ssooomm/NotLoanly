@@ -406,3 +406,31 @@ def get_consumption_analysis(user_id):
         "totalAmount": sum(november_expenses_dict.values()),
         "categories": categories_data
     }
+
+# 4. 거래내역 추가
+def create_transaction_service(user_id, category_id, transaction_date, amount, description, payment_method):
+    """
+    거래내역을 생성하는 서비스 함수
+    """
+    try:
+        # 새로운 거래 추가
+        transaction = Transactions(
+            user_id=user_id,
+            category_id=category_id,
+            transaction_date=transaction_date,
+            amount=amount,
+            description=description,
+            payment_method=payment_method
+        )
+        db.session.add(transaction)
+        db.session.commit()
+
+        return {"status": "success", "message": "Transaction created successfully"}, 201
+
+    except Exception as e:
+        db.session.rollback()
+        return {"status": "error", "message": str(e)}, 500
+    
+
+    # 5-2. 새 알림 생성
+    
