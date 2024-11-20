@@ -106,7 +106,7 @@ class RepaymentPlans(Base):
     duration = Column(Integer, nullable=False)
     details = Column(JSON, nullable=False)
     hashtags = Column(Text, nullable=False)  # hashtags 필드 추가
-    created_at = Column(TIMESTAMP, nullable=False)
+    created_at = Column(TIMESTAMP, nullable=False, server_default=func.now())
 
     def to_dict(self):
         return {
