@@ -390,12 +390,9 @@ def get_consumption_analysis(user_id):
         # 절약 비율 계산
         saving_percentage = (november_amount / suggested_reduced_amount) * 100 if reduced_amount else 0
 
-        # 카테고리 이름 가져오기
-        category = db.session.query(Categories).filter(Categories.category_id == category_id).first()
-        category_name = category.category_name if category else "Unknown"
+        
 
         categories_data.append({
-            "category": category_name,
             "amount": november_amount,
             "suggestedReducedAmount": suggested_reduced_amount,
             "savingPercentage": round(saving_percentage, 2)
