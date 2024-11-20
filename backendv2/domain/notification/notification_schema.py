@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from datetime import datetime
 from typing import List, Optional
 
 class TransactionCreate(BaseModel):
@@ -15,7 +16,7 @@ class TransactionResponse(BaseModel):
 class NotificationResponse(BaseModel):
     notification_id: int
     message: str
-    sent_at: str
+    sent_at: datetime  
 
 class NotificationsListResponse(BaseModel):
     status: str
