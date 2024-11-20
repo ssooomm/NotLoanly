@@ -57,17 +57,21 @@ export const useApiStore = defineStore('api', {
       return data; // 응답 반환
     },
 
-    // 줄이기 어려운 카테고리와 상환 기간 저장
-    async saveRepaymentPlan(userId, categories, repaymentPeriod) {
-      const response = await fetch('/api/repayment/save-plan', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, categories, repaymentPeriod }),
-      });
-      const data = await response.json();
-      this.message = data.message; // "상환 계획이 저장되었습니다."
-      return data; // 응답 반환
-    },
+        // 줄이기 어려운 카테고리와 상환 기간 저장
+        async saveRepaymentPlan(userId, categories, repaymentPeriod) {
+            const response = await fetch('/api/repayment/save-plan', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_id: userId, 
+                    categories, 
+                    repayment_period: repaymentPeriod 
+                }),
+            });
+            const data = await response.json();
+            this.message = data.message;
+            return data; // 응답 반환
+        },
 
     async fetchRepaymentStatus(userId) {
       try {
