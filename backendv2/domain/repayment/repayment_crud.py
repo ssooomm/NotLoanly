@@ -18,14 +18,14 @@ def save_repayment_plan(
 ):
     try:
         # 사용자 확인
-        user = get_user(db, plan.userId)
+        user = get_user(db, plan.user_id)
 
         # 상환 기간 업데이트
-        user.repayment_period = plan.repaymentPeriod
+        user.repayment_period = plan.repayment_period
 
         # 월별 상환 목표 계산 및 업데이트
-        if user.loan_amount and plan.repaymentPeriod:
-            user.monthly_repayment_goal = user.loan_amount // plan.repaymentPeriod
+        if user.loan_amount and plan.repayment_period:
+            user.monthly_repayment_goal = user.loan_amount // plan.repayment_period
         else:
             raise HTTPException(
                 status_code=400,
@@ -34,13 +34,13 @@ def save_repayment_plan(
 
         # 해당 user_id의 모든 UserExpenses의 is_hard_to_reduce를 먼저 False로 설정
         db.query(UserExpenses) \
-            .filter(UserExpenses.user_id == plan.userId) \
+            .filter(UserExpenses.user_id == plan.user_id) \
             .update({UserExpenses.is_hard_to_reduce: False})
 
         # 지정된 category_ids에 대해 is_hard_to_reduce를 True로 설정
         db.query(UserExpenses) \
             .filter(
-            UserExpenses.user_id == plan.userId,
+            UserExpenses.user_id == plan.user_id,
             UserExpenses.category_id.in_(plan.categories)
         ) \
             .update({UserExpenses.is_hard_to_reduce: True}, synchronize_session=False)

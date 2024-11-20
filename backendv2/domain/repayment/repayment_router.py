@@ -8,10 +8,11 @@ router = APIRouter(
     prefix="/api/repayment",
 )
 
-#2-1. - 사용 보류
+
+# 2-1. - 사용 보류
 
 # 2-2. 줄이기 어려운 카테고리와 상환 기간 저장
-@router.post("/repayment/save-plan", response_model=repayment_schema.ResponseModel)
+@router.post("/save-plan", response_model=repayment_schema.ResponseModel)
 async def save_plan(
         plan: repayment_schema.RepaymentPlanRequest,
         db: Session = Depends(get_db)
@@ -54,6 +55,7 @@ async def repayment_plans(
             status_code=500,
             detail=str(e)
         )
+
 
 # 2-3-1. 상환 플랜 상세 조회
 @router.get(
