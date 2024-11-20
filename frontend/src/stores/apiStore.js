@@ -62,10 +62,14 @@ export const useApiStore = defineStore('api', {
             const response = await fetch('/api/repayment/save-plan', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId, categories, repaymentPeriod }),
+                body: JSON.stringify({
+                    user_id: userId, 
+                    categories, 
+                    repayment_period: repaymentPeriod 
+                }),
             });
             const data = await response.json();
-            this.message = data.message; // "상환 계획이 저장되었습니다."
+            this.message = data.message;
             return data; // 응답 반환
         },
 

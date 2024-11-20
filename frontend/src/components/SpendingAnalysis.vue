@@ -17,7 +17,7 @@
       </div>
     </div>
 
-    <h3>20대 평균 소비 TOP3</h3>
+    <h3>20대 평균 소비</h3>
     <BarChart v-if="barChartData" :data="barChartData" />
   </div>
 </template>
@@ -79,7 +79,7 @@ const fetchConsumptionData = async () => {
     if (lastMonthData) {
       // 소득, 금융, 대출 상환을 제외한 실제 소비 카테고리만 필터링
       const spendingCategories = lastMonthData.categories.filter(cat => 
-        !["소득", "금융", "대출 상환"].includes(cat.category)
+        !["소득","대출 상환"].includes(cat.category)
       );
 
       totalSpending.value = spendingCategories.reduce((sum, cat) => sum + cat.totalAmount, 0);
@@ -91,6 +91,7 @@ const fetchConsumptionData = async () => {
           label: '소비 비율',
           data: spendingCategories.map(cat => cat.totalAmount),
           backgroundColor: [
+            "#66BB6A", // 금융
             '#FF6384', // 주거 및 통신
             '#36A2EB', // 식비
             '#FFCE56', // 교통

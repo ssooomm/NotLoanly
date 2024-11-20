@@ -8,24 +8,24 @@
       <div class="category-buttons">
         <button
           class="category-button"
+          :class="{ selected: selectedCategories.includes('금융') }"
+          @click="toggleCategory('금융')"
+        >
+        금융
+        </button>
+        <button
+          class="category-button"
+          :class="{ selected: selectedCategories.includes('주거 및 통신') }"
+          @click="toggleCategory('주거 및 통신')"
+        >
+        주거 및 통신
+        </button>
+        <button
+          class="category-button"
           :class="{ selected: selectedCategories.includes('식비') }"
           @click="toggleCategory('식비')"
         >
-          식비
-        </button>
-        <button
-          class="category-button"
-          :class="{ selected: selectedCategories.includes('카페/간식') }"
-          @click="toggleCategory('카페/간식')"
-        >
-          카페/간식
-        </button>
-        <button
-          class="category-button"
-          :class="{ selected: selectedCategories.includes('쇼핑') }"
-          @click="toggleCategory('쇼핑')"
-        >
-          쇼핑
+        식비
         </button>
         <button
           class="category-button"
@@ -36,17 +36,24 @@
         </button>
         <button
           class="category-button"
-          :class="{ selected: selectedCategories.includes('자동차') }"
-          @click="toggleCategory('자동차')"
+          :class="{ selected: selectedCategories.includes('생활') }"
+          @click="toggleCategory('생활')"
         >
-          자동차
+        생활
         </button>
         <button
           class="category-button"
-          :class="{ selected: selectedCategories.includes('주거/통신') }"
-          @click="toggleCategory('주거/통신')"
+          :class="{ selected: selectedCategories.includes('여가') }"
+          @click="toggleCategory('여가')"
         >
-          주거/통신
+        여가
+        </button>
+        <button
+          class="category-button"
+          :class="{ selected: selectedCategories.includes('건강') }"
+          @click="toggleCategory('건강')"
+        >
+        건강
         </button>
       </div>
     </div>
@@ -73,7 +80,7 @@
           :class="{ selected: selectedPeriod === '12개월' }"
           @click="selectPeriod('12개월')"
         >
-          12개월
+          9개월
         </button>
         <button
           class="period-button"
@@ -114,24 +121,16 @@ const apiStore = useApiStore(); // Initialize the store
 const selectedPeriod = ref(null);
 const customPeriod = ref("");
 
-const selectPeriod = (period) => {
-  selectedPeriod.value = period;
-  if (period !== "직접 입력") {
-    customPeriod.value = "";
-  }
+// Map categories to their respective IDs starting from 3
+const categoryMap = {
+  "금융": 3,
+  "주거 및 통신": 4,
+  "식비": 5,
+  "교통": 6,
+  "생활": 7,
+  "여가": 8,
+  "건강": 9
 };
-
-const doughnutChartData = ref({
-  labels: ["쇼핑/의류비", "식비", "여가/취미비"],
-  datasets: [
-    {
-      label: "소비 비율",
-      data: [638465, 241881, 170940],
-      backgroundColor: ["#ffcc00", "#36a2eb", "#4bc0c0"],
-      hoverOffset: 4,
-    },
-  ],
-});
 
 const selectedCategories = ref([]);
 
@@ -145,15 +144,19 @@ const toggleCategory = (category) => {
   }
 };
 
+const selectPeriod = (period) => {
+  selectedPeriod.value = period;
+  if (period !== "직접 입력") {
+    customPeriod.value = "";
+  }
+};
+
 const navigateToRepaymentPlanSuggestion = async () => {
-  const period = selectedPeriod.value === "직접 입력" ? customPeriod.value : selectedPeriod.value;
-  const categories = selectedCategories.value.map(category => ({
-    category,
-    isHardToReduce: true
-  }));
+  const period = selectedPeriod.value === "직접 입력" ? parseInt(customPeriod.value, 10) : parseInt(selectedPeriod.value, 10);
+  const categoryIds = selectedCategories.value.map(category => categoryMap[category]);
 
   try {
-    await apiStore.saveRepaymentPlan("1", categories, period); // Replace "3" with actual user ID if needed
+    await apiStore.saveRepaymentPlan(1, categoryIds, period); // Replace "1" with actual user ID if needed
     router.push("/repayment-plan-suggestion");
   } catch (error) {
     console.error("Error saving repayment plan:", error);
