@@ -4,6 +4,8 @@ from models import Transactions, User, Categories, RepaymentHistory, RepaymentPl
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from domain.notification import notification_schema, notification_crud
+from domain.common.common_crud import get_user
+
 import json
 
 # 3-1. 상환 요약 조회
@@ -85,7 +87,7 @@ def get_dashboard_summary(db: Session, user_id: int) -> SummaryResponse:
 # 3-2. 상환 현황 조회
 def get_repayment_status(db: Session, user_id: int) -> RepaymentStatusResponse:
     # 사용자 대출 정보 가져오기
-    user = db.query(User).filter(User.user_id == user_id).first()
+    user = get_user(db,user_id)
     if not user:
         raise ValueError("User not found")
 
