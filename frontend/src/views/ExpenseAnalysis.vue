@@ -1,32 +1,6 @@
 <template>
   <div class="spending-analysis">
-    <h2>오수민님의 월 평균 소비</h2>
-    <div class="doughnutChart">
-      <div class="doughnut-wrapper">
-        <DoughnutChart v-if="doughnutChartData" :data="doughnutChartData" />
-        <p class="total-spending">{{ totalSpending.toLocaleString() }} 원</p>
-      </div>
-    </div>
-
-    <div class="category-details">
-      <div
-        v-for="(amount, index) in categoryAmounts"
-        :key="index"
-        class="category-item"
-      >
-        <span
-          :style="{
-            color: doughnutChartData.datasets[0].backgroundColor[index],
-          }"
-        >
-          {{ doughnutChartData.labels[index] }}:
-        </span>
-        <span>{{ amount.toLocaleString() }} 원</span>
-      </div>
-    </div>
-
-    <h3>20대 평균 소비 TOP3</h3>
-    <BarChart v-if="barChartData" :data="barChartData" />
+    <SpendingAnalysis />
 
     <div class="category-selection">
       <h4>줄이기 어려운 걸 선택해주세요.</h4>
@@ -77,7 +51,6 @@
       </div>
     </div>
 
-    
     <div class="period-selection">
       <h4>상환 기간을 선택해주세요.</h4>
       <div class="period-buttons">
@@ -122,32 +95,31 @@
     </div>
 
     <div class="footer">
-      <button class="footer-button" @click="navigateToRepaymentPlanSuggestion">상환 플랜 제안받기</button>
+      <button class="footer-button" @click="navigateToRepaymentPlanSuggestion">
+        상환 플랜 제안받기
+      </button>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref } from "vue";
-import DoughnutChart from "../components/DoughnutChart.vue";
-import BarChart from "../components/BarChart.vue";
-import { useRouter } from 'vue-router';
+import SpendingAnalysis from "../components/SpendingAnalysis.vue";
+import { useRouter } from "vue-router";
+import { useApiStore } from "../stores/apiStore"; // Import the store
 
 const router = useRouter();
+const apiStore = useApiStore(); // Initialize the store
 
-
-const totalSpending = 1824235;
 const selectedPeriod = ref(null);
-const customPeriod = ref('');
-
+const customPeriod = ref("");
 
 const selectPeriod = (period) => {
   selectedPeriod.value = period;
-  if (period !== '직접 입력') {
-    customPeriod.value = ''; 
+  if (period !== "직접 입력") {
+    customPeriod.value = "";
   }
 };
-
 
 const doughnutChartData = ref({
   labels: ["쇼핑/의류비", "식비", "여가/취미비"],
@@ -161,27 +133,7 @@ const doughnutChartData = ref({
   ],
 });
 
-const categoryAmounts = doughnutChartData.value.datasets[0].data;
-
-
-const barChartData = ref({
-  labels: ["쇼핑/의류비", "여가/취미비", "식비"],
-  datasets: [
-    {
-      label: "나의 소비",
-      data: [638465, 170940, 241881],
-      backgroundColor: "#ffcc00",
-    },
-    {
-      label: "20대 평균",
-      data: [700000, 200000, 250000],
-      backgroundColor: "#4caf50",
-    },
-  ],
-});
-
 const selectedCategories = ref([]);
-
 
 const toggleCategory = (category) => {
   if (selectedCategories.value.includes(category)) {
@@ -189,13 +141,23 @@ const toggleCategory = (category) => {
       (c) => c !== category
     ); // Deselect
   } else {
-    selectedCategories.value.push(category); 
+    selectedCategories.value.push(category);
   }
 };
 
+const navigateToRepaymentPlanSuggestion = async () => {
+  const period = selectedPeriod.value === "직접 입력" ? customPeriod.value : selectedPeriod.value;
+  const categories = selectedCategories.value.map(category => ({
+    category,
+    isHardToReduce: true
+  }));
 
-const navigateToRepaymentPlanSuggestion = () => {
-  router.push('/repayment-plan-suggestion');
+  try {
+    await apiStore.saveRepaymentPlan("1", categories, period); // Replace "3" with actual user ID if needed
+    router.push("/repayment-plan-suggestion");
+  } catch (error) {
+    console.error("Error saving repayment plan:", error);
+  }
 };
 </script>
 
@@ -210,19 +172,19 @@ const navigateToRepaymentPlanSuggestion = () => {
 }
 
 .doughnut-wrapper {
-  position: relative; 
+  position: relative;
 }
 
 .total-spending {
-  position: absolute; 
-  top: 50%; 
-  left: 50%; 
-  transform: translate(-50%, -50%); 
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   font-size: 18px;
-  font-weight: bold; 
+  font-weight: bold;
   margin-top: 25px;
   margin-right: 30px;
-  color: #080600; 
+  color: #080600;
 }
 
 h2 {
