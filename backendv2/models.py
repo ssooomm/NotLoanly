@@ -38,7 +38,7 @@ class User(Base):
 
 
 class Categories(Base):
-    __tablename__ = 'Categories'
+    __tablename__ = 'categories'
     category_id = Column(Integer, primary_key=True, autoincrement=True)
     category_name = Column(String(255), nullable=False)
 
