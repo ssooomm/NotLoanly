@@ -1,10 +1,8 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
-from typing import Tuple, Dict, Any, List
 from models import User, Categories, UserExpenses, RepaymentPlans
 from domain.repayment.repayment_schema import *
 
-import json
 
 def get_user(db: Session, user_id: int) -> User:
     user = db.query(User).get(user_id)
@@ -12,58 +10,43 @@ def get_user(db: Session, user_id: int) -> User:
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
+
 # 2-2. 줄이기 어려운 카테고리와 상환 기간 저장
 def save_repayment_plan(
         db: Session,
-        user_id: int,
-        category_ids: List[int],
-        repayment_period: int
-) -> dict:
+        plan: RepaymentPlanRequest
+):
     try:
         # 사용자 확인
-        user = get_user(db, user_id)
+        user = get_user(db, plan.userId)
 
         # 상환 기간 업데이트
-        user.repayment_period = repayment_period
+        user.repayment_period = plan.repaymentPeriod
 
         # 월별 상환 목표 계산 및 업데이트
-        if user.loan_amount and repayment_period:
-            user.monthly_repayment_goal = user.loan_amount // repayment_period
+        if user.loan_amount and plan.repaymentPeriod:
+            user.monthly_repayment_goal = user.loan_amount // plan.repaymentPeriod
         else:
             raise HTTPException(
                 status_code=400,
                 detail="Invalid loan amount or repayment period"
             )
 
-        # 기존 UserExpenses 레코드들의 is_hard_to_reduce를 모두 False로 설정
+        # 해당 user_id의 모든 UserExpenses의 is_hard_to_reduce를 먼저 False로 설정
         db.query(UserExpenses) \
-            .filter(UserExpenses.user_id == user_id) \
+            .filter(UserExpenses.user_id == plan.userId) \
             .update({UserExpenses.is_hard_to_reduce: False})
 
-        # 선택된 카테고리들의 is_hard_to_reduce를 True로 설정
-        for category_id in category_ids:
-            user_expense = db.query(UserExpenses).filter(
-                UserExpenses.user_id == user_id,
-                UserExpenses.category_id == category_id
-            ).first()
-
-            if user_expense:
-                user_expense.is_hard_to_reduce = True
-            else:
-                new_expense = UserExpenses(
-                    user_id=user_id,
-                    category_id=category_id,
-                    month=11,  # 기본값
-                    original_amount=0,  # 초기값
-                    is_hard_to_reduce=True
-                )
-                db.add(new_expense)
+        # 지정된 category_ids에 대해 is_hard_to_reduce를 True로 설정
+        db.query(UserExpenses) \
+            .filter(
+            UserExpenses.user_id == plan.userId,
+            UserExpenses.category_id.in_(plan.categories)
+        ) \
+            .update({UserExpenses.is_hard_to_reduce: True}, synchronize_session=False)
 
         db.commit()
-        return {
-            "status": "success",
-            "message": "상환 계획이 저장되었습니다."
-        }
+        return "상환 계획이 저장되었습니다."
 
     except HTTPException as http_ex:
         db.rollback()
@@ -80,15 +63,59 @@ def save_repayment_plan(
 # 2-3. 상환 플랜 리스트 조회
 def get_repayment_plans(db: Session, user_id: int) -> RepaymentPlans:
     try:
-        # Query repayment plans for the user
         plans = db.query(RepaymentPlans).filter_by(user_id=user_id).all()
         if not plans:
             return []
-            
+
         return plans
 
     except Exception as e:
         raise HTTPException(
             status_code=500,
             detail=f"Failed to fetch repayment plans: {str(e)}"
+        )
+
+
+# 2-3-1. 상환 플랜 상세 조회
+def get_repayment_plan(db: Session, plan_id: int, user_id: int) -> RepaymentPlans:
+    try:
+        plan = db.query(RepaymentPlans).filter_by(user_id=user_id, plan_id=plan_id).first()
+        if not plan:
+            raise HTTPException(
+                status_code=404,
+                detail="Repayment plan not found"
+            )
+        return plan
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to fetch repayment plan: {str(e)}"
+        )
+
+
+# 2-4. 상환 플랜 선택
+def select_repayment_plan(db: Session, user_id: int, plan_id: int) -> str:
+    try:
+        # 사용자 확인
+        user = get_user(db, user_id)
+        if not user:
+            raise HTTPException(
+                status_code=404,
+                detail="User not found"
+            )
+        # 플랜 선택 업데이트
+        user.selected_plan_group_id = plan_id
+        db.commit()
+
+        return "선택한 상환 플랜이 시작되었습니다."
+
+    except HTTPException as http_ex:
+        db.rollback()
+        raise http_ex
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to select repayment plan: {str(e)}"
         )
