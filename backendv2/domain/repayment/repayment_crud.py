@@ -2,14 +2,7 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from models import User, Categories, UserExpenses, RepaymentPlans
 from domain.repayment.repayment_schema import *
-
-
-def get_user(db: Session, user_id: int) -> User:
-    user = db.query(User).get(user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return user
-
+from domain.user.user_crud import get_user
 
 # 2-2. 줄이기 어려운 카테고리와 상환 기간 저장
 def save_repayment_plan(
