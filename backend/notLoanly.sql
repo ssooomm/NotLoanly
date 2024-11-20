@@ -13,6 +13,7 @@ CREATE TABLE Users (
     available_funds INTEGER GENERATED ALWAYS AS (monthly_income - monthly_expense) STORED, -- 사용 가능 자금
     loan_amount INTEGER,               -- 대출 금액
     interest_rate REAL,                -- 대출 이자율
+    loan_date TIMESTAMP,
     repayment_period INTEGER,          -- 상환 기간 (개월)
     monthly_repayment_goal INTEGER,    -- 월별 상환 목표
     selected_plan_group_id INTEGER DEFAULT NULL,-- 선택된 플랜 그룹 ID (NULL 가능)
@@ -99,10 +100,10 @@ INSERT INTO Categories (category_name) VALUES
 ('기타');
 
 -- Users 테이블에 데이터 삽입
-INSERT INTO Users (name, monthly_income, monthly_expense, loan_amount, interest_rate, repayment_period, monthly_repayment_goal, selected_plan_group_id) 
+INSERT INTO Users (name, monthly_income, monthly_expense, loan_amount, interest_rate, loan_date, repayment_period, monthly_repayment_goal, selected_plan_group_id) 
 VALUES 
-('최민호', 2500000, 1500000, 3000000, 6.0, 3, 1015000, 3),
-('김민주', 2000000, 1500000, 2000000, 7.0, 6, 345000, 3);
+('최민호', 2500000, 1500000, 3000000, 6.0,'2024-10-09', 3, 1015000, 3),
+('김민주', 2000000, 1500000, 2000000, 7.0,'2024-09-11', 6, 345000, 3);
 
 
 
