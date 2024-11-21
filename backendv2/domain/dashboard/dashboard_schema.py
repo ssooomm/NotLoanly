@@ -24,17 +24,23 @@ class SummaryResponse(BaseModel):
 
 
 # 3-2
-class RepaymentStatus(BaseModel):
-    totalAmount: int
-    paidAmount: int
-    remainingAmount: int
-class RepaymentChartItem(BaseModel):
-    month: str
-    paid: int
-    interest: float
-class RepaymentStatusResponse(BaseModel):
-    repaymentStatus: RepaymentStatus
-    repaymentChart: List[RepaymentChartItem]
+# class RepaymentStatus(BaseModel):
+#     loan_amount: int
+#     remaining_amount: int
+#     total_paid: int
+#     total_count: int
+# # class RepaymenHistoryItem(BaseModel):
+# #     month: str
+# #     paid: int
+# #     interest: float
+# class RepaymenHistoryItem(BaseModel):
+#     month: str
+#     paid: int
+#     interest: float
+#
+# class RepaymentStatusResponse(BaseModel):
+#     repayment_status: RepaymentStatus
+#     repayment_history: List[RepaymenHistoryItem]
 
 #3-3
 # class Category(BaseModel):

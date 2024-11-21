@@ -4,14 +4,14 @@
     <v-app-bar :elevation="0" app class="custom-app-bar">
       <v-btn icon="mdi-chevron-left" @click="goBack"></v-btn>
       <v-app-bar-title class="custom-title">{{
-        isNotificationsPage ? "알림함" : "I’m not LOANly"
+        isNotificationsPage ? "알림함" : "I'm not LOANly"
       }}</v-app-bar-title>
       <v-btn
         v-if="!isNotificationsPage"
         icon="mdi-bell-outline"
         @click="goToNotifications"
       ></v-btn>
-      <v-btn icon="mdi-home"></v-btn>
+      <v-btn icon="mdi-home" @click="goHome"></v-btn>
       <v-app-bar-nav-icon></v-app-bar-nav-icon>
     </v-app-bar>
 
@@ -75,6 +75,11 @@ const goToNotifications = () => {
 // 뒤로 가기 버튼
 const goBack = () => {
   router.back();
+};
+
+// 홈으로 이동하는 함수
+const goHome = () => {
+  router.push("/");
 };
 
 // LoanInfoNotice.vue 페이지에서만 적용할 스타일

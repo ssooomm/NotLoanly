@@ -4,58 +4,45 @@
     <div class="body">
       <div class="progress-container">
         <div class="progress-label">
-          <span>11월 상환 진행률</span>
-          <span>1/6 개월</span>
+          <span>상환 진행률</span>
+          <span>{{ paidPeriod }}/{{ totalPeriod }} 개월</span>
           <span>{{ progressPercentage }}%</span>
         </div>
         <div class="progress-bar">
-          <div
-            class="progress"
-            :style="{ width: progressPercentage + '%' }"
-          ></div>
+          <div class="progress" :style="{ width: progressPercentage + '%' }"></div>
         </div>
         <div class="amounts">
-          <span>{{ currentAmount }}원</span>
-          <span>/ {{ totalAmount }}원</span>
+          <span>{{ currentAmount.toLocaleString() }}원</span>
+          <span>/ {{ totalAmount.toLocaleString() }}원</span>
         </div>
       </div>
       <section class="summary">
+        <div class="summary-total"> 다음 달</div>
         <div class="summary-item">
           <span>목표 상환 원금</span>
-          <span>{{ targetAmount }}원</span>
+          <span>{{ targetAmount.toLocaleString() }}원</span>
         </div>
         <div class="summary-item">
           <span>이자 납입액</span>
-          <span>{{ interestAmount }}원</span>
+          <span>{{ interestAmount.toLocaleString() }}원</span>
         </div>
         <div class="summary-total">
           <span>총 납부액</span>
-          <span>{{ totalPayment }}원</span>
+          <span>{{ totalPayment.toLocaleString() }}원</span>
         </div>
       </section>
       <section class="calendar">
         <div class="financial-info">
           <p class="expense">
-            지출: <span class="red-text">{{ formatAmount(expenditure) }}</span
-            >원
+            지출: <span class="red-text">{{ formatAmount(expenditure) }}</span>원
           </p>
           <p class="income">
-            수입: <span class="blue-text">{{ formatAmount(income) }}</span
-            >원
+            수입: <span class="blue-text">{{ formatAmount(income) }}</span>원
           </p>
         </div>
-        <vue-cal
-          xsmall
-          v-model="events"
-          :time="false"
-          hide-view-selector
-          active-view="month"
-          :disable-views="['years', 'year', 'week', 'day']"
-          :events="events"
-          events-on-month-view="short"
-          class="vuecal--yellow-theme"
-          style="height: 400px"
-        >
+        <vue-cal xsmall v-model="events" :time="false" hide-view-selector active-view="month"
+          :disable-views="['years', 'year', 'week', 'day']" :events="events" events-on-month-view="short"
+          class="vuecal--yellow-theme" style="height: 400px">
         </vue-cal>
       </section>
       <section class="plan">
@@ -65,20 +52,15 @@
         </div>
         <div class="budget-container">
           <div class="budget-bar">
-            <div
-              v-for="(item, index) in budgetItems"
-              :key="index"
-              class="budget-segment"
-              :style="{
-                width: (item.budget / totalBudget) * 100 + '%',
-                backgroundColor:
-                  item.status === 'danger'
-                    ? '#f44336'
-                    : item.status === 'warning'
+            <div v-for="(item, index) in budgetItems" :key="index" class="budget-segment" :style="{
+              width: (item.budget / totalBudget) * 100 + '%',
+              backgroundColor:
+                item.status === 'danger'
+                  ? '#f44336'
+                  : item.status === 'warning'
                     ? '#ffcc00'
                     : '#4caf50',
-              }"
-            >
+            }">
               {{ item.name }}
             </div>
           </div>
@@ -91,17 +73,13 @@
             </div>
           </div>
           <div class="category-bar">
-            <div
-              class="progress"
-              :style="{
-                width: calculateProgressWidth(item.spent, item.budget),
-              }"
-              :class="item.status"
-            ></div>
+            <div class="progress" :style="{
+              width: calculateProgressWidth(item.spent, item.budget),
+            }" :class="item.status"></div>
           </div>
           <div class="amounts">
-            <span>{{ formatAmount(item.spent) }}원</span>
-            <span>&#47;{{ formatAmount(item.budget) }}원</span>
+            <span>{{ formatAmount(item.spent) }}원</span>&#47;
+            <span>{{ formatAmount(item.budget) }}원</span>
           </div>
         </div>
       </section>
@@ -130,6 +108,8 @@ const expenditure = ref(0);
 const income = ref(0);
 const budgetItems = ref([]);
 const events = ref([]);
+const totalPeriod = ref(0);
+const paidPeriod = ref(0);
 
 // 금액 포맷팅 함수
 const formatAmount = (amount) => {
@@ -140,14 +120,6 @@ const formatAmount = (amount) => {
 const calculateProgressWidth = (spent, budget) => {
   const percentage = (spent / budget) * 100;
   return Math.min(percentage, 100) + "%";
-};
-
-// 상태 계산 헬퍼 함수
-const calculateStatus = (spent, budget) => {
-  const ratio = (spent / budget) * 100;
-  if (ratio <= 50) return "safe";
-  if (ratio < 80) return "warning";
-  return "danger";
 };
 
 // 데이터 가져오기
@@ -162,26 +134,17 @@ const fetchData = async () => {
       today.getMonth() + 1
     ).padStart(2, "0")}`;
 
-    // 현재 월의 상환 데이터 찾기
-    const currentMonthData = apiStore.repaymentChart.find(
-      (item) => item.month === currentMonth
-    );
-
-    if (currentMonthData) {
-      // 이번 달 갚아야 할 금액 (paid)
-      targetAmount.value = Number(currentMonthData.paid);
-
-      // 이자 금액
-      interestAmount.value = Number(currentMonthData.interest);
-
-      // 총 납부액 (원금 + 이자)
-      totalPayment.value = targetAmount.value + interestAmount.value;
-    }
-
     // 상환 현황 데이터 설정
     currentAmount.value = Number(apiStore.paidAmount);
     totalAmount.value = Number(apiStore.totalAmount);
     progressPercentage.value = Number(apiStore.completedPercentage.toFixed(1));
+    totalPeriod.value = Number(apiStore.totalPeriod);
+    paidPeriod.value = Number(apiStore.paidPeriod);
+
+    targetAmount.value = Number(apiStore.targetAmount);
+    interestAmount.value = Number(apiStore.interestAmount);
+    totalPayment.value = targetAmount.value + interestAmount.value;
+
 
     // 소비 데이터 가져오기
     const data = await apiStore.fetchRepaymentSummary(1);
@@ -191,19 +154,23 @@ const fetchData = async () => {
     // 소비 분석 데이터 가져오기
     const consumptionData = await apiStore.fetchConsumptionAnalysis(1);
 
+    // 상태 계산 헬퍼 함수
+    const calculateStatus = (percent) => {
+      if (percent <= 50) return "safe";
+      if (percent < 80) return "warning";
+      return "danger";
+    };
+
     // budgetItems 업데이트
     if (consumptionData && consumptionData.categories) {
       budgetItems.value = consumptionData.categories.map((category) => ({
         name: apiStore.categories[category.category_id],
         spent: category.amount,
         budget: category.suggestedReducedAmount,
-        status: calculateStatus(
-          category.amount,
-          category.suggestedReducedAmount
-        ),
+        status: calculateStatus(category.usingPercentage),
       }));
     }
-    console.log(budgetItems);
+    console.log(budgetItems.value);
 
     // 달력 이벤트 데이터 처리
     if (data.summary && data.summary.length > 0) {

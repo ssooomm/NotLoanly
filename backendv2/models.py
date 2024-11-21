@@ -82,6 +82,7 @@ class RepaymentHistory(Base):
     user_id = Column(Integer, ForeignKey('users.user_id', ondelete="CASCADE"), nullable=False)
     repayment_date = Column(Date, nullable=False)
     repayment_amount = Column(Integer, nullable=False)
+    interest_amount = Column(Integer, nullable=False)
     remaining_balance = Column(Integer, nullable=False)
     description = Column(Text, nullable=True)
 
