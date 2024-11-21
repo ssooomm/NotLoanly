@@ -1,43 +1,56 @@
 <template>
   <div>
-    <!-- 상환 플랜 제목 -->
-    <h1 class="title text-center">상환 플랜 선택</h1>
-    <!-- 플랜 카드 리스트 -->
-    <v-row dense>
-      <v-col
-        cols="12"
-        class="justify-center"
-        v-for="plan in plans"
-        :key="plan.id"
-      >
-        <v-card class="plan-card" outlined>
-          <div class="card-body" @click="goToDetail(plan.plan_id)" v-ripple>
-            <!-- 왼쪽: 해시태그, 오른쪽: 이미지 -->
-            <div class="left-content">
-              <v-card-title class="plan-title">{{
-                plan.plan_name
-              }}</v-card-title>
-              <v-card-subtitle class="plan-hashtags">
-                <p
-                  v-for="(hashtag, idx) in plan.hashtags.split(',')"
-                  :key="idx"
-                  class="hashtag"
-                >
-                  {{ hashtag.trim() }}
-                </p>
-              </v-card-subtitle>
+    <!-- 로딩 화면 -->
+    <div v-if="isLoading" class="loading-container">
+      <v-progress-circular
+        indeterminate
+        color="yellow-darken-3"
+        size="70"
+        width="6"
+      ></v-progress-circular>
+    </div>
+
+    <!-- 메인 콘텐츠 -->
+    <div v-else>
+      <!-- 상환 플랜 제목 -->
+      <h1 class="title text-center">상환 플랜 선택</h1>
+      <!-- 플랜 카드 리스트 -->
+      <v-row dense>
+        <v-col
+          cols="12"
+          class="justify-center"
+          v-for="plan in plans"
+          :key="plan.id"
+        >
+          <v-card class="plan-card" outlined>
+            <div class="card-body" @click="goToDetail(plan.plan_id)" v-ripple>
+              <!-- 왼쪽: 해시태그, 오른쪽: 이미지 -->
+              <div class="left-content">
+                <v-card-title class="plan-title">{{
+                  plan.plan_name
+                }}</v-card-title>
+                <v-card-subtitle class="plan-hashtags">
+                  <p
+                    v-for="(hashtag, idx) in plan.hashtags.split(',')"
+                    :key="idx"
+                    class="hashtag"
+                  >
+                    {{ hashtag.trim() }}
+                  </p>
+                </v-card-subtitle>
+              </div>
+              <div class="right-content">
+                <img
+                  :src="images[plan.plan_id]"
+                  class="plan-image"
+                  alt="Plan Image"
+                />
+              </div>
             </div>
-            <div class="right-content">
-              <img
-                :src="images[plan.plan_id]"
-                class="plan-image"
-                alt="Plan Image"
-              />
-            </div>
-          </div>
-        </v-card>
-      </v-col>
-    </v-row>
+          </v-card>
+        </v-col>
+      </v-row>
+    </div>
   </div>
 </template>
 
@@ -59,6 +72,7 @@ const apiStore = useApiStore();
 
 const userId = 1;
 const plans = ref([]);
+const isLoading = ref(true); // 로딩 상태
 
 // 이미지 매핑
 const images = {
@@ -82,7 +96,10 @@ const fetchConsumptionData = async () => {
 
 // 컴포넌트가 마운트될 때 데이터 가져오기
 onMounted(() => {
-  fetchConsumptionData();
+  setTimeout(async () => {
+    await fetchConsumptionData();
+    isLoading.value = false; // 로딩 상태 해제
+  }, 2000); // 2초 후 로딩 해제
 });
 
 // 세부 페이지로 이동하는 함수
@@ -107,6 +124,20 @@ const goToDetail = async (planId) => {
 </script>
 
 <style scoped>
+/* 로딩 화면 스타일 */
+.loading-container {
+  position: fixed; /* 화면 전체 기준으로 고정 */
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.9); /* 배경에 살짝 투명도 추가 */
+  z-index: 1000; /* 다른 콘텐츠보다 위에 표시 */
+}
+
 .title {
   font-size: 24px;
   font-weight: bold;
