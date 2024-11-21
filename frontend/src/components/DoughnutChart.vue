@@ -25,6 +25,7 @@
         position: 'top',
       },
     },
+    cutout: "70%"
   }
   </script>
   

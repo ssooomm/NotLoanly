@@ -51,29 +51,37 @@ export const useApiStore = defineStore('api', {
       return data; // 응답 반환
     },
 
-    // 소비 분석 데이터 조회
-    async fetchConsumptionAnalysis(userId) {
-      const response = await fetch(`/api/dashboard/consumption-analysis?user_id=${userId}`); // userId 포함
-      const data = await response.json();
-      this.consumptionAnalysis = data; // 소비 분석 데이터 저장
-      return data; // 응답 반환
-    },
+// 소비 분석 데이터 조회
+async fetchConsumptionAnalysis(userId, month) {
+  // 기본 URL 설정
+  let url = `/api/dashboard/consumption-analysis?user_id=${userId}`;
+  
+  // month가 존재할 경우 URL에 추가
+  if (month) {
+      url += `&month=${month}`;
+  }
 
-        // 줄이기 어려운 카테고리와 상환 기간 저장
-        async saveRepaymentPlan(userId, categories, repaymentPeriod) {
-            const response = await fetch('/api/repayment/save-plan', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    user_id: userId, 
-                    categories, 
-                    repayment_period: repaymentPeriod 
-                }),
-            });
-            const data = await response.json();
-            this.message = data.message;
-            return data; // 응답 반환
-        },
+  const response = await fetch(url); // 수정된 URL 사용
+  const data = await response.json();
+  this.consumptionAnalysis = data; // 소비 분석 데이터 저장
+  return data; // 응답 반환
+},
+
+    // 줄이기 어려운 카테고리와 상환 기간 저장
+    async saveRepaymentPlan(userId, categories, repaymentPeriod) {
+        const response = await fetch('/api/repayment/save-plan', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                user_id: userId, 
+                categories, 
+                repayment_period: repaymentPeriod 
+            }),
+        });
+        const data = await response.json();
+        this.message = data.message;
+        return data; // 응답 반환
+    },
 
     async fetchRepaymentStatus(userId) {
       try {
@@ -238,6 +246,23 @@ export const useApiStore = defineStore('api', {
                 console.error("Error occurred in SSE stream:", error);
                 eventSource.close(); // 연결 닫기
             };
+        },
+
+        // 사용자 소비 데이터 조회
+        async fetchUserExpenses(userId, month = 9) {
+            const response = await fetch(`/api/dashboard/user-expenses?user_id=${userId}&month=${month}`);
+            
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const data = await response.json();
+
+            if (data.status === 'success') {
+                return data.data; // 소비 데이터 반환
+            } else {
+                throw new Error('Failed to fetch user expenses');
+            }
         },
 
   }

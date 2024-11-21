@@ -10,7 +10,7 @@ from domain.common.common_crud import get_user
 from domain.repayment.repayment_crud import get_repayment_plan
 from fastapi import HTTPException
 import json
-
+import datetime
 from datetime import datetime
 
 
@@ -191,7 +191,7 @@ def get_consumption_percentage(db: Session, user_id: int):
 
 
 # 3-4. 소비 분석 조회
-def get_consumption_analysis(db: Session, user_id: int):
+def get_consumption_analysis(db: Session, user_id: int, month: int):
     # 사용자 조회
     user = get_user(db, user_id)
     if not user:
@@ -206,16 +206,15 @@ def get_consumption_analysis(db: Session, user_id: int):
         return {"status": "error", "message": "Repayment plan not found"}, 404
     plan_details = plan.details
 
-    # 현재 서버 시간의 월 추출
-    current_month = datetime.now().month
-    expenses = get_user_expenses_by_month(db, user_id, current_month)
+    # 주어진 month에 해당하는 지출 조회
+    expenses = get_user_expenses_by_month(db, user_id, month)
     if not expenses:
         return {"status": "error", "message": "Expenses not found"}, 404
 
     categories = generate_categories_summary(expenses, plan_details)
 
     return {
-        "month": current_month,
+        "month": month,
         "totalAmount": sum(expense["total_amount"] for expense in expenses),
         "categories": categories
     }

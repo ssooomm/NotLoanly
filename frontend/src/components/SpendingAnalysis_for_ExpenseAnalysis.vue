@@ -68,7 +68,7 @@ const barChartData = ref(null);
 
 const fetchData = async () => {
   try {
-    const expenses = await apiStore.fetchUserExpenses(1, 11);
+    const expenses = await apiStore.fetchUserExpenses(1, 9);
     
     // 소득, 대출 소비 제외하고 데이터 정리
     const expenseMap = new Map();

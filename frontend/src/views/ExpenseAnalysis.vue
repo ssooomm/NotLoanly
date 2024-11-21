@@ -111,7 +111,7 @@
 
 <script setup>
 import { ref } from "vue";
-import SpendingAnalysis from "../components/SpendingAnalysis.vue";
+import SpendingAnalysis from "../components/SpendingAnalysis_for_ExpenseAnalysis.vue";
 import { useRouter } from "vue-router";
 import { useApiStore } from "../stores/apiStore"; // Import the store
 
