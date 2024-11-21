@@ -249,7 +249,7 @@ export const useApiStore = defineStore('api', {
             // 5초 후 알림 숨김
             setTimeout(() => {
               this.showAlert = false;
-            }, 150000);
+            }, 3000);
 
             // 알림 목록에 추가
             this.notifications.unshift({
