@@ -186,7 +186,7 @@ const handleConfirm = async () => {
 
     if (response.status === "success") {
       console.log("플랜 선택이 완료되었습니다.");
-      router.push("/");
+      router.push({ name: "Main" });
     }
   } catch (error) {
     console.error("플랜 선택 중 오류 발생:", error);

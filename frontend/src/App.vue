@@ -49,8 +49,8 @@
 <script setup>
 import { useDisplay } from "vuetify";
 import { useRouter, useRoute } from "vue-router";
-import { ref, computed, watch, onMounted  } from "vue";
-import { useApiStore } from '@/stores/apiStore';
+import { ref, computed, watch, onMounted } from "vue";
+import { useApiStore } from "@/stores/apiStore";
 
 const display = useDisplay();
 const router = useRouter();
@@ -79,26 +79,22 @@ const goBack = () => {
 
 // 홈으로 이동하는 함수
 const goHome = () => {
-  router.push("/");
+  router.push({ name: "Main" });
 };
 
 // LoanInfoNotice.vue 페이지에서만 적용할 스타일
 const containerStyle = computed(() => {
-  return route.path === "/loan-info-notice" ? { padding: "0 0 24px 0" } : {};
+  return route.path === "/" ? { padding: "0 0 24px 0" } : {};
 });
 
 // SSE 연결
 onMounted(() => {
-  const userId = 1; 
+  const userId = 1;
   apiStore.connectSSE(userId); // SSE 연결 시작
 });
 
 // 푸터 숨김 여부
-const footerHiddenRoutes = [
-  "/loan-input",
-  "/loan-complete",
-  "/loan-info-notice",
-]; // 푸터를 숨길 라우트 경로 추가
+const footerHiddenRoutes = ["/loan-input", "/loan-complete", "/"]; // 푸터를 숨길 라우트 경로 추가
 
 const hideFooter = computed(() => {
   // 현재 라우트가 repayment-plan-suggestion에 대한 동적 패턴과 일치하는지 확인
@@ -149,7 +145,7 @@ const hideFooter = computed(() => {
 .notification-image {
   width: 48px; /* 이미지 크기 증가 */
   height: 48px; /* 이미지 크기 증가 */
-  
+
   border-radius: 50%; /* 이미지 둥글게 */
   object-fit: cover; /* 이미지가 컨테이너 크기에 맞게 조정 */
 }
