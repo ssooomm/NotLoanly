@@ -4,6 +4,7 @@ from typing import Optional, List
 import datetime
 from database import get_db
 from domain.dashboard import dashboard_schema, dashboard_crud
+from models import User
 
 # from models import User
 
@@ -84,4 +85,19 @@ def get_user_expenses(user_id: int = Query(..., alias="user_id"), month: int = Q
     return {
         "status": "success",
         "data": response
+    }
+
+# 3-6. 사용자 정보 조회
+@router.get("/user")
+def get_user_info(user_id: int = Query(..., alias="user_id"), db: Session = Depends(get_db)):
+    if not user_id:
+        raise HTTPException(status_code=400, detail="User ID is required")
+
+    user = db.query(User).filter(User.user_id == user_id).first()  # User 테이블에서 사용자 조회
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return {
+        "status": "success",
+        "data": user.to_dict()  # User 객체를 딕셔너리 형태로 변환하여 반환
     }
