@@ -5,7 +5,7 @@
       <div class="progress-container">
         <div class="progress-label">
           <span>11월 상환 진행률</span>
-          <span>1/6 개월</span>
+          <span>1/3 개월</span>
           <span>{{ progressPercentage }}%</span>
         </div>
         <div class="progress-bar">
@@ -22,15 +22,21 @@
       <section class="summary">
         <div class="summary-item">
           <span>목표 상환 원금</span>
-          <span>{{ targetAmount.toLocaleString() }}원</span>
+          <!-- <span>{{ targetAmount.toLocaleString() }}원</span> -->
+          <span>1,000,000원</span>
+
         </div>
         <div class="summary-item">
           <span>이자 납입액</span>
-          <span>{{ interestAmount.toLocaleString() }}원</span>
+          <!-- <span>{{ interestAmount.toLocaleString() }}원</span> -->
+          <span>15,000원</span>
+
         </div>
         <div class="summary-total">
           <span>총 납부액</span>
-          <span>{{ totalPayment.toLocaleString() }}원</span>
+          <!-- <span>{{ totalPayment.toLocaleString() }}원</span> -->
+          <span>1,015,000원</span>
+
         </div>
       </section>
       <section class="calendar">
@@ -60,7 +66,7 @@
       </section>
       <section class="plan">
         <div class="plan-header">
-          <h2 class="plan-title">{{ selectedPlanName }}</h2>
+          <h3 class="plan-title">{{ selectedPlanName }}</h3>
           <div class="change" @click="toggleEditMode">플랜 변경 ></div>
         </div>
         <div class="budget-container">
