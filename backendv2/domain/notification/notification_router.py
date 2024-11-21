@@ -28,7 +28,7 @@ async def create_transaction(
     raise HTTPException(status_code=500, detail="Failed to create transaction")
 
 
-@router.get("/notifications/{user_id}", response_model=notification_schema.NotificationsListResponse)
+@router.get("/{user_id}", response_model=notification_schema.NotificationsListResponse)
 async def get_notifications(
         user_id: int,
         db: Session = Depends(get_db)

@@ -13,6 +13,7 @@ class User(Base):
     monthly_expense = Column(Integer, nullable=False)
     available_funds = Column(Integer, nullable=False)  # MySQL에선 GENERATED ALWAYS AS 지원 필요
     loan_amount = Column(Integer, nullable=False)
+    loan_date = Column(TIMESTAMP, nullable=False)
     interest_rate = Column(Float, nullable=False)
     repayment_period = Column(Integer, nullable=False)
     monthly_repayment_goal = Column(Integer, nullable=False)
@@ -29,6 +30,7 @@ class User(Base):
             "monthly_expense": self.monthly_expense,
             "available_funds": self.available_funds,
             "loan_amount": self.loan_amount,
+            "loan_date" : self.loan_date,
             "interest_rate": self.interest_rate,
             "repayment_period": self.repayment_period,
             "monthly_repayment_goal": self.monthly_repayment_goal,
