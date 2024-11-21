@@ -73,9 +73,9 @@ class TransactionCRUD:
 
     def generate_notification_message(self, user_name: str, category_name: str, using_percentage: float) -> str:
         if using_percentage < 100:
-            return f"{user_name}님, {category_name} 부분에서 {round(using_percentage)}% 사용했습니다. 한 발짝만 더 절약해볼까요?"
+            return f"{user_name}님, {category_name} 부분에서 {round(using_percentage)}% 사용했습니다.\n 한 발짝만 더 절약해볼까요?"
         elif using_percentage == 100:
-            return f"{user_name}님, {category_name} 부분에서 100% 사용했습니다. 목표 금액을 다 사용했습니다."
+            return f"{user_name}님, {category_name} 부분에서 100% 사용했습니다.\n 목표 금액을 다 사용했습니다."
         else:
             overused_percentage = round(using_percentage - 100, 2)
             return f"{user_name}님, {category_name} 부분에서 계획보다 {overused_percentage}% 더 사용했습니다."
@@ -131,38 +131,6 @@ class TransactionCRUD:
             })
         return categories
 
-    def get_users_with_loan_due_tomorrow(self):
-        """
-        하루 전 상환일이 다가온 사용자를 검색합니다.
-        """
-        today = datetime.now()
-        tomorrow = today + timedelta(days=1)
-
-        # 내일 상환일인 사용자 검색
-        users = self.db.query(User).filter(
-            func.date(User.loan_date) == tomorrow.date()
-        ).all()
-        return users
-
-    def get_users_with_upcoming_repayment(self):
-        """
-        상환 주기에 따라 상환일이 다가온 사용자를 검색합니다.
-        """
-        now = datetime.now()
-        tomorrow = now + timedelta(days=1)
-
-        users = self.db.query(User).filter(
-            func.date_add(
-                func.date(User.loan_date),
-                func.interval(
-                    func.timestampdiff(text("MONTH"), User.loan_date, now) + 1,
-                    text("MONTH")
-                )
-            ) == tomorrow.date()
-        ).all()
-
-        return users
-
 
     def get_users_with_upcoming_repayment(self):
         """
@@ -194,8 +162,6 @@ class TransactionCRUD:
             return []
 
 
-
-
     def send_repayment_reminder_notifications(self):
         """
         상환일 알림을 전송합니다.
@@ -206,8 +172,12 @@ class TransactionCRUD:
             return
 
         for user in users:
-            message = f"{user.name}님, 대출 상환일이 내일입니다. 준비해주세요!"
+            message = f"{user.name}님, 대출 상환일이 내일입니다."
             print(f"Sending notification to {user.name}: {message}")
+
+            # SSE 큐에 JSON 데이터 추가
+            notifications.append({"user_id": user.user_id, "message": message})
+            print(f"Added to SSE queue: {notifications[-1]}")  # 디버깅용 로그 추가
 
             # 알림 데이터 저장
             notification = Notification(

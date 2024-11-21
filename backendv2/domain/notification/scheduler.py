@@ -25,7 +25,7 @@ def start_notification_scheduler():
     """
     scheduler = BackgroundScheduler()
     #scheduler.add_job(send_repayment_reminders, "cron", hour=10)  # 매일 오전 10시 실행
-    scheduler.add_job(send_repayment_reminders, "cron", hour=21, minute=18)  # 매일 오전 10시 실행
+    scheduler.add_job(send_repayment_reminders, "cron", hour=23, minute=31)  # 매일 오전 10시 실행
 
     scheduler.start()
     print("Notification scheduler started!")

@@ -227,47 +227,54 @@ export const useApiStore = defineStore('api', {
 
     // SSE 연결 설정
     connectSSE(userId) {
-      const streamUrl = `http://127.0.0.1:8000/api/notification/stream/${userId}`;
-      const eventSource = new EventSource(streamUrl);
+  const streamUrl = `http://127.0.0.1:8000/api/notification/stream/${userId}`;
+  const eventSource = new EventSource(streamUrl);
 
-      // SSE 연결 성공
-      eventSource.onopen = () => {
-        console.log("SSE connection opened.");
-      };
+  // SSE 연결 성공
+  eventSource.onopen = () => {
+    console.log("SSE connection opened.");
+  };
 
-      // SSE 데이터 수신
-      eventSource.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data); // JSON 파싱
-          console.log("New Event:", data);
+  // SSE 데이터 수신
+  eventSource.onmessage = (event) => {
+    try {
+      const data = JSON.parse(event.data); // JSON 파싱
+      console.log("New Event:", data);
 
-          // 알림 메시지 처리
-          if (data.message) {
-            this.alertMessage = data.message; // 메시지 저장
-            this.showAlert = true; // 알림 표시
+      if (data.message) {
+        // 알림 상태 업데이트
+        this.alertMessage = data.message; // 메시지 저장
+        this.showAlert = true; // 알림 표시
 
-            // 5초 후 알림 숨김
-            setTimeout(() => {
-              this.showAlert = false;
-            }, 150000);
+        // 디버깅용 로그 추가
+        console.log("Before updating notifications:", this.notifications);
 
-            // 알림 목록에 추가
-            this.notifications.unshift({
-              message: data.message,
-              date: new Date().toISOString(), // 현재 시간 저장
-            });
-          }
-        } catch (e) {
-          console.error("Error parsing event data:", e);
-        }
-      };
+        // 알림 목록에 추가
+        this.notifications.unshift({
+          message: data.message,
+          date: new Date().toISOString(), // 현재 시간 저장
+        });
 
-      // SSE 오류 처리
-      eventSource.onerror = (error) => {
-        console.error("Error occurred in SSE stream:", error);
-        eventSource.close(); // 연결 닫기
-      };
-    },
+        // 디버깅용 로그 추가
+        console.log("After updating notifications:", this.notifications);
+
+        // 5초 후 알림 숨김
+        setTimeout(() => {
+          this.showAlert = false;
+        }, 15000);
+      }
+    } catch (e) {
+      console.error("Error parsing event data:", e);
+    }
+  };
+
+  // SSE 오류 처리
+  eventSource.onerror = (error) => {
+    console.error("Error occurred in SSE stream:", error);
+    eventSource.close(); // 연결 닫기
+  };
+}
+,
 
     // 사용자 소비 데이터 조회
     async fetchUserExpenses(userId, month = 9) {
