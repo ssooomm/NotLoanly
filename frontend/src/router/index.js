@@ -11,13 +11,13 @@ import Notifications from '../views/Notifications.vue';
 const routes = [
   {
     path: '/',
-    name: 'Main',
-    component: MainView,
-  },
-  {
-    path: '/loan-info-notice',
     name: 'LoanInfoNotice',
     component: LoanInfoNotice,
+  },
+  {
+    path: '/dashboard',
+    name: 'Main',
+    component: MainView,
   },
   {
     path: '/loan-input',
@@ -45,11 +45,25 @@ const routes = [
     path: '/repayment-plan-suggestion',
     name: 'RepaymentPlanSuggestion',
     component: RepaymentPlanSuggestion,
+    beforeEnter: (to, from, next) => {
+      if (from.name === 'ExpenseAnalysis' || from.name === 'RepaymentPlanSuggestionDetail' || from.name === 'Main') {
+        next();
+      } else {
+        next('/expense-analysis');
+      }
+    },
   },
   {
     path: '/repayment-plan-suggestion/:id',
     name: 'RepaymentPlanSuggestionDetail',
     component: RepaymentPlanSuggestionDetail,
+    beforeEnter: (to, from, next) => {
+      if (from.name === 'RepaymentPlanSuggestion') {
+        next();
+      } else {
+        next('/repayment-plan-suggestion');
+      }
+    },
   },
   {
     path: '/notifications',
