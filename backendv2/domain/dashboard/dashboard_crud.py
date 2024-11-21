@@ -5,7 +5,7 @@ from domain.repayment.repayment_schema import Plan_Details
 from models import Transactions, Categories, RepaymentHistory, UserExpenses
 
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, desc
 from domain.common.common_crud import get_user
 from domain.repayment.repayment_crud import get_repayment_plan
 from fastapi import HTTPException
@@ -97,47 +97,35 @@ def get_repayment_status(db: Session, user_id: int):  # -> RepaymentStatusRespon
     if not user:
         raise ValueError("User not found")
 
-    # 총 대출 금액과 이자율
-    loan_amount = user.loan_amount
-    interest_rate = user.interest_rate
-    monthly_interest = (loan_amount * (interest_rate / 100)) / user.repayment_period  # 월이자
+    loan_amount = user.loan_amount  # 총 대출 금액
+    interest_rate = user.interest_rate  # 이자율
+    repayment_period = user.repayment_period # 상환 기간
 
-    # 상환 상태 계산
+    # 상환 상태 계산 paidAmount
     total_paid = db.query(
         func.sum(RepaymentHistory.repayment_amount)
     ).filter(RepaymentHistory.user_id == user_id).scalar() or 0
+
+    repayment_history = db.query(RepaymentHistory).filter(
+        RepaymentHistory.user_id == user_id
+    ).order_by(
+        desc(RepaymentHistory.repayment_date)
+    ).all()
+    total_count = len(repayment_history)
+
     remaining_amount = loan_amount - total_paid
+    total_paid_percenatage = (total_count /repayment_period) * 100
 
-    # 월별 상환 내역
-    repayment_chart = db.query(
-        func.date_format(RepaymentHistory.repayment_date, '%Y-%m').label('month'),
-        func.sum(RepaymentHistory.repayment_amount).label('paid')
-    ).filter(RepaymentHistory.user_id == user_id) \
-        .group_by('month') \
-        .order_by('month') \
-        .all()
-
-    # 월별 데이터 생성
-    repayment_chart_data = [
-        {"month": row.month, "paid": row.paid, "interest": round(monthly_interest, 2)}
-        for row in repayment_chart
-    ]
-
-    # 최종 데이터 반환
-    return RepaymentStatusResponse(
-        repaymentStatus=RepaymentStatus(
-            totalAmount=loan_amount,
-            paidAmount=total_paid,
-            remainingAmount=remaining_amount
-        ),
-        repaymentChart=[
-            RepaymentChartItem(
-                month=item["month"],
-                paid=item["paid"],
-                interest=item["interest"]
-            ) for item in repayment_chart_data
-        ]
-    )
+    return {
+            "repayment_period": repayment_period,
+            "loan_amount": loan_amount,
+            "remaining_amount": remaining_amount,
+            "total_paid_percenatage": round(total_paid_percenatage, 2),
+            "total_paid": total_paid,
+            "total_count": total_count,
+            "repayment_amount":repayment_history[0].repayment_amount,
+            "interest_amount":repayment_history[0].interest_amount
+        }
 
 
 # 3-3 상환 플랜 비율 조회
