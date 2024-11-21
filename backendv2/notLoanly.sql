@@ -167,6 +167,9 @@ INSERT INTO Transactions (user_id, category_id, transaction_date, amount, descri
 (1, 4, '2024-11-15', 50000, '휴대폰 요금', 'Bank Transfer'),
 (1, 8, '2024-11-20', 30000, '전시회 관람', 'Card');
 
+-- INSERT INTO Transactions (user_id, category_id, transaction_date, amount, description, payment_method) VALUES
+-- (1, 8, '2024-11-20', 30000, '전시회 관람', 'Card');
+
 
 
 -- ****************************** 8월 ****************************** 
@@ -334,9 +337,13 @@ INSERT INTO RepaymentHistory (user_id, repayment_date, repayment_amount, interes
 VALUES
 -- 사용자 1 상환기록
 (1, '2024-11-09', 1000000, 15000 ,2000000, '첫 번째 상환'),
+
 -- 사용자 2 상환기록
 (2, '2024-10-11', 333333, 11667 , 1655000, '첫 번째 상환'),
 (2, '2024-11-11', 333333, 11667 , 1340000, '두 번째 상환');
+
+
+
 
 INSERT INTO Notification (user_id, message)
 VALUES

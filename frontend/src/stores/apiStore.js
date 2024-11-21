@@ -192,14 +192,6 @@ export const useApiStore = defineStore('api', {
     },
 
 
-    async fetchNotifications(userId) {
-      const response = await fetch(`/api/notifications/${userId}`);
-      const notifications = await response.json();
-      this.notifications = notifications;
-      return notifications;
-    },
-
-
     async createNotification(userId, message) {
       const response = await fetch('/api/notifications', {
         method: 'POST',
@@ -214,7 +206,7 @@ export const useApiStore = defineStore('api', {
     // 사용자 알림 조회
     async fetchNotifications(userId) {
       try {
-        const response = await fetch(`/api/notification/notifications/${userId}`, {
+        const response = await fetch(`/api/notification/${userId}`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
         });
