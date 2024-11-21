@@ -110,22 +110,22 @@ const fetchRepaymentData = async () => {
     };
 
     // 월별 상환 데이터 업데이트
-    const monthlyData = data.repaymentChart.map(item => parseInt(item.paid));
-    const monthlyLabels = data.repaymentChart.map(item => {
-      const month = item.month.split('-')[1].replace(/^0+/, '');
-      return `${month}월`;
-    });
+    // const monthlyData = data.repaymentChart.map(item => parseInt(item.paid));
+    // const monthlyLabels = data.repaymentChart.map(item => {
+    //   const month = item.month.split('-')[1].replace(/^0+/, '');
+    //   return `${month}월`;
+    // });
 
-    barChartData.value = {
-      labels: monthlyLabels,
-      datasets: [{
-        label: '월별 상환금액',
-        data: monthlyData,
-        backgroundColor: 'rgba(255, 206, 86, 0.6)',
-        borderColor: 'rgba(255, 206, 86, 1)',
-        borderWidth: 1,
-      }]
-    };
+    // barChartData.value = {
+    //   labels: monthlyLabels,
+    //   datasets: [{
+    //     label: '월별 상환금액',
+    //     data: monthlyData,
+    //     backgroundColor: 'rgba(255, 206, 86, 0.6)',
+    //     borderColor: 'rgba(255, 206, 86, 1)',
+    //     borderWidth: 1,
+    //   }]
+    // };
 
   } catch (error) {
     console.error('Failed to fetch repayment data:', error);
