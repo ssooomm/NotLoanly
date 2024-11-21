@@ -1,3 +1,4 @@
+
 <template>
   <div class="spending-analysis">
     <h2>소비 분석</h2>
