@@ -2,12 +2,15 @@
   <div>
     <!-- 로딩 화면 -->
     <div v-if="isLoading" class="loading-container">
-      <v-progress-circular
-        indeterminate
-        color="yellow-darken-3"
-        size="70"
-        width="6"
-      ></v-progress-circular>
+      <v-col
+        ><v-progress-circular
+          indeterminate
+          color="yellow-darken-3"
+          size="70"
+          width="6"
+        ></v-progress-circular>
+        <v-col>GPT가 맞춤 상환 플랜을 생성중입니다.</v-col>
+      </v-col>
     </div>
 
     <!-- 메인 콘텐츠 -->
