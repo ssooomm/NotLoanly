@@ -12,23 +12,23 @@
           <div class="progress" :style="{ width: progressPercentage + '%' }"></div>
         </div>
         <div class="amounts">
-          <span>{{ currentAmount }}원</span>
-          <span>/ {{ totalAmount }}원</span>
+          <span>{{ currentAmount.toLocaleString() }}원</span>
+          <span>/ {{ totalAmount.toLocaleString() }}원</span>
         </div>
       </div>
       <section class="summary">
         <div class="summary-total"> 다음 달</div>
         <div class="summary-item">
           <span>목표 상환 원금</span>
-          <span>{{ targetAmount }}원</span>
+          <span>{{ targetAmount.toLocaleString() }}원</span>
         </div>
         <div class="summary-item">
           <span>이자 납입액</span>
-          <span>{{ interestAmount }}원</span>
+          <span>{{ interestAmount.toLocaleString() }}원</span>
         </div>
         <div class="summary-total">
           <span>총 납부액</span>
-          <span>{{ totalPayment }}원</span>
+          <span>{{ totalPayment.toLocaleString() }}원</span>
         </div>
       </section>
       <section class="calendar">
@@ -78,8 +78,8 @@
             }" :class="item.status"></div>
           </div>
           <div class="amounts">
-            <span>{{ formatAmount(item.spent) }}원</span>
-            <span>&#47;{{ formatAmount(item.budget) }}원</span>
+            <span>{{ formatAmount(item.spent) }}원</span>&#47;
+            <span>{{ formatAmount(item.budget) }}원</span>
           </div>
         </div>
       </section>
@@ -122,14 +122,6 @@ const calculateProgressWidth = (spent, budget) => {
   return Math.min(percentage, 100) + "%";
 };
 
-// 상태 계산 헬퍼 함수
-const calculateStatus = (spent, budget) => {
-  const ratio = (spent / budget) * 100;
-  if (ratio <= 50) return "safe";
-  if (ratio < 80) return "warning";
-  return "danger";
-};
-
 // 데이터 가져오기
 const fetchData = async () => {
   try {
@@ -162,19 +154,23 @@ const fetchData = async () => {
     // 소비 분석 데이터 가져오기
     const consumptionData = await apiStore.fetchConsumptionAnalysis(1);
 
+    // 상태 계산 헬퍼 함수
+    const calculateStatus = (percent) => {
+      if (percent <= 50) return "safe";
+      if (percent < 80) return "warning";
+      return "danger";
+    };
+
     // budgetItems 업데이트
     if (consumptionData && consumptionData.categories) {
       budgetItems.value = consumptionData.categories.map((category) => ({
         name: apiStore.categories[category.category_id],
         spent: category.amount,
         budget: category.suggestedReducedAmount,
-        status: calculateStatus(
-          category.amount,
-          category.suggestedReducedAmount
-        ),
+        status: calculateStatus(category.usingPercentage),
       }));
     }
-    console.log(budgetItems);
+    console.log(budgetItems.value);
 
     // 달력 이벤트 데이터 처리
     if (data.summary && data.summary.length > 0) {

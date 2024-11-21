@@ -29,13 +29,9 @@
                 :key="index"
                 class="category-item"
               >
-                <span
-                  class="font-weight-bold"
-                  :style="{
-                    color:
-                      stackedBarChartData.datasets[0].backgroundColor[index],
-                  }"
-                >
+                <span class="font-weight-bold">
+                  <v-badge dot inline :color="categoryColors[index]"></v-badge>
+
                   {{ stackedBarChartData.labels[index] }}
                 </span>
                 <span
@@ -49,10 +45,12 @@
         <v-divider></v-divider>
         <v-col class="px-0 text-end">
           <div>상환 목표 기간: {{ currentPlan.duration }}개월</div>
-          <div>총 절약액: {{ currentPlan.totalSavingAmount }}만원</div>
+          <div>
+            월 상환금: {{ currentPlan.total_amount.toLocaleString() }}원
+          </div>
         </v-col>
         <v-col class="pa-0 text-end">
-          <h3>월 상환금: {{ currentPlan.total_amount.toLocaleString() }}원</h3>
+          <h3>총 절약액: {{ currentPlan.totalSavingAmount }}원</h3>
         </v-col>
       </div>
     </v-card-text>
@@ -62,19 +60,32 @@
         color="yellow-darken-2"
         text="플랜 선택하기"
         variant="flat"
+        @click="handleConfirm"
       ></v-btn>
     </v-card-actions>
   </v-card>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from "vue";
-import { useRoute } from "vue-router";
+import { inject, ref, onMounted, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import StackedBarCharts from "../../components/StackedBarCharts.vue";
 import { useApiStore } from "../../stores/apiStore";
 
 const route = useRoute();
+const router = useRouter();
 const apiStore = useApiStore();
+
+const categoryColors = inject("categoryColors");
+const lightCategoryColors = categoryColors.map((color) => {
+  // RGB 색상을 RGBA로 변환하고 투명도를 추가
+  const rgbaColor = color
+    .replace("#", "rgba(")
+    .replace(/([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})/i, (match, r, g, b) => {
+      return `${parseInt(r, 16)}, ${parseInt(g, 16)}, ${parseInt(b, 16)}, 0.3)`;
+    });
+  return rgbaColor;
+});
 
 const userId = 1;
 const planId = ref(null);
@@ -87,49 +98,20 @@ const stackedBarChartData = ref({
     {
       label: "목표 소비액",
       data: [],
-      backgroundColor: [
-        "#66BB6A", // 금융
-        "#FF6384", // 주거 및 통신
-        "#36A2EB", // 식비
-        "#FFCE56", // 교통
-        "#4BC0C0", // 쇼핑
-        "#9966FF", // 여가
-        "#FF9F40", // 건강
-        "#C9CBCF", // 기타
-      ],
+      backgroundColor: categoryColors,
       hoverOffset: 4,
     },
     {
       label: "절약 금액",
       data: [],
-      backgroundColor: [
-        "rgba(102, 187, 106, 0.3)", // 금융 (연한 녹색)
-        "rgba(255, 99, 132, 0.3)", // 주거 및 통신 (연한 핑크색)
-        "rgba(54, 162, 235, 0.3)", // 식비 (연한 파란색)
-        "rgba(255, 206, 86, 0.3)", // 교통 (연한 노란색)
-        "rgba(75, 192, 192, 0.3)", // 쇼핑 (연한 청록색)
-        "rgba(153, 102, 255, 0.3)", // 여가 (연한 보라색)
-        "rgba(255, 159, 64, 0.3)", // 건강 (연한 주황색)
-        "rgba(201, 203, 207, 0.3)", // 기타 (연한 회색)
-      ],
+      backgroundColor: lightCategoryColors,
       hoverOffset: 4,
     },
   ],
 });
 
 // 카테고리 목록
-const categories = {
-  1: "소득",
-  2: "대출 상환",
-  3: "금융",
-  4: "주거 및 통신",
-  5: "식비",
-  6: "교통",
-  7: "쇼핑",
-  8: "여가",
-  9: "건강",
-  10: "기타",
-};
+const categories = apiStore.categories;
 
 // 플랜 설명
 const plansDesc = {
@@ -167,7 +149,7 @@ const fetchPlanData = async (planId) => {
         (detail) => detail.original_amount
       );
       modifiedCategoryAmounts.value = currentPlan.value.details.map(
-        (detail) => detail.reduced_amount
+        (detail) => detail.original_amount - detail.reduced_amount
       );
 
       // 차트 데이터 설정
@@ -182,19 +164,33 @@ const fetchPlanData = async (planId) => {
 
       // 절약 금액 설정
       stackedBarChartData.value.datasets[1].data =
-        currentPlan.value.details.map(
-          (detail) => detail.original_amount - detail.reduced_amount
-        );
+        currentPlan.value.details.map((detail) => detail.reduced_amount);
 
       const totalSavings = currentPlan.value.details.reduce(
-        (sum, detail) => sum + (detail.original_amount - detail.reduced_amount),
+        (sum, detail) => sum + detail.reduced_amount,
         0
       );
 
-      currentPlan.value.totalSavingAmount = (totalSavings / 10000).toFixed(0);
+      currentPlan.value.totalSavingAmount = totalSavings.toLocaleString();
     }
   } catch (error) {
     console.error("데이터 가져오기 실패:", error);
+  }
+};
+
+// 확인 버튼 클릭 시 이벤트
+const handleConfirm = async () => {
+  try {
+    console.log(planId.value);
+    const response = await apiStore.selectRepaymentPlan(userId, planId.value);
+
+    if (response.status === "success") {
+      console.log("플랜 선택이 완료되었습니다.");
+      router.push("/");
+    }
+  } catch (error) {
+    console.error("플랜 선택 중 오류 발생:", error);
+    alert("플랜 선택에 실패했습니다. 다시 시도해 주세요.");
   }
 };
 

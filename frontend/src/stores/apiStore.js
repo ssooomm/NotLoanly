@@ -191,14 +191,6 @@ export const useApiStore = defineStore('api', {
       return data; // 응답 반환
     },
 
-
-    calculateStatus(spent, budget) {
-      const ratio = spent / budget;
-      if (ratio < 0.6) return 'safe';
-      if (ratio < 0.8) return 'warning';
-      return 'danger';
-    },
-
     // 사용자 알림 조회
     async fetchNotifications(userId) {
       try {
