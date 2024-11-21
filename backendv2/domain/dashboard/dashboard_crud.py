@@ -248,18 +248,19 @@ def generate_categories_summary(expenses, plan_details):
         category_id = plan["category_id"]
         reduced_amount = plan["reduced_amount"]
         original_amount = plan["original_amount"]
-        saving_percentage = round(plan["saving_percentage"], 2)
+        # saving_percentage = round(plan["saving_percentage"], 2)
 
         # expenses에서 category_id에 해당하는 total_amount 가져오기
         amount = expenses_dict.get(category_id, 0)  # 기본값은 0
         suggested_reduced_amount = original_amount - reduced_amount
+        using_percentage = round((amount / suggested_reduced_amount) * 100, 2)
 
         # 결과에 추가
         categories.append({
             "category_id": category_id,
             "amount": amount,
             "suggestedReducedAmount": suggested_reduced_amount,
-            "savingPercentage": saving_percentage
+            "usingPercentage": using_percentage
         })
 
     return categories

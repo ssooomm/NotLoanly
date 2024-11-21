@@ -1,252 +1,252 @@
 .dashboard {
-    text-align: center;
-  }
-  
-  .dashboard .progress-container {
-    margin: 20px 0;
-  }
-  
-  .dashboard .progress-label {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-  }
-  
-  .dashboard .progress-bar {
-    background: #e0e0e0;
-    border-radius: 5px;
-    height: 20px;
-    position: relative;
-  }
-  
-  .dashboard .progress {
-    background: #ffc107; /* 노란색 */
-    height: 100%;
-    border-radius: 5px;
-    transition: width 0.3s ease;
-  }
-  
-  .dashboard .amounts {
-    display: flex;
-    justify-content: space-between;
-    font-size: 18px;
-    margin-top: 5px;
-  }
-  
-  .dashboard .summary {
-    margin: 20px 0;
-    text-align: left;
-  }
-  
-  .dashboard .summary-item {
-    display: flex;
-    justify-content: space-between;
-    margin: 5px 0;
-  }
-  
-  .dashboard .summary-total {
-    font-weight: bold;
-    border-top: 1px solid #e0e0e0;
-    padding-top: 10px;
-    display: flex;
-    justify-content: space-between;
-    margin: 5px 0;
-  }
-  
-  .dashboard .calendar {
-    margin: 20px 0;
-  }
-  
-  /* vuecal Yellow theme */
-  .vuecal--yellow-theme .vuecal__menu,
-  .vuecal--yellow-theme .vuecal__cell-events-count {
-    background-color: rgba(255, 179, 0, 0.8);
-  }
-  
-  .vuecal--yellow-theme .vuecal__menu {
-    color: #fff;
-  }
-  
-  .vuecal--yellow-theme .vuecal__title-bar {
-    background-color: rgba(255, 179, 0, 0.8);
-  }
-  
-  .vuecal--yellow-theme .vuecal__cell--today,
-  .vuecal--yellow-theme .vuecal__cell--current {
-    background-color: rgba(255, 236, 202, 0.4);
-  }
-  
-  .vuecal--yellow-theme .vuecal__cell--selected {
-    background-color: rgba(255, 179, 0, 0.4);
-  }
-  
-  .vuecal--yellow-theme .vuecal__cell--selected:before {
-    border-color: rgba(235, 216, 182, 0.5);
-  }
-  
-  .vuecal--yellow-theme .vuecal__event-title {
-    padding: 0 2px;
-    font-size: 8px;
-  }
-  
-  .vuecal--yellow-theme .vuecal__event {
-    padding: 0 2px;
-    font-size: 0.5em;
-  }
-  
-  .expenditure-event {
-    color: red;
-  }
-  
-  .income-event {
-    color: blue;
-  }
-  
-  .vuecal--yellow-theme .income-event {
-    color: #2196F3 !important;
-    font-weight: bold;
-    font-size: 0.9em;
-    padding: 1px 3px;
-  }
-  
-  .vuecal--yellow-theme .expense-event {
-    color: #F44336 !important;
-    font-weight: bold;
-    font-size: 0.9em;
-    padding: 1px 3px;
-  }
-  
-  .vuecal__event {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 1px;
-    border-radius: 3px;
-  }
-  
-  .vuecal__cell-content {
-    padding: 2px !important;
-  }
-  
-  .dashboard .financial-info {
-    display: flex;
-    justify-content: flex-end;
-    margin: 20px 0;
-    color: #ecb91f;
-    font-weight: bold;
-  }
-  
-  .dashboard .expense {
-    margin-right: 10px;
-  }
-  
-  .dashboard .plan-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-    position: relative; 
-  }
-  .dashboard .plan-title {
-    position: absolute;  
-    left: 50%;          
-    transform: translateX(-50%);  
-    margin: 0;        
-  }
-  
-  .dashboard .budget-container {
-    width: 100%;
-    margin-top: 30px; 
-  }
-  
-  .dashboard .budget-bar {
-    display: flex;
-    height: 25px;      
-    border-radius: 5px;
-    width: 100%;
-    overflow: hidden;  
-  }
-  
-  .dashboard .budget-segment {
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 12px;   
-    min-width: 60px;   
-  }
-  
-  .dashboard .change {
-    color: rgb(48, 110, 243);
-    cursor: pointer;
-    margin-left: auto; 
-  }
+  text-align: center;
+}
 
-  .dashboard .category {
-    margin: 15px 0;
-  }
-  
-  .dashboard .category-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .dashboard .category-name {
-    font-size: 18px;
-    margin-bottom: 5px;
-    font-weight: bold;
-  }
-  
-  .dashboard .status {
-    font-size: 14px;
-    margin-bottom: 5px;
-    padding: 5px 10px;
-    border-radius: 10px;
-    color: rgb(255, 255, 255);
-  }
-  
-  .dashboard .status-safe {
-    background-color: #4caf50;
-  }
-  
-  .dashboard .status-danger {
-    background-color: #f44336;
-  }
-  
-  .dashboard .status-warning {
-    background-color: #ffcc00;
-  }
-  
-  .dashboard .category-bar {
-    background-color: #e0e0e0;
-    border-radius: 5px;
-    height: 20px;
-    position: relative;
-  }
-  
-  .dashboard .progress {
-    height: 100%;
-    border-radius: 5px;
-    transition: width 0.3s ease;
-  }
-  
-  .dashboard .amounts {
-    display: flex;
-    justify-content: space-between;
-    font-size: 14px;
-  }
-  
-  /* Progress bar colors */
-  .progress.safe {
-    background-color: #4caf50;
-  }
-  
-  .progress.warning {
-    background-color: #ffcc00;
-  }
-  
-  .progress.danger {
-    background-color: #f44336;
-  }
+.dashboard .progress-container {
+  margin: 20px 0;
+}
+
+.dashboard .progress-label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.dashboard .progress-bar {
+  background: #e0e0e0;
+  border-radius: 5px;
+  height: 20px;
+  position: relative;
+}
+
+.dashboard .progress {
+  background: #ffc107; /* 노란색 */
+  height: 100%;
+  border-radius: 5px;
+  transition: width 0.3s ease;
+}
+
+.dashboard .amounts {
+  display: flex;
+  justify-content: space-between;
+  font-size: 18px;
+  margin-top: 5px;
+}
+
+.dashboard .summary {
+  margin: 20px 0;
+  text-align: left;
+}
+
+.dashboard .summary-item {
+  display: flex;
+  justify-content: space-between;
+  margin: 5px 0;
+}
+
+.dashboard .summary-total {
+  font-weight: bold;
+  border-top: 1px solid #e0e0e0;
+  padding-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  margin: 5px 0;
+}
+
+.dashboard .calendar {
+  margin: 20px 0;
+}
+
+/* vuecal Yellow theme */
+.vuecal--yellow-theme .vuecal__menu,
+.vuecal--yellow-theme .vuecal__cell-events-count {
+  background-color: rgba(255, 179, 0, 0.8);
+}
+
+.vuecal--yellow-theme .vuecal__menu {
+  color: #fff;
+}
+
+.vuecal--yellow-theme .vuecal__title-bar {
+  background-color: rgba(255, 179, 0, 0.8);
+}
+
+.vuecal--yellow-theme .vuecal__cell--today,
+.vuecal--yellow-theme .vuecal__cell--current {
+  background-color: rgba(255, 236, 202, 0.4);
+}
+
+.vuecal--yellow-theme .vuecal__cell--selected {
+  background-color: rgba(255, 179, 0, 0.4);
+}
+
+.vuecal--yellow-theme .vuecal__cell--selected:before {
+  border-color: rgba(235, 216, 182, 0.5);
+}
+
+.vuecal--yellow-theme .vuecal__event-title {
+  padding: 0 2px;
+  font-size: 8px;
+}
+
+.vuecal--yellow-theme .vuecal__event {
+  padding: 0 2px;
+  font-size: 0.5em;
+}
+
+.expenditure-event {
+  color: red;
+}
+
+.income-event {
+  color: blue;
+}
+
+.vuecal--yellow-theme .income-event {
+  color: #2196f3 !important;
+  font-weight: bold;
+  font-size: 0.9em;
+  padding: 1px 3px;
+}
+
+.vuecal--yellow-theme .expense-event {
+  color: #f44336 !important;
+  font-weight: bold;
+  font-size: 0.9em;
+  padding: 1px 3px;
+}
+
+.vuecal__event {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 1px;
+  border-radius: 3px;
+}
+
+.vuecal__cell-content {
+  padding: 2px !important;
+}
+
+.dashboard .financial-info {
+  display: flex;
+  justify-content: flex-end;
+  margin: 20px 0;
+  color: #ecb91f;
+  font-weight: bold;
+}
+
+.dashboard .expense {
+  margin-right: 10px;
+}
+
+.dashboard .plan-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  position: relative;
+}
+.dashboard .plan-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+}
+
+.dashboard .budget-container {
+  width: 100%;
+  margin-top: 30px;
+}
+
+.dashboard .budget-bar {
+  display: flex;
+  height: 25px;
+  border-radius: 5px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.dashboard .budget-segment {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 12px;
+  min-width: 60px;
+}
+
+.dashboard .change {
+  color: rgb(48, 110, 243);
+  cursor: pointer;
+  margin-left: auto;
+}
+
+.dashboard .category {
+  margin: 15px 0;
+}
+
+.dashboard .category-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dashboard .category-name {
+  font-size: 18px;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.dashboard .status {
+  font-size: 14px;
+  margin-bottom: 5px;
+  padding: 5px 10px;
+  border-radius: 10px;
+  color: rgb(255, 255, 255);
+}
+
+.dashboard .status-safe {
+  background-color: #4caf50;
+}
+
+.dashboard .status-danger {
+  background-color: #f44336;
+}
+
+.dashboard .status-warning {
+  background-color: #ffcc00;
+}
+
+.dashboard .category-bar {
+  background-color: #e0e0e0;
+  border-radius: 5px;
+  height: 20px;
+  position: relative;
+}
+
+.dashboard .progress {
+  height: 100%;
+  border-radius: 5px;
+  transition: width 0.3s ease;
+}
+
+.dashboard .amounts {
+  display: flex;
+  justify-content: flex-end;
+  font-size: 14px;
+}
+
+/* Progress bar colors */
+.progress.safe {
+  background-color: #4caf50;
+}
+
+.progress.warning {
+  background-color: #ffcc00;
+}
+
+.progress.danger {
+  background-color: #f44336;
+}
