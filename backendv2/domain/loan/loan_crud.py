@@ -1,9 +1,9 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
-from models import User, Categories, UserExpenses, RepaymentPlans
 from domain.loan.loan_schema import *
 from domain.common.common_crud import get_user
 
+# 1-1.
 def apply_loan(
         db: Session,
         req: LoanApplicationRequest

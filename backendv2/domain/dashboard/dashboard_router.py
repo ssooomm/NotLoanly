@@ -19,7 +19,7 @@ router = APIRouter(
 
 # 3-1. 상환 요약 조회
 @router.get("/summary")
-def repayment_status(user_id: int = Query(1, alias="user_id"),db: Session = Depends(get_db)):
+def repayment_summary(user_id: int = Query(1, alias="user_id"),db: Session = Depends(get_db)):
     try:
         if not user_id:
             raise HTTPException(status_code=400, detail="User ID is required")

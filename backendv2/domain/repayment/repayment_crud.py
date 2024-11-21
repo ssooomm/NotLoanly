@@ -1,8 +1,13 @@
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
+from sqlalchemy.sql import func
+
 from fastapi import HTTPException
-from models import User, Categories, UserExpenses, RepaymentPlans
+from models import UserExpenses, RepaymentPlans
 from domain.repayment.repayment_schema import *
 from domain.common.common_crud import get_user
+import json
+
 
 # 2-2. 줄이기 어려운 카테고리와 상환 기간 저장
 def save_repayment_plan(
@@ -51,6 +56,31 @@ def save_repayment_plan(
             status_code=500,
             detail=str(e)
         )
+
+# 2-2-1
+def get_user_expenses(db: Session, user_id: int, month: int):
+    """특정 사용자의 월별 지출 데이터 조회."""
+    return db.query(UserExpenses).filter_by(user_id=user_id, month=month).all()
+
+
+def insert_repayment_plans(db: Session, user_id: int, plans: list):
+    """RepaymentPlans 테이블에 새로운 계획 삽입."""
+    try:
+        for plan in plans:
+            new_plan = RepaymentPlans(
+                user_id=user_id,
+                plan_name=plan["plan_name"],
+                total_amount=plan["total_amount"],
+                duration=plan["duration"],
+                details=json.loads(plan["details"]),  # JSON 문자열 파싱
+                hashtags=", ".join(plan["hashtags"]),  # 문자열로 변환
+                created_at=func.now()
+            )
+            db.add(new_plan)
+        db.commit()
+    except SQLAlchemyError as e:
+        db.rollback()
+        raise e
 
 
 # 2-3. 상환 플랜 리스트 조회

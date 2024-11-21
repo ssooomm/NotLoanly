@@ -35,4 +35,3 @@ async def loan_apply(
             status_code=500,
             detail=str(e)
         )
-# 1-2. GPT 호출

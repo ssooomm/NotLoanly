@@ -14,6 +14,27 @@
       <v-btn icon="mdi-home"></v-btn>
       <v-app-bar-nav-icon></v-app-bar-nav-icon>
     </v-app-bar>
+
+    <!-- Real-time Notification Alert -->
+    <v-alert
+      v-if="apiStore.showAlert && !isNotificationsPage"
+      :value="true"
+      class="notification-alert"
+      color="warning"
+      icon="priority_high"
+      variant="outlined"
+    >
+      <!-- 이미지 추가 -->
+      <template #prepend>
+        <img
+          src="@/assets/logo.png"
+          alt="Notification Icon"
+          class="notification-image"
+        />
+      </template>
+      {{ apiStore.alertMessage }}
+    </v-alert>
+
     <!-- Main -->
     <v-main class="custom-main">
       <v-container fluid class="custom-container" :style="containerStyle">
@@ -28,11 +49,13 @@
 <script setup>
 import { useDisplay } from "vuetify";
 import { useRouter, useRoute } from "vue-router";
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted  } from "vue";
+import { useApiStore } from '@/stores/apiStore';
 
 const display = useDisplay();
 const router = useRouter();
 const route = useRoute();
+const apiStore = useApiStore();
 
 const isNotificationsPage = ref(false);
 
@@ -57,6 +80,12 @@ const goBack = () => {
 // LoanInfoNotice.vue 페이지에서만 적용할 스타일
 const containerStyle = computed(() => {
   return route.path === "/loan-info-notice" ? { padding: "0 0 24px 0" } : {};
+});
+
+// SSE 연결
+onMounted(() => {
+  const userId = 1; 
+  apiStore.connectSSE(userId); // SSE 연결 시작
 });
 
 // 푸터 숨김 여부
@@ -95,5 +124,32 @@ const hideFooter = computed(() => {
 
 .custom-container {
   padding: 24px;
+}
+
+.notification-alert {
+  position: fixed;
+  top: 10%; /* 화면 상단에서 10% 아래 */
+  left: 50%; /* 화면 가로 중앙 */
+  transform: translateX(-50%); /* 가로 중앙 정렬 */
+  z-index: 1000; /* 다른 요소 위로 표시 */
+  width: 88%; /* 알림 너비를 더 길게 설정 (뷰포트의 90%) */
+  max-width: 500px; /* 최대 너비를 500px로 제한 */
+  display: flex;
+  align-items: center; /* 이미지와 텍스트를 수직 가운데 정렬 */
+  background-color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); /* 약간의 그림자 추가 */
+  border-radius: 8px; /* 알림 모서리를 둥글게 */
+}
+
+.notification-image {
+  width: 48px; /* 이미지 크기 증가 */
+  height: 48px; /* 이미지 크기 증가 */
+  
+  border-radius: 50%; /* 이미지 둥글게 */
+  object-fit: cover; /* 이미지가 컨테이너 크기에 맞게 조정 */
+}
+.notification-alert .v-alert__content {
+  font-size: 0.875rem; /* 글자 크기를 줄임 (14px) */
+  line-height: 1.4; /* 줄 간격 설정 */
 }
 </style>
