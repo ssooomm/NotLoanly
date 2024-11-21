@@ -36,6 +36,7 @@ export const useApiStore = defineStore('api', {
     paidPeriod: 0, // 상환한 기간 
     targetAmount: 0, //상환 원금
     interestAmount: 0, //상환 이자 
+    restPaymentCount: 1, // 남은 상환 기간
   }),
   actions: {
     // 카테고리와 색상 매핑
