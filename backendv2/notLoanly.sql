@@ -167,6 +167,9 @@ INSERT INTO Transactions (user_id, category_id, transaction_date, amount, descri
 (1, 4, '2024-11-15', 50000, '휴대폰 요금', 'Bank Transfer'),
 (1, 8, '2024-11-20', 30000, '전시회 관람', 'Card');
 
+INSERT INTO Transactions (user_id, category_id, transaction_date, amount, description, payment_method) VALUES
+(1, 8, '2024-11-20', 30000, '전시회 관람', 'Card');
+
 
 
 -- ****************************** 8월 ****************************** 
