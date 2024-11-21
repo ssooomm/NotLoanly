@@ -155,7 +155,7 @@ export const useApiStore = defineStore('api', {
         const today = new Date();
         const currentMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
         const currentMonthData = data.summary.find(month => month.month === currentMonth);
-
+        console.log(currentMonthData);
         if (currentMonthData) {
           // 현재 월의 총 지출과 소득 저장
           this.totalSpent = currentMonthData.totalSpent;
