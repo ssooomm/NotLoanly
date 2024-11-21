@@ -6,27 +6,13 @@
         <DoughnutChart :data="donutChartData" />
         <p class="percentage-text">{{ completedPercentage.toFixed(1) }}%</p>
       </div>
-      <div>
-        <div class="amount-text mb-3">상환 금액<br /> {{ paidAmount }}원</div>
-        <div class="amount-text">남은 금액<br /> {{ remainingAmount }}원</div>
-      </div>
-
     </div>
-    <!-- <div class="status-circles">
-      <div class="circle-row">
-        <div class="circle active">
-          <img src="@/assets/stamp.png" alt="1개월" class="icon" />
-          1개월
-        </div>
-        <div class="circle">2개월</div>
-        <div class="circle">3개월</div>
+    <div class="amount-bg">
+      <div class="amount-text mb-3">
+        <span class="me-2">상환 금액</span> {{ paidAmount.toLocaleString() }}원
       </div>
-      <div class="circle-row">
-        <div class="circle">4개월</div>
-        <div class="circle">5개월</div>
-        <div class="circle">6개월</div>
-      </div>
-    </div> -->
+      <div class="amount-text"><span class="me-2">남은 금액</span> {{ remainingAmount.toLocaleString() }}원</div>
+    </div>
     <div class="status-circles">
       <!-- 각 행에 3개씩 circle을 묶어서 렌더링 -->
       <div v-for="(row, rowIndex) in chunkedRepaymentPeriods" :key="rowIndex" class="circle-row">
@@ -141,8 +127,9 @@ onMounted(fetchRepaymentData);
 .chart-container {
   display: flex;
   align-items: center;
+  justify-content: center;
   width: 100%;
-  margin: 30px 0;
+  margin: 2rem 0;
 }
 
 .donut-chart-wrapper {
@@ -163,8 +150,17 @@ onMounted(fetchRepaymentData);
   color: #ecbf28;
 }
 
+.amount-bg {
+  margin-left: 3rem;
+  margin-right: 3rem;
+  padding: 1rem;
+  /* background-color: #e0e0e0; */
+  border-radius: 15px;
+  border: 2px solid #e0e0e0;
+}
+
 .amount-text {
-  margin-left: 20px;
+  /* margin-left: 20px; */
   font-size: 16px;
   font-weight: bold;
 }
@@ -175,8 +171,8 @@ onMounted(fetchRepaymentData);
 }
 
 .status-circles {
-  margin-top: 20px;
-  margin-bottom: 50px;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
 }
 
 .circle-row {
