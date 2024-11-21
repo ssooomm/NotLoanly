@@ -1,17 +1,18 @@
-from fastapi import HTTPException
 from sqlalchemy.orm import Session
-from sqlalchemy import func
-from domain.notification.notification_schema import TransactionCreate
-from models import Transactions, Notification, User, RepaymentPlans, UserExpenses, Categories, User
-import json
-from shared_memory import notifications  # 공유 메모리 임포트
+from fastapi import HTTPException
+from domain.common.common_crud import get_user, get_user_name, get_category_name
+from domain.dashboard.dashboard_crud import get_user_expenses_by_month
+from domain.repayment.repayment_crud import get_repayment_plan
+from shared_memory import notifications
+from models import Transactions, Notification
+from datetime import datetime
 
 
 class TransactionCRUD:
     def __init__(self, db: Session):
         self.db = db
 
-    def create_transaction(self, transaction: TransactionCreate) -> bool:
+    def create_transaction(self, transaction):
         try:
             db_transaction = Transactions(
                 user_id=transaction.user_id,
@@ -25,7 +26,7 @@ class TransactionCRUD:
             self.db.commit()
             self.db.refresh(db_transaction)
 
-            # 절약 비율 확인 및 알림 처리 호출 (추가된 카테고리에 대해서만)
+            # 절약 비율 확인 및 알림 처리
             self.check_saving_percentage_and_notify(transaction.user_id, transaction.category_id)
 
             return True
@@ -33,28 +34,35 @@ class TransactionCRUD:
             self.db.rollback()
             raise HTTPException(status_code=500, detail=f"Error creating transaction: {str(e)}")
 
-    
+    def check_saving_percentage_and_notify(self, user_id: int, category_id: int):
+        user_name = get_user_name(self.db, user_id)
+        consumption_data = self.get_consumption_analysis(user_id)
+        if consumption_data["status"] == "error":
+            return
 
-    def get_user_notifications(self, user_id: int):
-        try:
-            notifications = self.db.query(Notification).filter(Notification.user_id == user_id).all()
-            if not notifications:
-                return []
-            return [
-                {"notification_id": n.notification_id, "message": n.message, "sent_at": n.sent_at}
-                for n in notifications
-            ]
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Error fetching notifications: {str(e)}")
+        category_data = next((c for c in consumption_data["categories"] if c["category_id"] == category_id), None)
+        if category_data:
+            using_percentage = category_data["usingPercentage"]
+            category_name = get_category_name(self.db, category_id)
 
-    def create_transaction_notification(self, user_id: int, category_id: int, saving_percentage: float, category_name: str, message: str):
+            message = self.generate_notification_message(user_name, category_name, using_percentage)
+            self.create_transaction_notification(user_id, category_id, using_percentage, category_name, message)
+
+    def generate_notification_message(self, user_name: str, category_name: str, using_percentage: float) -> str:
+        if using_percentage < 100:
+            return f"{user_name}님, {category_name} 부분에서 {round(using_percentage)}% 사용했습니다. 한 발짝만 더 절약해볼까요?"
+        elif using_percentage == 100:
+            return f"{user_name}님, {category_name} 부분에서 100% 사용했습니다. 목표 금액을 다 사용했습니다."
+        else:
+            overused_percentage = round(using_percentage - 100, 2)
+            return f"{user_name}님, {category_name} 부분에서 계획보다 {overused_percentage}% 더 사용했습니다."
+
+    def create_transaction_notification(self, user_id: int, category_id: int, using_percentage: float, category_name: str, message: str):
         """
         알림 메시지를 SSE 큐 및 DB에 추가
         """
         print(f"Adding notification: {message}")  # 디버깅용 출력
-        
-        # SSE 큐에 추가
-        #notifications.append(message)
+
         # SSE 큐에 JSON 데이터 추가
         notifications.append({"user_id": user_id, "message": message})
 
@@ -66,71 +74,36 @@ class TransactionCRUD:
         self.db.add(db_notification)
         self.db.commit()
 
-
-    def check_saving_percentage_and_notify(self, user_id: int, category_id: int):
-        # 사용자 조회
-        user = self.db.query(User).filter(User.user_id == user_id).first()
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-
+    def get_consumption_analysis(self, user_id: int):
+        user = get_user(self.db, user_id)
         if not user.selected_plan_group_id:
-            raise HTTPException(status_code=404, detail="No repayment plan selected for the user")
+            return {"status": "error", "message": "No repayment plan selected for the user"}
 
-        # 플랜 조회
-        plan = self.db.query(RepaymentPlans).filter(RepaymentPlans.plan_id == user.selected_plan_group_id).first()
+        plan = get_repayment_plan(self.db, user.selected_plan_group_id, user_id)
         if not plan:
-            raise HTTPException(status_code=404, detail="Repayment plan not found")
+            return {"status": "error", "message": "Repayment plan not found"}
 
-        # 플랜 세부 정보 파싱
-        try:
-            plan_details = json.loads(plan.details) if isinstance(plan.details, str) else plan.details
-        except json.JSONDecodeError:
-            raise HTTPException(status_code=500, detail="Invalid JSON format in plan details")
+        current_month = datetime.now().month
+        expenses = get_user_expenses_by_month(self.db, user_id, current_month)
+        if not expenses:
+            return {"status": "error", "message": "Expenses not found"}
 
-        if not isinstance(plan_details, list):
-            raise HTTPException(status_code=500, detail="Invalid plan details format")
+        categories = self.generate_categories_summary(expenses, plan.details)
+        return {"status": "success", "categories": categories}
 
-        # 거래 내역이 추가된 카테고리에 해당하는 플랜 정보 가져오기
-        category_plan = next((entry for entry in plan_details if entry.get("category_id") == category_id), None)
-        if not category_plan:
-            return  # 해당 카테고리가 플랜에 포함되지 않은 경우 처리하지 않음
+    def generate_categories_summary(self, expenses, plan_details):
+        expenses_dict = {e["category_id"]: e["total_amount"] for e in expenses}
+        categories = []
+        for plan in plan_details:
+            category_id = plan["category_id"]
+            amount = expenses_dict.get(category_id, 0)
+            suggested_reduced_amount = max(plan["original_amount"] - plan["reduced_amount"], 0)
+            using_percentage = (amount / suggested_reduced_amount) * 100 if suggested_reduced_amount > 0 else 0
 
-        reduced_amount = category_plan.get("reduced_amount", 0)
-
-        # 10월 소비 금액 및 절약 목표 계산
-        october_expense = self.db.query(UserExpenses.original_amount).filter(
-            UserExpenses.user_id == user_id,
-            UserExpenses.category_id == category_id,
-            UserExpenses.month == 10
-        ).scalar() or 0
-        suggested_reduced_amount = max(october_expense - reduced_amount, 0)
-
-        # 11월 소비 금액 가져오기
-        november_expense = self.db.query(UserExpenses.original_amount).filter(
-            UserExpenses.user_id == user_id,
-            UserExpenses.category_id == category_id,
-            UserExpenses.month == 11
-        ).scalar() or 0
-
-        # 절약 비율 계산
-        saving_percentage = (november_expense / suggested_reduced_amount) * 100 if suggested_reduced_amount else 0
-
-        # 카테고리 이름 가져오기
-        category = self.db.query(Categories).filter(Categories.category_id == category_id).first()
-        category_name = category.category_name if category else "Unknown"
-
-        # 메시지 생성 및 알림 처리
-        if saving_percentage >= 80:
-            if saving_percentage < 100:
-                # 80% 이상, 100% 미만
-                message = f"{user.name}님, {category_name} 부분에서 {round(saving_percentage)}% 사용했습니다. 한 발짝만 더 절약해볼까요?"
-            elif saving_percentage == 100:
-                # 정확히 100%
-                message = f"{user.name}님, {category_name} 부분에서 100% 사용했습니다. 목표 금액을 다 사용했습니다."
-            else:
-                # 100% 초과
-                overused_percentage = round(saving_percentage - 100, 2)
-                message = f"{user.name}님, {category_name} 부분에서 계획보다 {overused_percentage}% 더 사용했습니다."
-
-            # 알림 전송 및 저장
-            self.create_transaction_notification(user_id, category_id, saving_percentage, category_name, message)
+            categories.append({
+                "category_id": category_id,
+                "amount": amount,
+                "suggestedReducedAmount": suggested_reduced_amount,
+                "usingPercentage": round(using_percentage, 2),
+            })
+        return categories
