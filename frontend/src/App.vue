@@ -27,7 +27,7 @@
       <!-- 이미지 추가 -->
       <template #prepend>
         <img
-          src="@/assets/logo.png"
+          src="@/assets/repayment.png"
           alt="Notification Icon"
           class="notification-image"
         />
