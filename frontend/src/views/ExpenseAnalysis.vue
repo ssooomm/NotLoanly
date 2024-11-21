@@ -11,21 +11,21 @@
           :class="{ selected: selectedCategories.includes('금융') }"
           @click="toggleCategory('금융')"
         >
-        금융
+          금융
         </button>
         <button
           class="category-button"
           :class="{ selected: selectedCategories.includes('주거 및 통신') }"
           @click="toggleCategory('주거 및 통신')"
         >
-        주거 및 통신
+          주거 및 통신
         </button>
         <button
           class="category-button"
           :class="{ selected: selectedCategories.includes('식비') }"
           @click="toggleCategory('식비')"
         >
-        식비
+          식비
         </button>
         <button
           class="category-button"
@@ -39,21 +39,21 @@
           :class="{ selected: selectedCategories.includes('생활') }"
           @click="toggleCategory('생활')"
         >
-        생활
+          생활
         </button>
         <button
           class="category-button"
           :class="{ selected: selectedCategories.includes('여가') }"
           @click="toggleCategory('여가')"
         >
-        여가
+          여가
         </button>
         <button
           class="category-button"
           :class="{ selected: selectedCategories.includes('건강') }"
           @click="toggleCategory('건강')"
         >
-        건강
+          건강
         </button>
       </div>
     </div>
@@ -111,7 +111,7 @@
 
 <script setup>
 import { ref } from "vue";
-import SpendingAnalysis from "../components/SpendingAnalysis.vue";
+import SpendingAnalysis from "../components/SpendingAnalysis_for_ExpenseAnalysis.vue";
 import { useRouter } from "vue-router";
 import { useApiStore } from "../stores/apiStore"; // Import the store
 
@@ -123,13 +123,13 @@ const customPeriod = ref("");
 
 // Map categories to their respective IDs starting from 3
 const categoryMap = {
-  "금융": 3,
+  금융: 3,
   "주거 및 통신": 4,
-  "식비": 5,
-  "교통": 6,
-  "생활": 7,
-  "여가": 8,
-  "건강": 9
+  식비: 5,
+  교통: 6,
+  생활: 7,
+  여가: 8,
+  건강: 9,
 };
 
 const selectedCategories = ref([]);
@@ -152,8 +152,13 @@ const selectPeriod = (period) => {
 };
 
 const navigateToRepaymentPlanSuggestion = async () => {
-  const period = selectedPeriod.value === "직접 입력" ? parseInt(customPeriod.value, 10) : parseInt(selectedPeriod.value, 10);
-  const categoryIds = selectedCategories.value.map(category => categoryMap[category]);
+  const period =
+    selectedPeriod.value === "직접 입력"
+      ? parseInt(customPeriod.value, 10)
+      : parseInt(selectedPeriod.value, 10);
+  const categoryIds = selectedCategories.value.map(
+    (category) => categoryMap[category]
+  );
 
   try {
     await apiStore.saveRepaymentPlan(1, categoryIds, period); // Replace "1" with actual user ID if needed
