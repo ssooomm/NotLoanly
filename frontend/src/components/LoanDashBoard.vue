@@ -101,7 +101,7 @@
           </div>
           <div class="amounts">
             <span>{{ formatAmount(item.spent) }}원</span>
-            <span>/ {{ formatAmount(item.budget) }}원</span>
+            <span>&#47;{{ formatAmount(item.budget) }}원</span>
           </div>
         </div>
       </section>
@@ -155,21 +155,25 @@ const fetchData = async () => {
   try {
     // 상환 상태 데이터 가져오기
     await apiStore.fetchRepaymentStatus(1);
-    
+
     // 현재 날짜로 현재 월 구하기
     const today = new Date();
-    const currentMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
-    
+    const currentMonth = `${today.getFullYear()}-${String(
+      today.getMonth() + 1
+    ).padStart(2, "0")}`;
+
     // 현재 월의 상환 데이터 찾기
-    const currentMonthData = apiStore.repaymentChart.find(item => item.month === currentMonth);
-    
+    const currentMonthData = apiStore.repaymentChart.find(
+      (item) => item.month === currentMonth
+    );
+
     if (currentMonthData) {
       // 이번 달 갚아야 할 금액 (paid)
       targetAmount.value = Number(currentMonthData.paid);
-      
+
       // 이자 금액
       interestAmount.value = Number(currentMonthData.interest);
-      
+
       // 총 납부액 (원금 + 이자)
       totalPayment.value = targetAmount.value + interestAmount.value;
     }
@@ -190,7 +194,7 @@ const fetchData = async () => {
     // budgetItems 업데이트
     if (consumptionData && consumptionData.categories) {
       budgetItems.value = consumptionData.categories.map((category) => ({
-        name: category.category,
+        name: apiStore.categories[category.category_id],
         spent: category.amount,
         budget: category.suggestedReducedAmount,
         status: calculateStatus(
@@ -205,17 +209,21 @@ const fetchData = async () => {
     if (data.summary && data.summary.length > 0) {
       // VueCal에 표시할 이벤트 배열
       let allEvents = [];
-      
+
       // 각 월별 데이터를 순회하면서 이벤트 생성
-      data.summary.forEach(monthData => {
+      data.summary.forEach((monthData) => {
         if (monthData.transactions) {
-          const monthEvents = monthData.transactions.map(transaction => ({
+          const monthEvents = monthData.transactions.map((transaction) => ({
             start: transaction.date, // "2024-11-01" 형식
             end: transaction.date,
-            title: transaction.category === "소득"
-              ? `+${formatAmount(transaction.amount)}`
-              : `-${formatAmount(transaction.amount)}`,
-            class: transaction.category === "소득" ? "income-event" : "expense-event"
+            title:
+              transaction.category === "소득"
+                ? `+${formatAmount(transaction.amount)}`
+                : `-${formatAmount(transaction.amount)}`,
+            class:
+              transaction.category === "소득"
+                ? "income-event"
+                : "expense-event",
           }));
           allEvents = [...allEvents, ...monthEvents];
         }
