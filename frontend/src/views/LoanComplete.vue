@@ -9,13 +9,16 @@
       >
         <v-row>
           <v-card-item class="ma-2">
-            <v-card-title>
-              <span class="card-title" v-html="formattedTitle"></span>
-            </v-card-title>
-            <v-card-subtitle
+            <v-card-title class="clickable-title" @click="redirectToPlan">
+  <span class="card-title" v-html="formattedTitle"></span>
+  <v-icon class="icon">mdi-chevron-right</v-icon>
+</v-card-title>
+<v-card-subtitle
               >비상금 대출, 혹시나 연체될까 걱정된다면?<br />
               I'm not LOANly와 함께하세요!</v-card-subtitle
             >
+            <!-- 오른쪽 중앙에 아이콘 추가 -->
+            <v-spacer></v-spacer>
           </v-card-item>
         </v-row>
       </v-card>
@@ -75,7 +78,7 @@ const displayAmount = computed(() => {
   return new Intl.NumberFormat("ko-KR").format(loanAmount.value);
 });
 
-const title = "You're LOANly? I'm not LOANly!";
+const title = "맞춤형 상환 플랜 받아보기";
 const formattedTitle = ref(title);
 
 const handleResize = () => {
@@ -97,6 +100,7 @@ const handleConfirm = () => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  
 }
 
 @media (max-width: 430px) {
@@ -104,4 +108,29 @@ const handleConfirm = () => {
     white-space: normal;
   }
 }
+.clickable-title {
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: bold;
+  color: #000; /* 강조 색상 */
+  display: flex;
+  align-items: center;
+  gap: 8px; /* 텍스트와 아이콘 사이 간격 */
+  transition: transform 0.2s, color 0.2s;
+}
+
+.clickable-title:hover {
+  color: #e65100; /* 호버 시 색상 변경 */
+  /* transform: scale(1.05); 약간 확대 */
+}
+
+.icon {
+  font-size: 20px; /* 아이콘 크기 */
+  transition: transform 0.2s;
+}
+
+.clickable-title:hover .icon {
+  transform: translateX(5px); /* 아이콘 이동 효과 */
+}
+
 </style>
