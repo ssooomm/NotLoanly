@@ -109,6 +109,7 @@ export const useApiStore = defineStore('api', {
         this.paidPeriod = data.total_count
         this.totalAmount = data.loan_amount
         this.paidAmount = data.total_paid; // 상환한 금액
+        this.remainingAmount = data.remaining_amount; // 남은 금액
         this.targetAmount = data.repayment_amount
         this.interestAmount = data.interest_amount
         this.completedPercentage = data.total_paid_percenatage // 상환 비율 계산
