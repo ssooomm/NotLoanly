@@ -36,6 +36,7 @@ export const useApiStore = defineStore('api', {
     paidPeriod: 0, // 상환한 기간 
     targetAmount: 0, //상환 원금
     interestAmount: 0, //상환 이자 
+    restPaymentCount: 1, // 남은 상환 기간
   }),
   actions: {
     // 카테고리와 색상 매핑
@@ -246,8 +247,7 @@ export const useApiStore = defineStore('api', {
         this.alertMessage = data.message; // 메시지 저장
         this.showAlert = true; // 알림 표시
 
-        // 디버깅용 로그 추가
-        console.log("Before updating notifications:", this.notifications);
+
 
         // 알림 목록에 추가
         this.notifications.unshift({
@@ -258,10 +258,10 @@ export const useApiStore = defineStore('api', {
         // 디버깅용 로그 추가
         console.log("After updating notifications:", this.notifications);
 
-        // 5초 후 알림 숨김
+        // 3초 후 알림 숨김
         setTimeout(() => {
           this.showAlert = false;
-        }, 15000);
+        }, 3000);
       }
     } catch (e) {
       console.error("Error parsing event data:", e);
