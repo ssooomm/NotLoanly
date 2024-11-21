@@ -5,7 +5,7 @@ from domain.repayment.repayment_schema import Plan_Details
 from models import Transactions, Categories, RepaymentHistory, UserExpenses
 
 from sqlalchemy.orm import Session
-from sqlalchemy import func, desc
+from sqlalchemy import func, desc, case
 from domain.common.common_crud import get_user
 from domain.repayment.repayment_crud import get_repayment_plan
 from fastapi import HTTPException
@@ -18,10 +18,13 @@ from datetime import datetime
 def get_dashboard_summary(db: Session, user_id: int) -> SummaryResponse:
     summary = []
 
-    # Group transactions by month for the given user
+    # Group transactions by month for the given user, excluding income categories for totalSpent
     monthly_transactions = db.query(
         func.date_format(Transactions.transaction_date, '%Y-%m').label('month'),
-        func.sum(Transactions.amount).label('totalSpent')
+        func.sum(case(
+            (Transactions.category_id.notin_([1, 2]), Transactions.amount),
+            else_=0
+        )).label('totalSpent')
     ).filter(
         Transactions.user_id == user_id
     ).group_by('month').all()
@@ -29,7 +32,7 @@ def get_dashboard_summary(db: Session, user_id: int) -> SummaryResponse:
     for month, totalSpent in monthly_transactions:
         totalSpent = int(totalSpent) if totalSpent is not None else 0
 
-        # Fetch transactions for the month
+        # Fetch all transactions for the month (including income)
         transactions = db.query(
             Transactions.transaction_date,
             Categories.category_name,
@@ -52,7 +55,7 @@ def get_dashboard_summary(db: Session, user_id: int) -> SummaryResponse:
             ) for t in transactions
         ]
 
-        # Group transactions by category
+        # Group all transactions by category (including income)
         categories = db.query(
             Categories.category_name.label('category'),
             func.sum(Transactions.amount).label('totalAmount')
@@ -61,7 +64,9 @@ def get_dashboard_summary(db: Session, user_id: int) -> SummaryResponse:
         ).filter(
             Transactions.user_id == user_id,
             func.date_format(Transactions.transaction_date, '%Y-%m') == month
-        ).group_by(Categories.category_name).all()
+        ).group_by(
+            Categories.category_name
+        ).all()
 
         # Map categories to CategorySummary objects
         category_summaries = [
