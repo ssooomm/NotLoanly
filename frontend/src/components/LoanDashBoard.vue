@@ -5,7 +5,7 @@
       <div class="progress-container">
         <div class="progress-label">
           <span>11월 상환 진행률</span>
-          <span>1/3 개월</span>
+          <span>{{ restPaymentCount }} &#47; {{ repaymentPeriod }} 개월</span>
           <span>{{ progressPercentage }}%</span>
         </div>
         <div class="progress-bar">
@@ -15,28 +15,22 @@
           ></div>
         </div>
         <div class="amounts">
-          <span>{{ currentAmount.toLocaleString() }}원</span>
-          <span>/ {{ totalAmount.toLocaleString() }}원</span>
+          <span>{{ currentAmount.toLocaleString() }}원</span>&#47;
+          <span>{{ totalAmount.toLocaleString() }}원</span>
         </div>
       </div>
       <section class="summary">
         <div class="summary-item">
           <span>목표 상환 원금</span>
-          <!-- <span>{{ targetAmount.toLocaleString() }}원</span> -->
-          <span>1,000,000원</span>
-
+          <span>{{ targetAmount.toLocaleString() }}원</span>
         </div>
         <div class="summary-item">
           <span>이자 납입액</span>
-          <!-- <span>{{ interestAmount.toLocaleString() }}원</span> -->
-          <span>15,000원</span>
-
+          <span>{{ interestAmount.toLocaleString() }}원</span>
         </div>
         <div class="summary-total">
           <span>총 납부액</span>
-          <!-- <span>{{ totalPayment.toLocaleString() }}원</span> -->
-          <span>1,015,000원</span>
-
+          <span>{{ totalPayment.toLocaleString() }}원</span>
         </div>
       </section>
       <section class="calendar">
@@ -66,7 +60,7 @@
       </section>
       <section class="plan">
         <div class="plan-header">
-          <h3 class="plan-title">{{ selectedPlanName }}</h3>
+          <h2 class="plan-title">{{ selectedPlanName }}</h2>
           <div class="change" @click="toggleEditMode">플랜 변경 ></div>
         </div>
         <div class="budget-container">
@@ -130,6 +124,7 @@ const userId = 1;
 const currentAmount = ref(0);
 const totalAmount = ref(0);
 const targetAmount = ref(0);
+const repaymentPeriod = ref(0);
 const interestAmount = ref(0);
 const totalPayment = ref(0);
 const progressPercentage = ref(0);
@@ -138,6 +133,7 @@ const income = ref(0);
 const budgetItems = ref([]);
 const events = ref([]);
 const selectedPlanName = ref("");
+const restPaymentCount = ref(0);
 
 // 금액 포맷팅 함수
 const formatAmount = (amount) => {
@@ -163,9 +159,9 @@ const fetchData = async () => {
     ).padStart(2, "0")}`;
 
     // 상환 현황 데이터 설정
-    currentAmount.value = Number(apiStore.paidAmount);
-    totalAmount.value = Number(apiStore.totalAmount);
-    progressPercentage.value = Number(apiStore.completedPercentage.toFixed(1));
+    // currentAmount.value = Number(apiStore.paidAmount);
+    // totalAmount.value = Number(apiStore.totalAmount);
+    // progressPercentage.value = Number(apiStore.completedPercentage.toFixed(1));
 
     // 소비 데이터 가져오기
     const data = await apiStore.fetchRepaymentSummary(userId);
@@ -175,6 +171,21 @@ const fetchData = async () => {
     // 유저가 선택했던 플랜 데이터 가져오기
     const selectedPlanData = await apiStore.fetchCurrentPlan(userId);
     if (selectedPlanData) {
+      // 상환 현황 데이터 설정
+      currentAmount.value = apiStore.paidAmount;
+      totalAmount.value = selectedPlanData.loan_amount;
+      progressPercentage.value = Number(
+        apiStore.completedPercentage.toFixed(1)
+      );
+
+      targetAmount.value = apiStore.targetAmount;
+      interestAmount.value = apiStore.interestAmount;
+      totalPayment.value = targetAmount.value + interestAmount.value;
+
+      repaymentPeriod.value = selectedPlanData.repayment_period;
+      restPaymentCount.value = apiStore.restPaymentCount;
+      console.log(selectedPlanData);
+
       const selectedPlanId = selectedPlanData.selected_plan_group_id;
 
       // 플랜 데이터 가져오기
