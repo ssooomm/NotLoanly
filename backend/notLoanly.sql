@@ -58,7 +58,7 @@ CREATE TABLE RepaymentHistory (
     user_id INTEGER NOT NULL,
     repayment_date DATE NOT NULL,
     repayment_amount INTEGER NOT NULL,
-    interest_amoun INTEGER NOT NULL,
+    interest_amount INTEGER NOT NULL,
     remaining_balance INTEGER NOT NULL,
     description TEXT,
     FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
