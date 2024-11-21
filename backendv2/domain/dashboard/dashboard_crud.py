@@ -123,7 +123,8 @@ def get_repayment_status(db: Session, user_id: int):  # -> RepaymentStatusRespon
             "total_paid_percenatage": round(total_paid_percenatage, 2),
             "total_paid": total_paid,
             "total_count": total_count,
-            "repayment_history": repayment_history
+            "repayment_amount":repayment_history[0].repayment_amount,
+            "interest_amount":repayment_history[0].interest_amount
         }
 
 

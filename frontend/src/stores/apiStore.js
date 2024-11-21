@@ -18,17 +18,21 @@ export const useApiStore = defineStore('api', {
     },
     repaymentPlans: [],
     repaymentStatus: {},
-    repaymentChart: [],
+    repaymentHistories: [],
     consumptionAnalysis: {},
     notifications: [],
     showAlert: false, // 알림 표시 여부
     alertMessage: '', // 알림 메시지
     message: '',
-    totalAmount: 5000000, // 총 대출 금액
+    totalAmount: 0, // 총 대출 금액
     paidAmount: 0, // 상환한 총 금액
     remainingAmount: 0, // 남은 상환 금액
     completedPercentage: 0, // 상환 비율
     summary: [], // 월별 소비 요약 데이터 추가
+    totalPeriod: 0, // 총 상환 기간
+    paidPeriod: 0, // 상환한 기간 
+    targetAmount: 0, //상환 원금
+    interestAmount: 0, //상환 이자 
   }),
   actions: {
     // 대출 신청
@@ -62,36 +66,36 @@ export const useApiStore = defineStore('api', {
       return data; // 응답 반환
     },
 
-// 소비 분석 데이터 조회
-async fetchConsumptionAnalysis(userId, month) {
-  // 기본 URL 설정
-  let url = `/api/dashboard/consumption-analysis?user_id=${userId}`;
-  
-  // month가 존재할 경우 URL에 추가
-  if (month) {
-      url += `&month=${month}`;
-  }
+    // 소비 분석 데이터 조회
+    async fetchConsumptionAnalysis(userId, month) {
+      // 기본 URL 설정
+      let url = `/api/dashboard/consumption-analysis?user_id=${userId}`;
 
-  const response = await fetch(url); // 수정된 URL 사용
-  const data = await response.json();
-  this.consumptionAnalysis = data; // 소비 분석 데이터 저장
-  return data; // 응답 반환
-},
+      // month가 존재할 경우 URL에 추가
+      if (month) {
+        url += `&month=${month}`;
+      }
+
+      const response = await fetch(url); // 수정된 URL 사용
+      const data = await response.json();
+      this.consumptionAnalysis = data; // 소비 분석 데이터 저장
+      return data; // 응답 반환
+    },
 
     // 줄이기 어려운 카테고리와 상환 기간 저장
     async saveRepaymentPlan(userId, categories, repaymentPeriod) {
-        const response = await fetch('/api/repayment/save-plan', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                user_id: userId, 
-                categories, 
-                repayment_period: repaymentPeriod 
-            }),
-        });
-        const data = await response.json();
-        this.message = data.message;
-        return data; // 응답 반환
+      const response = await fetch('/api/repayment/save-plan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: userId,
+          categories,
+          repayment_period: repaymentPeriod
+        }),
+      });
+      const data = await response.json();
+      this.message = data.message;
+      return data; // 응답 반환
     },
 
     async fetchRepaymentStatus(userId) {
@@ -101,11 +105,13 @@ async fetchConsumptionAnalysis(userId, month) {
           throw new Error('Network response was not ok');
         }
         const data = await response.json();
-        this.repaymentStatus = data.repaymentStatus; // 상환 현황 저장
-        this.repaymentChart = data.repaymentChart; // 월별 상환 데이터 저장
-        this.paidAmount = this.repaymentStatus.paidAmount; // 상환한 금액
-        this.remainingAmount = this.repaymentStatus.remainingAmount; // 남은 금액
-        this.completedPercentage = (this.paidAmount / this.totalAmount) * 100; // 상환 비율 계산
+        this.totalPeriod = data.repayment_period
+        this.paidPeriod = data.total_count
+        this.totalAmount = data.loan_amount
+        this.paidAmount = data.total_paid; // 상환한 금액
+        this.targetAmount = data.repayment_amount
+        this.interestAmount = data.interest_amount
+        this.completedPercentage = data.total_paid_percenatage // 상환 비율 계산
         return data; // 응답 반환
       } catch (error) {
         console.error('Error fetching repayment status:', error);
@@ -259,22 +265,22 @@ async fetchConsumptionAnalysis(userId, month) {
       };
     },
 
-        // 사용자 소비 데이터 조회
-        async fetchUserExpenses(userId, month = 9) {
-            const response = await fetch(`/api/dashboard/user-expenses?user_id=${userId}&month=${month}`);
-            
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
+    // 사용자 소비 데이터 조회
+    async fetchUserExpenses(userId, month = 9) {
+      const response = await fetch(`/api/dashboard/user-expenses?user_id=${userId}&month=${month}`);
 
-            const data = await response.json();
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
 
-            if (data.status === 'success') {
-                return data.data; // 소비 데이터 반환
-            } else {
-                throw new Error('Failed to fetch user expenses');
-            }
-        },
+      const data = await response.json();
+
+      if (data.status === 'success') {
+        return data.data; // 소비 데이터 반환
+      } else {
+        throw new Error('Failed to fetch user expenses');
+      }
+    },
 
   }
 });
