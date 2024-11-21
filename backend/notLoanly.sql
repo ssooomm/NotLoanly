@@ -58,6 +58,7 @@ CREATE TABLE RepaymentHistory (
     user_id INTEGER NOT NULL,
     repayment_date DATE NOT NULL,
     repayment_amount INTEGER NOT NULL,
+    interest_amoun INTEGER NOT NULL,
     remaining_balance INTEGER NOT NULL,
     description TEXT,
     FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
@@ -102,8 +103,8 @@ INSERT INTO Categories (category_name) VALUES
 -- Users 테이블에 데이터 삽입
 INSERT INTO Users (name, monthly_income, monthly_expense, loan_amount, interest_rate, loan_date, repayment_period, monthly_repayment_goal, selected_plan_group_id) 
 VALUES 
-('최민호', 2500000, 1500000, 3000000, 6.0,'2024-10-09', 3, 1015000, 3),
-('김민주', 2000000, 1500000, 2000000, 7.0,'2024-09-11', 6, 345000, 6);
+('최민호', 2500000, 1500000, 3000000, 6.0,'2024-10-09 09:06:35', 3, 1015000, 3),
+('김민주', 2000000, 1500000, 2000000, 7.0,'2024-09-11 12:32:10', 6, 345000, 6);
 
 
 
@@ -329,10 +330,10 @@ INSERT INTO RepaymentPlans (user_id, plan_name, total_amount, duration, details,
  '#걸어다니자, #대중교통을 이용하자, #내가 바로 환경 지킴이'
 );
 
-INSERT INTO RepaymentHistory (user_id, repayment_date, repayment_amount, remaining_balance, description)
+INSERT INTO RepaymentHistory (user_id, repayment_date, repayment_amount, interest_amount , remaining_balance, description)
 VALUES
 -- 사용자 1 상환기록
-(1, '2024-11-09', 1015000, 2000000, '첫 번째 상환'),
+(1, '2024-11-09', 1000000, 15000 ,2000000, '첫 번째 상환'),
 -- 사용자 2 상환기록
 (2, '2024-10-11', 345000, 1655000, '첫 번째 상환'),
 (2, '2024-11-11', 345000, 1340000, '두 번째 상환');

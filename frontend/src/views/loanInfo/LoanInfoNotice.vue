@@ -42,7 +42,7 @@
           icon="mdi-book-open-page-variant-outline"
         ></v-btn>
       </div>
-      <button class="action-button">시작하기</button>
+      <button class="action-button" @click="goToLoanInputPage">대출하기</button>
     </div>
   </div>
 </template>
@@ -81,6 +81,14 @@ const slides = ref([
     src: info7,
   },
 ]);
+
+import { useRouter } from "vue-router";
+
+const router = useRouter();
+
+const goToLoanInputPage = () => {
+  router.push("../loan-input"); // '/loan-input' 경로로 이동
+};
 </script>
 
 <style scoped>

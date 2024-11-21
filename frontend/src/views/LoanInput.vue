@@ -42,7 +42,7 @@
       </v-col>
     </v-form>
     <!-- 확인 버튼 -->
-    <ConfirmButton @confirm="handleConfirm" />
+    <ConfirmButton @confirm="handleConfirm" class="full-width-button" />
   </div>
 </template>
 
@@ -168,4 +168,5 @@ const handleConfirm = async () => {
     transform: translateX(-50%);
   }
 }
+
 </style>
