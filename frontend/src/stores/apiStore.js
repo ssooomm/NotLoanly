@@ -3,34 +3,45 @@
 import { defineStore } from 'pinia';
 
 export const useApiStore = defineStore('api', {
-    state: () => ({
-        categories: [],
-        repaymentPlans: [],
-        repaymentStatus: {},
-        repaymentChart: [],
-        consumptionAnalysis: {},
-        notifications: [],
-        showAlert: false, // 알림 표시 여부
-        alertMessage: '', // 알림 메시지
-        message: '',
-        totalAmount: 5000000, // 총 대출 금액
-        paidAmount: 0, // 상환한 총 금액
-        remainingAmount: 0, // 남은 상환 금액
-        completedPercentage: 0, // 상환 비율
-        summary: [], // 월별 소비 요약 데이터 추가
-    }),
-    actions: {
-        // 대출 신청
-        async applyForLoan(userId, loanAmount, interestRate) {
-            const response = await fetch('/api/loan/apply', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: userId, loan_amount: loanAmount, interest_rate: interestRate }),
-            });
-            const data = await response.json();
-            this.message = data.message; // "상환 계획이 저장되었습니다."
-            return data; // 응답 반환
-        },
+  state: () => ({
+    categories: {
+      1: "소득",
+      2: "대출 상환",
+      3: "금융",
+      4: "주거 및 통신",
+      5: "식비",
+      6: "교통",
+      7: "쇼핑",
+      8: "여가",
+      9: "건강",
+      10: "기타",
+    },
+    repaymentPlans: [],
+    repaymentStatus: {},
+    repaymentChart: [],
+    consumptionAnalysis: {},
+    notifications: [],
+    showAlert: false, // 알림 표시 여부
+    alertMessage: '', // 알림 메시지
+    message: '',
+    totalAmount: 5000000, // 총 대출 금액
+    paidAmount: 0, // 상환한 총 금액
+    remainingAmount: 0, // 남은 상환 금액
+    completedPercentage: 0, // 상환 비율
+    summary: [], // 월별 소비 요약 데이터 추가
+  }),
+  actions: {
+    // 대출 신청
+    async applyForLoan(userId, loanAmount, interestRate) {
+      const response = await fetch('/api/loan/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId, loan_amount: loanAmount, interest_rate: interestRate }),
+      });
+      const data = await response.json();
+      this.message = data.message; // "상환 계획이 저장되었습니다."
+      return data; // 응답 반환
+    },
 
     // 상환 플랜 제안
     async suggestRepaymentPlan() {
@@ -51,29 +62,37 @@ export const useApiStore = defineStore('api', {
       return data; // 응답 반환
     },
 
-    // 소비 분석 데이터 조회
-    async fetchConsumptionAnalysis(userId) {
-      const response = await fetch(`/api/dashboard/consumption-analysis?user_id=${userId}`); // userId 포함
-      const data = await response.json();
-      this.consumptionAnalysis = data; // 소비 분석 데이터 저장
-      return data; // 응답 반환
-    },
+// 소비 분석 데이터 조회
+async fetchConsumptionAnalysis(userId, month) {
+  // 기본 URL 설정
+  let url = `/api/dashboard/consumption-analysis?user_id=${userId}`;
+  
+  // month가 존재할 경우 URL에 추가
+  if (month) {
+      url += `&month=${month}`;
+  }
 
-        // 줄이기 어려운 카테고리와 상환 기간 저장
-        async saveRepaymentPlan(userId, categories, repaymentPeriod) {
-            const response = await fetch('/api/repayment/save-plan', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    user_id: userId, 
-                    categories, 
-                    repayment_period: repaymentPeriod 
-                }),
-            });
-            const data = await response.json();
-            this.message = data.message;
-            return data; // 응답 반환
-        },
+  const response = await fetch(url); // 수정된 URL 사용
+  const data = await response.json();
+  this.consumptionAnalysis = data; // 소비 분석 데이터 저장
+  return data; // 응답 반환
+},
+
+    // 줄이기 어려운 카테고리와 상환 기간 저장
+    async saveRepaymentPlan(userId, categories, repaymentPeriod) {
+        const response = await fetch('/api/repayment/save-plan', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                user_id: userId, 
+                categories, 
+                repayment_period: repaymentPeriod 
+            }),
+        });
+        const data = await response.json();
+        this.message = data.message;
+        return data; // 응답 반환
+    },
 
     async fetchRepaymentStatus(userId) {
       try {
@@ -173,71 +192,88 @@ export const useApiStore = defineStore('api', {
       return 'danger';
     },
 
-        // 사용자 알림 조회
-        async fetchNotifications(userId) {
-            try {
-                const response = await fetch(`/api/notification/notifications/${userId}`, {
-                    method: 'GET',
-                    headers: { 'Content-Type': 'application/json' },
-                });
+    // 사용자 알림 조회
+    async fetchNotifications(userId) {
+      try {
+        const response = await fetch(`/api/notification/notifications/${userId}`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        });
 
-                if (!response.ok) {
-                    throw new Error(`Error fetching notifications: ${response.status}`);
-                }
+        if (!response.ok) {
+          throw new Error(`Error fetching notifications: ${response.status}`);
+        }
 
-                const data = await response.json();
-                if (data.status === 'success') {
-                    this.notifications = data.notifications; // 알림 목록 저장
-                }
-                return data;
-            } catch (error) {
-                console.error('Error fetching notifications:', error);
-                throw error; // 에러를 호출한 곳으로 전달
+        const data = await response.json();
+        if (data.status === 'success') {
+          this.notifications = data.notifications; // 알림 목록 저장
+        }
+        return data;
+      } catch (error) {
+        console.error('Error fetching notifications:', error);
+        throw error; // 에러를 호출한 곳으로 전달
+      }
+    },
+
+    // SSE 연결 설정
+    connectSSE(userId) {
+      const streamUrl = `http://127.0.0.1:8000/api/notification/stream/${userId}`;
+      const eventSource = new EventSource(streamUrl);
+
+      // SSE 연결 성공
+      eventSource.onopen = () => {
+        console.log("SSE connection opened.");
+      };
+
+      // SSE 데이터 수신
+      eventSource.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data); // JSON 파싱
+          console.log("New Event:", data);
+
+          // 알림 메시지 처리
+          if (data.message) {
+            this.alertMessage = data.message; // 메시지 저장
+            this.showAlert = true; // 알림 표시
+
+            // 5초 후 알림 숨김
+            setTimeout(() => {
+              this.showAlert = false;
+            }, 150000);
+
+            // 알림 목록에 추가
+            this.notifications.unshift({
+              message: data.message,
+              date: new Date().toISOString(), // 현재 시간 저장
+            });
+          }
+        } catch (e) {
+          console.error("Error parsing event data:", e);
+        }
+      };
+
+      // SSE 오류 처리
+      eventSource.onerror = (error) => {
+        console.error("Error occurred in SSE stream:", error);
+        eventSource.close(); // 연결 닫기
+      };
+    },
+
+        // 사용자 소비 데이터 조회
+        async fetchUserExpenses(userId, month = 9) {
+            const response = await fetch(`/api/dashboard/user-expenses?user_id=${userId}&month=${month}`);
+            
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
             }
-        },
 
-        // SSE 연결 설정
-        connectSSE(userId) {
-            const streamUrl = `http://127.0.0.1:8000/api/notification/stream/${userId}`;
-            const eventSource = new EventSource(streamUrl);
+            const data = await response.json();
 
-            // SSE 연결 성공
-            eventSource.onopen = () => {
-                console.log("SSE connection opened.");
-            };
-
-            // SSE 데이터 수신
-            eventSource.onmessage = (event) => {
-                try {
-                    const data = JSON.parse(event.data); // JSON 파싱
-                    console.log("New Event:", data);
-
-                    // 알림 메시지 처리
-                    if (data.message) {
-                        this.alertMessage = data.message; // 메시지 저장
-                        this.showAlert = true; // 알림 표시
-
-                        // 5초 후 알림 숨김
-                        setTimeout(() => {
-                            this.showAlert = false;
-                        }, 150000);
-
-                        // 알림 목록에 추가
-                        this.notifications.unshift({
-                            message: data.message,
-                            date: new Date().toISOString(), // 현재 시간 저장
-                        });
-                    }
-                } catch (e) {
-                    console.error("Error parsing event data:", e);
-                }
-            };
-
-            // SSE 오류 처리
-            eventSource.onerror = (error) => {
-                console.error("Error occurred in SSE stream:", error);
-                eventSource.close(); // 연결 닫기
-            };
+            if (data.status === 'success') {
+                return data.data; // 소비 데이터 반환
+            } else {
+                throw new Error('Failed to fetch user expenses');
+            }
         },
 
   }
