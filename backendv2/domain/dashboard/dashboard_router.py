@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
 from typing import Optional, List
-
+import datetime
 from database import get_db
 from domain.dashboard import dashboard_schema, dashboard_crud
 
@@ -63,13 +63,25 @@ def consumption_percentage(user_id: int, db: Session = Depends(get_db)):
 # 3-4. 소비 분석 조회
 @router.get(
     "/consumption-analysis")
-def consumption_analysis(user_id: int = Query(1, alias="user_id"),db: Session = Depends(get_db)):
+def consumption_analysis(user_id: int = Query(1, alias="user_id"), month: int = Query(datetime.datetime.now().month, alias="month"), db: Session = Depends(get_db)):
     if not user_id:
         raise HTTPException(status_code=400, detail="User ID is required")
 
-    response = dashboard_crud.get_consumption_analysis(db, user_id)
-
-    # if response["status"] == "error":
-    #     raise HTTPException(status_code=status, detail=response["message"])
+    response = dashboard_crud.get_consumption_analysis(db, user_id, month)  # month 인자 추가
 
     return response
+
+# 3-5. 사용자 지출 조회
+@router.get("/user-expenses")
+def get_user_expenses(user_id: int = Query(..., alias="user_id"), month: int = Query(..., alias="month"), db: Session = Depends(get_db)):
+    if not user_id:
+        raise HTTPException(status_code=400, detail="User ID is required")
+    if not month:
+        raise HTTPException(status_code=400, detail="Month is required")
+
+    response = dashboard_crud.get_user_expenses_by_month(db, user_id, month)
+
+    return {
+        "status": "success",
+        "data": response
+    }
