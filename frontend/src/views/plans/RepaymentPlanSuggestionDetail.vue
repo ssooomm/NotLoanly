@@ -68,13 +68,24 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { inject, ref, onMounted, watch } from "vue";
 import { useRoute } from "vue-router";
 import StackedBarCharts from "../../components/StackedBarCharts.vue";
 import { useApiStore } from "../../stores/apiStore";
 
 const route = useRoute();
 const apiStore = useApiStore();
+
+const categoryColors = inject("categoryColors");
+const lightCategoryColors = categoryColors.map((color) => {
+  // RGB 색상을 RGBA로 변환하고 투명도를 추가
+  const rgbaColor = color
+    .replace("#", "rgba(")
+    .replace(/([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})/i, (match, r, g, b) => {
+      return `${parseInt(r, 16)}, ${parseInt(g, 16)}, ${parseInt(b, 16)}, 0.3)`;
+    });
+  return rgbaColor;
+});
 
 const userId = 1;
 const planId = ref(null);
@@ -87,31 +98,13 @@ const stackedBarChartData = ref({
     {
       label: "목표 소비액",
       data: [],
-      backgroundColor: [
-        "#66BB6A", // 금융
-        "#FF6384", // 주거 및 통신
-        "#36A2EB", // 식비
-        "#FFCE56", // 교통
-        "#4BC0C0", // 쇼핑
-        "#9966FF", // 여가
-        "#FF9F40", // 건강
-        "#C9CBCF", // 기타
-      ],
+      backgroundColor: categoryColors,
       hoverOffset: 4,
     },
     {
       label: "절약 금액",
       data: [],
-      backgroundColor: [
-        "rgba(102, 187, 106, 0.3)", // 금융 (연한 녹색)
-        "rgba(255, 99, 132, 0.3)", // 주거 및 통신 (연한 핑크색)
-        "rgba(54, 162, 235, 0.3)", // 식비 (연한 파란색)
-        "rgba(255, 206, 86, 0.3)", // 교통 (연한 노란색)
-        "rgba(75, 192, 192, 0.3)", // 쇼핑 (연한 청록색)
-        "rgba(153, 102, 255, 0.3)", // 여가 (연한 보라색)
-        "rgba(255, 159, 64, 0.3)", // 건강 (연한 주황색)
-        "rgba(201, 203, 207, 0.3)", // 기타 (연한 회색)
-      ],
+      backgroundColor: lightCategoryColors,
       hoverOffset: 4,
     },
   ],
