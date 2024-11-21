@@ -1,6 +1,7 @@
 // frontend/src/stores/apiStore.js
 
 import { defineStore } from 'pinia';
+import { inject } from 'vue';
 
 export const useApiStore = defineStore('api', {
   state: () => ({
@@ -16,6 +17,8 @@ export const useApiStore = defineStore('api', {
       9: "건강",
       10: "기타",
     },
+    categoryColors: inject('categoryColors'), // categoryColors 주입
+    categoriesWithColors: [], // 매핑된 데이터
     repaymentPlans: [],
     repaymentStatus: {},
     repaymentHistories: [],
@@ -35,6 +38,15 @@ export const useApiStore = defineStore('api', {
     interestAmount: 0, //상환 이자 
   }),
   actions: {
+    // 카테고리와 색상 매핑
+    initializeCategoryColors() {
+      this.categoriesWithColors = Object.entries(this.categories).map(([id, name], index) => ({
+        id: Number(id),
+        name,
+        color: this.categoryColors[index % this.categoryColors.length], // 색상 순환 적용
+      }));
+    },
+
     // 대출 신청
     async applyForLoan(userId, loanAmount, interestRate) {
       const response = await fetch('/api/loan/apply', {
@@ -132,7 +144,7 @@ export const useApiStore = defineStore('api', {
 
     // 상환 플랜 선택
     async selectRepaymentPlan(userId, planId) {
-      const response = await fetch('/api/repayment/select-plan', {
+      const response = await fetch(`/api/repayment/select-plan?user_id=${userId}&plan_id=${planId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, planId }),
@@ -140,6 +152,13 @@ export const useApiStore = defineStore('api', {
       const data = await response.json();
       this.message = data.message; // "선택한 상환 플랜이 시작되었습니다."
       return data; // 응답 반환
+    },
+
+    // 사용자의 현재 상환 플랜 조회
+    async fetchCurrentPlan(userId) {
+      const response = await fetch(`/api/dashboard/user?user_id=${userId}`);
+      const data = await response.json();
+      return data.data; // 응답 반환
     },
 
     // 상환 요약 조회
