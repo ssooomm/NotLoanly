@@ -30,6 +30,7 @@ const chartOptions = {
   plugins: {
     legend: {
       position: "top",
+      onClick: null,
     },
   },
   cutout: "70%", // 도넛 차트의 두께 설정

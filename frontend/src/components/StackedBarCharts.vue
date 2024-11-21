@@ -47,6 +47,7 @@ const chartOptions = {
         boxHeight: 5,
         usePointStyle: true,
       },
+      onClick: null,
     },
     tooltip: {
       enabled: true,
